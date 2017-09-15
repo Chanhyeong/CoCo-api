@@ -89,9 +89,6 @@ router.get('/check', function (req, res, next) {
 router.get('/auth', function (req, res) {
     if(req.isAuthenticated()) { res.json(req.user) }
     else {
-        res.header("Access-Control-Allow-Origin", "http://localhost:4001");
-        console.log("*2123");
-        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
         res.redirect('/api/auth/google') }
 });
 
@@ -101,7 +98,9 @@ router.get('/auth/google',
 router.get('/auth/google/callback',
     passport.authenticate('google', { failureRedirect: '/' }),
     function(req, res) {
-        res.json(req.user);
+    //TODO: 테스트한 사람의 ip로 어떻게 보내는가
+    	//res.redirect('http://:4001');
+        res.json(req.user)
     });
 
 module.exports = router;
