@@ -1,0 +1,14 @@
+# # Debug log from npm
+logs
+*.log
+*.log.*
+tatu
+
+# dependencies
+/node_modules
+
+# WebStorm
+.idea/
+
+# etc
+./package-lock.json

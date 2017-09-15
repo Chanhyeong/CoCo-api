@@ -1,0 +1,37 @@
+{
+  "name": "box-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chanhyeong/box-api.git"
+  },
+  "author": "Chanhyeong Cho",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/chanhyeong/box-api/issues"
+  },
+  "homepage": "https://github.com/chanhyeong/box-api#readme",
+  "dependencies": {
+    "body-parser": "^1.18.1",
+    "connect-flash": "^0.1.1",
+    "express": "^4.15.4",
+    "express-session": "^1.15.5",
+    "mongodb": "^2.2.31",
+    "ot-text": "^1.0.1",
+    "passport": "^0.4.0",
+    "passport-google-oauth": "^1.0.0",
+    "passport-local": "^1.0.0",
+    "sharedb": "^1.0.0-beta.7",
+    "sharedb-mongo": "^1.0.0-beta.4",
+    "socket.io": "^2.0.3",
+    "ssh2": "^0.5.5",
+    "websocket-json-stream": "0.0.3",
+    "ws": "^3.1.0"
+  }
+}
