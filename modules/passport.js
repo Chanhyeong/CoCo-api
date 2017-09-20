@@ -1,4 +1,4 @@
-var passport = require('passport');
+var passport = require('modules/passport');
 var assert = require('assert');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var database = null;
