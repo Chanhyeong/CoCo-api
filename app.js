@@ -30,8 +30,8 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/api', require('./api/'));
-app.use('/auth', require('./auth/router'));
+app.use('/api', require('./routes/api'));
+app.use('/auth', require('./routes/auth.js'));
 
 // 없는 경로로 이동할 시
 app.use(function(req, res, next) {
