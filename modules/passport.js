@@ -1,6 +1,7 @@
 var passport = require('modules/passport');
 var assert = require('assert');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+var LocalStrategy = require('passport-local').Strategy;
 var database = null;
 
 //serializer와 deseriazlier는 필수로 구현해야 함.
@@ -17,6 +18,21 @@ passport.deserializeUser(function(user, done) {
     done(null, user);
 });
 
+passport.use(new LocalStrategy({
+        usernameField : 'email',
+        passwordField : 'password',
+        passReqToCallback : true
+    }
+    ,function(req,email, password, done) {
+        if(email=='hello@naver.com' && password=='world'){
+                          'email':'hello@naver.com'};
+                          var user = { 'userid':'hello',
+            return done(null,user);
+        }else{
+            return done(null,false);
+        }
+    }
+));
 
 //구글 로그인
 passport.use(new GoogleStrategy({

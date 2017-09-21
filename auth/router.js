@@ -1,9 +1,11 @@
 var express = require('express');
 var router = express.Router();
 var passport = require('../modules/passport');
-var abc = require('./controller')
+var controller = require('./controller')
 
-router.get('/login', passport)
-router.get('/join', passport, abc.login())
+router.post('/login',
+    passport.authenticate('local', { failureRedirect: '/login', failureFlash: true }),
+    controller.login);
+
 
 export default router
