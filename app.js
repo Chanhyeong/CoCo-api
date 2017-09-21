@@ -14,8 +14,8 @@ var session = require('express-session');
 
 var io = require('socket.io')(server);
 
-// initialize custom module
-share.init(server, app, passport);
+// initialize sharedb
+share.init(server);
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'ejs');
@@ -30,25 +30,12 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
-// TODO: express 라우팅 다시 손보기
 app.use('/api', require('./api/'));
 app.use('/auth', require('./auth/router'));
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
 
 // 없는 경로로 이동할 시
 app.use(function(req, res, next) {
     res.status(404).send('wrong address');
-});
-
-app.get('/logout' , function(req, res){
-    req.session.destroy();
-    req.logout();
-    console.log("logout");
-    res.redirect('/login');
 });
 
 server.listen(port, function (err) {

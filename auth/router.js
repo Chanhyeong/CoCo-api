@@ -9,5 +9,6 @@ router.get('/login',
 );
 // TODO: /signup (회원가입) 구현
 
+router.get('/logout', controller.logout);
 
-export default router
+module.exports = router;
