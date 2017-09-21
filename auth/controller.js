@@ -1,8 +1,9 @@
 var passport = require('../modules/passport');
 
 exports.login = function (req, res) {
-      var confirm = {
-        islogin = true
+      if (req.isAuthenticated()) {
+          // TODO: user nickname을 리액트로 보내주기
+          res.send();
       }
-      res.json(confirm);
+      else { res.send(false); }
 }

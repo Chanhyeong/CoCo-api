@@ -3,9 +3,11 @@ var router = express.Router();
 var passport = require('../modules/passport');
 var controller = require('./controller')
 
-router.post('/login',
-    passport.authenticate('local', { failureRedirect: '/login', failureFlash: true }),
-    controller.login);
+router.get('/login',
+    passport.authenticate('local', { failureFlash: true }),
+    controller.login
+);
+// TODO: /signup (회원가입) 구현
 
 
 export default router

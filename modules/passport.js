@@ -1,4 +1,4 @@
-var passport = require('modules/passport');
+var passport = require('passport');
 var assert = require('assert');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var LocalStrategy = require('passport-local').Strategy;
@@ -22,26 +22,21 @@ passport.use(new LocalStrategy({
         usernameField : 'email',
         passwordField : 'password',
         passReqToCallback : true
-    }
-    ,function(req,email, password, done) {
-        if(email=='hello@naver.com' && password=='world'){
-                          'email':'hello@naver.com'};
-                          var user = { 'userid':'hello',
-            return done(null,user);
-        }else{
-            return done(null,false);
-        }
+    }, function(req, id, password, done) {
+        // TODO: 회원 정보 일치하는지 확인하고 로그인.
+        // 로그인 성공 시 user 객체 생성해서 return(null, user), 실패 시 return (null, false)
+        // mongodb 썼을 때 코드: https://github.com/highalps/CoCo/commit/3b5f3ad21d80f5bebce92e4cb92392b8410989b6
     }
 ));
 
 //구글 로그인
 passport.use(new GoogleStrategy({
-    clientID: "565437120355-6st0a0vdcblkviveld60uppe9hft8h4c.apps.googleusercontent.com",
-    clientSecret: "_K5lQEMuHXgHpYn0SYV8YN7T",
-    callbackURL: "http://external.sopad.ml:3000/api/auth/google/callback"
-  },
-  function(accessToken, refreshToken, profile, done) {
-          var query = {
+        clientID: "565437120355-6st0a0vdcblkviveld60uppe9hft8h4c.apps.googleusercontent.com",
+        clientSecret: "_K5lQEMuHXgHpYn0SYV8YN7T",
+        callbackURL: "http://external.sopad.ml:3000/api/auth/google/callback"
+    },
+    function(accessToken, refreshToken, profile, done) {
+        var query = {
             id:profile.id,
             name:profile.displayName
         };
