@@ -36,7 +36,7 @@ exports.signUp = function(req,res){
                 res.json({success: false, msg: '해당아이디가 이미 존재합니다'})
             } else {
                 sql = "insert into USER SET ?";
-                db.query(sql, user, function(err, result){
+                mysql.query(sql, user, function(err, result){
                     if (err) {
                         console.log('err :' + err);
                     } else {
