@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chanhyeong/box-api.git"
+    "url": "git+https://github.com/chanhyeong/coco-api.git"
   },
   "author": "Chanhyeong Cho",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/chanhyeong/box-api/issues"
+    "url": "https://github.com/chanhyeong/coco-api/issues"
   },
-  "homepage": "https://github.com/chanhyeong/box-api#readme",
+  "homepage": "https://github.com/chanhyeong/coco-api#readme",
   "dependencies": {
     "bcrypt": "^1.0.3",
     "body-parser": "^1.18.1",
