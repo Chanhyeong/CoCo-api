@@ -3,7 +3,7 @@ var router = express.Router();
 var passport = require('passport');
 var controller = require('./controller')
 
-router.get('/login',
+router.post('/login',
     // 인증실패시 401 리턴, {} -> 인증 스트레티지
     passport.authenticate('local', { failureFlash: true }),
     controller.login

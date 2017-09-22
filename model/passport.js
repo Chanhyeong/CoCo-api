@@ -20,17 +20,10 @@ passport.deserializeUser(function(user, done) {
 });
 
 passport.use('local', new LocalStrategy({
-        usernameField : 'email',
+        usernameField : 'userID',
         passwordField : 'password',
-        passReqToCallback : true
-    }, function(req, userId, password, done) {
-        // TODO: 회원 정보 일치하는지 확인하고 로그인.
-        // 로그인 성공 시 user 객체 생성해서 return(null, user), 실패 시 return (null, false)
-        // mongodb 썼을 때 코드: https://github.com/highalps/CoCo/commit/3b5f3ad21d80f5bebce92e4cb92392b8410989b6
-
-        var userID = req.body.userID,
-            password = req.body.password;
-
+        passReqToCallback : true //인증을 수행하는 인증 함수로 HTTP request를 그대로  전달할지 여부를 결정한다
+    }, function(req, userID, password, done) {
         var sql = "select * from USER where userID = ?";
         mysql.query(sql, userID ,function (err, result){
             if (err) {
