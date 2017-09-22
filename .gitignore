@@ -11,4 +11,4 @@ tatu
 .idea/
 
 # etc
-./package-lock.json
+package-lock.json
