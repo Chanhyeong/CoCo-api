@@ -11,7 +11,7 @@ router.post('/login',
 
 router.get('/logout', controller.logout);
 
-router.get('/signup', controller.signUp);
+router.post('/signup', controller.signUp);
 
 // router.get('/auth/google',
 //     passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login'] }));
