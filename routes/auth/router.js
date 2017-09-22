@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var passport = require('../modules/passport');
+var passport = require('passport');
 var controller = require('./controller')
 
 router.get('/login',

@@ -2,10 +2,10 @@
   "name": "box-api",
   "version": "1.0.0",
   "description": "",
-  "main": "main.js",
+  "main": "app.js",
   "scripts": {
     "test": "node_modules/.bin/mocha",
-    "start": "node ./main.js"
+    "start": "node ./app.js"
   },
   "repository": {
     "type": "git",

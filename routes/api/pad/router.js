@@ -3,7 +3,7 @@ var router = express.Router();
 
 router.get('/');
 router.post('/');
-router.update('/');
+router.put('/');
 router.delete('/');
 
 module.exports = router;
