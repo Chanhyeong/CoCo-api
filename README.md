@@ -1,3 +1,3 @@
-# box-api [![Build Status](https://secure.travis-ci.org/Chanhyeong/box-api.png)](http://travis-ci.org/Chanhyeong/box-api)
+# CoCo-api [![Build Status](https://secure.travis-ci.org/Chanhyeong/coco-api.png)](http://travis-ci.org/Chanhyeong/coco-api)
 
-The backend of [sopad](https://github.com/highalps/sopad)
+The back-end of [CoCo](https://github.com/highalps/coco)
