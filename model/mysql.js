@@ -1,10 +1,10 @@
 var mysql = require('mysql');
 
-var mydb = mysql.createConnection({
-    host    :'220.230.118.120',
-    port : 3306,
-    user : 'coco',
-    password : 'whdtjf123@',
+var db = mysql.createConnection({
+    host:'external.sopad.ml',
+    port: 3306,
+    user: 'coco',
+    password: 'whdtjf123@',
     database:'coco'
 });
 
@@ -16,4 +16,5 @@ db.connect(function(err) {
     }
 });
 
-module.exports = mydb;
+
+module.exports = db;
