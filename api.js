@@ -1,8 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var assert = require('assert');
-var updateSocket = require('./service/update-socket');
-var passport = require('./service/passport');
+var updateSocket = require('./model/update-socket');
+var passport = require('./model/passport');
 
 // REST API Reference: http://meetup.toast.com/posts/92
 

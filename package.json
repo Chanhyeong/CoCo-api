@@ -2,27 +2,29 @@
   "name": "box-api",
   "version": "1.0.0",
   "description": "",
-  "main": "main.js",
+  "main": "app.js",
   "scripts": {
     "test": "node_modules/.bin/mocha",
-    "start": "node ./main.js"
+    "start": "node ./app.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chanhyeong/box-api.git"
+    "url": "git+https://github.com/chanhyeong/coco-api.git"
   },
   "author": "Chanhyeong Cho",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/chanhyeong/box-api/issues"
+    "url": "https://github.com/chanhyeong/coco-api/issues"
   },
-  "homepage": "https://github.com/chanhyeong/box-api#readme",
+  "homepage": "https://github.com/chanhyeong/coco-api#readme",
   "dependencies": {
+    "bcrypt": "^1.0.3",
     "body-parser": "^1.18.1",
     "connect-flash": "^0.1.1",
     "express": "^4.15.4",
     "express-session": "^1.15.5",
     "mongodb": "^2.2.31",
+    "mysql": "^2.14.1",
     "ot-text": "^1.0.1",
     "passport": "^0.4.0",
     "passport-google-oauth": "^1.0.0",
@@ -35,6 +37,7 @@
     "ws": "^3.1.0"
   },
   "devDependencies": {
-    "mocha": "^3.5.3"
+    "mocha": "^3.5.3",
+    "node-mocks-http": "^1.6.4"
   }
 }
