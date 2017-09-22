@@ -7,8 +7,9 @@ router.get('/login',
     passport.authenticate('local', { failureFlash: true }),
     controller.login
 );
-// TODO: /signup (회원가입) 구현
 
 router.get('/logout', controller.logout);
+
+router.get('/signup', controller.signUp);
 
 module.exports = router;

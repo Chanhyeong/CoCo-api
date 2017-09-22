@@ -17,8 +17,6 @@ var io = require('socket.io')(server);
 // initialize sharedb
 share.init(server);
 
-app.set('views', __dirname + '/views');
-app.set('view engine', 'ejs');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({
@@ -30,8 +28,7 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/api', require('./api/'));
-app.use('/auth', require('./auth/router'));
+app.use('/', require('./routes'));
 
 // 없는 경로로 이동할 시
 app.use(function(req, res, next) {
