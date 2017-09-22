@@ -8,7 +8,7 @@ var port = 3000;
 
 var server = http.createServer(app);
 
-var passport = require('passport');
+var passport = require('./model/passport');
 var flash = require('connect-flash'); // session 관련해서 사용됨. 로그인 실패시 session등 클리어하는 기능으로 보임.
 var session = require('express-session');
 

@@ -3,7 +3,7 @@ var assert = require('assert');
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var LocalStrategy = require('passport-local').Strategy;
 var bcrypt = require('bcrypt');
-var mysql = require('../../model/mysql.js');
+var mysql = require('./mysql');
 
 //serializer와 deseriazlier는 필수로 구현해야 함.
 
