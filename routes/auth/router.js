@@ -19,7 +19,7 @@ router.post('/signup', controller.signUp);
 // router.get('/auth/google/callback',
 //     passport.authenticate('google', { failureRedirect: '/' }),
 //     function(req, res) {
-//         res.redirect('/#/sopad');
+//         res.redirect('/#/');
 //     });
 
 module.exports = router;

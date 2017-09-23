@@ -1,7 +1,7 @@
 var mysql = require('mysql');
 
 var db = mysql.createConnection({
-    host:'external.sopad.ml',
+    host:'external.cocotutor.ml',
     port: 3306,
     user: 'coco',
     password: 'whdtjf123@',

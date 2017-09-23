@@ -50,7 +50,7 @@ passport.use('local', new LocalStrategy({
 // passport.use(new GoogleStrategy({
 //         clientID: "565437120355-6st0a0vdcblkviveld60uppe9hft8h4c.apps.googleusercontent.com",
 //         clientSecret: "_K5lQEMuHXgHpYn0SYV8YN7T",
-//         callbackURL: "http://external.sopad.ml:3000/api/auth/google/callback"
+//         callbackURL: "http://external.cocotutor.ml:3000/api/auth/google/callback"
 //     },
 //     function(accessToken, refreshToken, profile, done) {
 //         var query = {
