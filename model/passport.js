@@ -46,34 +46,4 @@ passport.use('local', new LocalStrategy({
     }
 ));
 
-//구글 로그인
-// passport.use(new GoogleStrategy({
-//         clientID: "565437120355-6st0a0vdcblkviveld60uppe9hft8h4c.apps.googleusercontent.com",
-//         clientSecret: "_K5lQEMuHXgHpYn0SYV8YN7T",
-//         callbackURL: "http://external.cocotutor.ml:3000/api/auth/google/callback"
-//     },
-//     function(accessToken, refreshToken, profile, done) {
-//         var query = {
-//             id:profile.id,
-//             name:profile.displayName
-//         };
-//         console.log("query+ ",query);
-//         if (profile) {
-//             database.collection('users').findOne(query, function (err, user) {
-//                 assert.equal(err, null);
-//
-//                 // query에 맞는 유저정보가 없을 때 query 전체 저장
-//                 if(!user){
-//                     query['projectList'] = [ 8001 ];
-//                     database.collection('users').insertOne(query);
-//                 }
-//             });
-//             return done(null, profile);
-//         }
-//         else {
-//             return done(null, false);
-//         }
-//     }
-// ));
-
 module.exports = passport;
