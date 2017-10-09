@@ -6,15 +6,16 @@ var pick = require('lodash/pick')
 var SECRET = process.env.JWT || 'coco_token_secret'
 var EXPIRES = 60*60; // 1 hour
 
-function signToken(userID) {
-    return jwt.sign({ userID: userID }, SECRET, { expiresIn : EXPIRES });
+function signToken(user) {
+    return jwt.sign({ user: user }, SECRET, { expiresIn : EXPIRES });
 }
 
 // 토큰을 해독한 후, 사용자 ID를 request에 추가합니다.
 exports.decodeToken = function() {
     return function (req, res, next) {
-        if (req.query && req.query.hasOwnProperty('access_token'))
+        if (req.query && req.query.hasOwnProperty('access_token')) {
             req.headers.authorization = 'Bearer' + req.query.access_token
+        }
 
         var token = ''
 
@@ -38,18 +39,17 @@ exports.decodeToken = function() {
     }
 }
 
-
 exports.signIn = function (req, res) {
     if (req.isAuthenticated()) {
-        var id = req.user.userID
-        var token = signToken(id);
+        var user = {
+            userID: req.user.userID,
+            nickName: req.user.nickName,
+            email: req.user.email
+        }
+        var token = signToken(user);
         return res.json({
             access_token: token,
-            user: {
-                userID: id,
-                nickName: req.user.nickName,
-                email: req.body.email
-            }
+            user: user
         });
     }
     else {
