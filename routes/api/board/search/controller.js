@@ -2,22 +2,23 @@ var mysql = require('../../model/mysql.js');
 
 
 exports.search = function (req, res) {
-    var keyword = "%"+ req.param.keyword + "%";
+    var keyword = req.param.keyword + "*";
     var category = req.param.category;
     var sql;
 
     // 검색
     switch (category){
         case "all" : sql = "select * from TUTORING " +
-            "               where Title like ? " +
-            "               or Content like ?" +
-            "               or Language like ?";
+            "               where match (Title, Content, Language) against (? in boolean mode);";
             break;
         case "Title" : sql = "select * from TUTORING" +
-            "               where Title like ? ";
+            "               where match (Title) against (? in boolean mode);";
             break;
         case "Content" : sql = "select * from TUTORING" +
-            "               where Content like ? ";
+            "               where match (Content) against (? in boolean mode);";
+            break;
+        case "Language" : sql = "select * from TUTORING" +
+            "               where match (Language) against (? in boolean mode);";
     }
 
     mysql.query(sql, keyword, function (err, result) {
