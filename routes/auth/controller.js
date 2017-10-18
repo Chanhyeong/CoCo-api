@@ -3,11 +3,11 @@ var mysql = require('../../middleware/mysql');
 var jwtHandler = require('../../middleware/jwt-handler');
 
 exports.signIn = function (req, res) {
-    var sql = "select * from USER where userID = ?";
-    mysql.query(sql, req.body.userID ,function (err, result){
+    var sql = "select * from User where id = ?";
+    mysql.query(sql, req.body.id ,function (err, result){
         if (err) { // DB 에러 발생 시
             console.log('DB err :' + err);
-            res.status(500).json({ error: err })
+            res.status(500).json({ error: err });
         } else {
             if (result.length === 0) { // DB에 ID가 없을 경우
                 res.status(401).send('CHECK_ID');
@@ -16,9 +16,10 @@ exports.signIn = function (req, res) {
                     res.status(401).send('CHECK_PW');
                 } else { // 모든게 정상적으로 확인됐을 때
                     var user = {
-                        userID: req.user.userID,
-                        nickName: result[0].nickName,
-                        email: result[0].userEmail
+                        id: result[0].id,
+                        nickname: result[0].nickname,
+                        email: result[0].email,
+                        tutor: result[0].tutor
                     };
                     var token = jwtHandler.signToken(user);
                     res.json({
@@ -35,26 +36,27 @@ exports.signUp = function(req,res){
     var hash = bcrypt.hashSync(req.body.password, 10);
 
     var user = {
-        userID : req.body.userID,
+        id : req.body.id,
         password : hash,
         email : req.body.email,
-        nickName : req.body.nickName
+        nickname : req.body.nickname
     };
 
-    var sql = "select * from USER where userID = ?";
+    var sql = "select * from User where id = ?";
 
-    mysql.query(sql, req.body.userID, function(err, result){
+    mysql.query(sql, req.body.id, function(err, result){
         if (err) {
-            console.log('DB err :' + err);
-            res.status(500).json({ error: err })
+            console.log('DB select err :' + err);
+            res.status(500).json({ error: err });
         } else {
             if(result.length !== 0) {
                 res.status(401).json({ errors: '해당아이디가 이미 존재합니다' });
             } else {
-                sql = "insert into USER SET ?";
+                sql = "insert into User SET ?";
                 mysql.query(sql, user, function(err, result) {
                     if (err) {
-                        console.log('err :' + err);
+                        console.log('DB insert err :' + err);
+                        res.status(500).json({ error: err });
                     } else {
                         res.status(200).json({ user: user })
                     }
