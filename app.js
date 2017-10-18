@@ -8,7 +8,6 @@ var port = 3000;
 
 var server = http.createServer(app);
 
-var passport = require('./middleware/passport');
 var flash = require('connect-flash'); // session 관련해서 사용됨. 로그인 실패시 session등 클리어하는 기능으로 보임.
 var session = require('express-session');
 
@@ -28,8 +27,6 @@ app.use(session({
     cookie: {maxAge: 10000}
 }));
 app.use(flash());
-app.use(passport.initialize());
-app.use(passport.session());
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
