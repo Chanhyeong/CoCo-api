@@ -1,66 +1,34 @@
 var bcrypt = require('bcrypt');
-var mysql = require('../../model/mysql.js');
-var jwt = require('jsonwebtoken')
-var pick = require('lodash/pick')
-
-var SECRET = process.env.JWT || 'coco_token_secret'
-var EXPIRES = 60*60; // 1 hour
-
-function signToken(user) {
-    return jwt.sign({ user: user }, SECRET, { expiresIn : EXPIRES });
-}
-
-// 토큰을 해독한 후, 사용자 ID를 request에 추가합니다.
-exports.decodeToken = function() {
-    return function (req, res, next) {
-        if (req.query && req.query.hasOwnProperty('access_token')) {
-            req.headers.authorization = 'Bearer' + req.query.access_token
-        }
-
-        var token = ''
-
-        if (req.headers.authorization)
-            token = req.headers.authorization.split(' ')[1]
-
-        if (token) {
-            // 토큰을 해독한 후, 사용자 정보(id)를 request에 추가합니다.
-            jwt.verify(token, SECRET, function(err, decoded) {
-                if (err)
-                    res.status(401).send('사용자 인증에 실패했습니다.')
-                else {
-                    req.user = decoded
-                    next()
-                }
-            })
-        }
-        else {
-            res.status(403).send('토큰이 필요합니다.')
-        }
-    }
-}
+var mysql = require('../../middleware/mysql');
+var jwtHandler = require('../../middleware/jwt-handler');
 
 exports.signIn = function (req, res) {
-    if (req.isAuthenticated()) {
-        var user = {
-            userID: req.user.userID,
-            nickName: req.user.nickName,
-            email: req.user.email
+    var sql = "select * from USER where userID = ?";
+    mysql.query(sql, req.body.userID ,function (err, result){
+        if (err) { // DB 에러 발생 시
+            console.log('DB err :' + err);
+            res.status(500).json({ error: err })
+        } else {
+            if (result.length === 0) { // DB에 ID가 없을 경우
+                res.status(401).send('CHECK_ID');
+            } else {
+                if (!bcrypt.compareSync(req.body.password, result[0].password)) { // 비밀번호 불일치
+                    res.status(401).send('CHECK_PW');
+                } else { // 모든게 정상적으로 확인됐을 때
+                    var user = {
+                        userID: req.user.userID,
+                        nickName: result[0].nickName,
+                        email: result[0].userEmail
+                    };
+                    var token = jwtHandler.signToken(user);
+                    res.json({
+                        access_token: token,
+                        user: user
+                    });
+                }
+            }
         }
-        var token = signToken(user);
-        return res.json({
-            access_token: token,
-            user: user
-        });
-    }
-    else {
-        return res.status(401).send('해당 유저가 없습니다.');
-    }
-};
-
-exports.logout = function (req, res){
-    console.log("logout");
-    req.logout();
-    res.send('logout');
+    });
 };
 
 exports.signUp = function(req,res){
@@ -77,7 +45,8 @@ exports.signUp = function(req,res){
 
     mysql.query(sql, req.body.userID, function(err, result){
         if (err) {
-            res.status(404).json({ error: err })
+            console.log('DB err :' + err);
+            res.status(500).json({ error: err })
         } else {
             if(result.length !== 0) {
                 res.status(401).json({ errors: '해당아이디가 이미 존재합니다' });
@@ -93,5 +62,4 @@ exports.signUp = function(req,res){
             }
         }
     });
-
 };

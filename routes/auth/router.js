@@ -1,16 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var passport = require('passport');
-var controller = require('./controller')
+var controller = require('./controller');
 
-router.post('/login',
-    // 인증실패시 401 리턴, {} -> 인증 스트레티지
-    passport.authenticate('local', { failureFlash: true }),
-    controller.signIn
-);
-
-router.post('/logout', controller.logout);
-
+router.post('/login', controller.signIn);
 router.post('/signup', controller.signUp);
 
 module.exports = router;
