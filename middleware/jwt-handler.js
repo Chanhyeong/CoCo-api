@@ -9,7 +9,6 @@ exports.signToken = function (user) {
     return jwt.sign({ user: user }, SECRET, { expiresIn : EXPIRES });
 }
 
-// TODO: 디비에 로그인 토큰 저장?
 // 토큰을 해독한 후, 사용자 ID를 request에 추가합니다.
 exports.decodeToken = function (req, res, next) {
     console.log('jwt-handler.js: decodeToken');
@@ -26,7 +25,7 @@ exports.decodeToken = function (req, res, next) {
         // 토큰을 해독한 후, 사용자 정보(id)를 request에 추가합니다.
         jwt.verify(token, SECRET, function(err, decoded) {
             if (err)
-                res.status(401).send('사용자 인증에 실패했습니다.')
+                res.status(401).send('사용자 인증에 실패했습니다.');
             else {
                 req.user = decoded;
                 next();

@@ -1,4 +1,4 @@
-var mysql = require('../../../middleware/mysql');
+var mysql = require('../../../middleware/database')('mysql');
 
 exports.create = function (req, res) {
     var data = req.body;

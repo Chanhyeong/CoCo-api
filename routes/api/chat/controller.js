@@ -1,24 +1,57 @@
-var mysql = require('../../../middleware/mysql');
+var mysql = require('../../../middleware/database')('mysql');
+var mongodb = require('../../../middleware/database')('mongodb');
+
+/**
+ * req.body: mode, id, message;
+ */
 
 exports.getList = function (req, res) {
-    var nickQuery = 'select nickName from User where id = ?';
-
-    // TODO: 아이디로 닉네임 찾는 쿼리 진행
-    var nickname;
-    mysql.query(nickQuery, req.user.id)
+    var nickname = req.user.nickname;
 
     var listQuery = "select * from Class where tutorNick = ? or studentNick = ?";
 
     mysql.query(listQuery, nickname, nickname, function(err, result){
         if (err) {
-            res.status(404).json({ error: err })
+            res.status(404).json(err)
         } else {
             if(result.length !== 0) {
-                res.status(204).json({ list: null });
+                res.status(204).json(null);
             }
             else {
-                res.status(200).json({ list: user })
+                res.status(200).json(result)
             }
         }
     });
+};
+
+exports.getMessageLog = function (req, res) {
+    var classId = req.params.id;
+
+    mongodb.getMessage(req.body.mode, classId, function (result) {
+        process.nextTick( function () {
+            if(result) {
+                res.status(200).send(result.log);
+            } else {
+                res.status(401).send('Error; Get msg');
+            }
+        })
+    });
+};
+
+exports.sendMessage = function (req, res) {
+    var classId = req.params.id;
+    var current = new Date().toISOString().
+    replace(/T/, ' ').      // replace T with a space
+    replace(/\..+/, '');     // delete the dot and everything after
+
+    var message = {
+        id: req.body.id,
+        message: req.body.message,
+        date: current
+    };
+
+    mongodb.insertMessage(req.body.mode, classId, message);
+    req.app.get('dataHandler').sendChatMsg(classId, message);
+
+    res.status(200).send();
 };

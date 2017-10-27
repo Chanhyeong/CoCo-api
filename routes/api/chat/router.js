@@ -3,10 +3,9 @@ var router = express.Router();
 var controller = require('./controller');
 var jwtHandler = require('../../../middleware/jwt-handler');
 
-router.get('/:tnum');
+router.get('/:id', controller.getMessageLog);
 router.get('/list', jwtHandler.decodeToken, controller.getList);
-router.post('/');
-router.put('/');
+router.put('/:id', controller.sendMessage);
 router.delete('/');
 
 module.exports = router;
