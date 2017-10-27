@@ -3,9 +3,9 @@ var router = express.Router();
 var controller = require('./controller');
 var jwtHandler = require('../../../middleware/jwt-handler');
 
-router.get('/:classId', controller.getMessageLog);
+router.get('/:mode/:classNumber', controller.getMessageLog);
 router.get('/list', jwtHandler.decodeToken, controller.getList);
-router.put('/:classId', controller.sendMessage);
+router.put('/:mode/:classNumber', controller.sendMessage);
 router.delete('/');
 
 module.exports = router;

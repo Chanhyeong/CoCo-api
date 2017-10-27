@@ -2,7 +2,7 @@ var mysql = require('../../../middleware/database')('mysql');
 var mongodb = require('../../../middleware/database')('mongodb');
 
 /**
- * req.body: mode, id, message;
+ * req.body: id, message;
  */
 
 exports.getList = function (req, res) {
@@ -25,9 +25,9 @@ exports.getList = function (req, res) {
 };
 
 exports.getMessageLog = function (req, res) {
-    var classNumber = req.params.classNumber;
+    var classNumber = parseInt(req.params.classNumber);
 
-    mongodb.getMessage(req.body.mode, classNumber, function (result) {
+    mongodb.getMessage(req.params.mode, classNumber, function (result) {
         process.nextTick( function () {
             if(result) {
                 res.status(200).send(result.log);
@@ -39,7 +39,7 @@ exports.getMessageLog = function (req, res) {
 };
 
 exports.sendMessage = function (req, res) {
-    var classNumer = req.params.classNumer
+    var classNumber = parseInt(req.params.classNumber);
     var current = new Date().toISOString().
     replace(/T/, ' ').      // replace T with a space
     replace(/\..+/, '');     // delete the dot and everything after
@@ -50,7 +50,7 @@ exports.sendMessage = function (req, res) {
         date: current
     };
 
-    mongodb.insertMessage(req.body.mode, classNumer, message);
+    mongodb.insertMessage(req.params.mode, classNumer, message);
     req.app.get('dataHandler').sendChatMsg(classNumer, message);
 
     res.status(200).send();

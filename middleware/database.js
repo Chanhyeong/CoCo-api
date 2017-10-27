@@ -26,13 +26,15 @@ function MongoDB() {}
 
 // result 값이 router로 전달되지 않아서 callback으로 설계
 // mode: 'matching' (매칭 중일 때의 채팅) or 'class' (에디터 접속 후 채팅)
-MongoDB.getMessage = function (mode, id, callback) {
+MongoDB.getMessage = function (mode, classNumber, callback) {
     MongoClient.connect(mongoUrl, function (err, db) {
         assert.equal(err, null);
 
-        db.collection(mode).findOne( { _id : id }, function (err, result) {
+        console.log(mode, classNumber);
+        db.collection(mode).findOne( { _id : classNumber }, function (err, result) {
             assert.equal(err, null);
 
+            console.log(result);
             callback(result);
         });
 
@@ -40,11 +42,11 @@ MongoDB.getMessage = function (mode, id, callback) {
     });
 };
 
-MongoDB.insertMessage = function (mode, id, message) {
+MongoDB.insertMessage = function (mode, classNumber, message) {
     MongoClient.connect(mongoUrl, function (err, db) {
         assert(err, equal);
 
-        db.collection(mode).update( { _id: id }, {
+        db.collection(mode).update( { _id: classNumber }, {
             $push: { log: message }
         });
     });
