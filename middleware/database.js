@@ -12,15 +12,14 @@ var mysqlOptions = {
 
 var mongoUrl = 'mongodb://external.cocotutor.ml:27017/chat';
 
-function getMysql () {
-    return mysql.createConnection(mysqlOptions).connect(function(err) {
-        if (err) {
-            console.error('mysql connection error');
-            console.error(err);
-            throw err;
-        }
-    })
-}
+var mysqlDb = mysql.createConnection(mysqlOptions);
+mysqlDb.connect(function(err) {
+    if (err) {
+        console.error('mysql connection error');
+        console.error(err);
+        throw err;
+    }
+});
 
 function MongoDB() {}
 
@@ -54,7 +53,7 @@ MongoDB.insertMessage = function (mode, classNumber, message) {
 
 module.exports = function (name) {
     switch (name) {
-        case 'mysql': getMysql;
+        case 'mysql': return mysqlDb; break;
         case 'mongodb': return MongoDB;
     }
 };
