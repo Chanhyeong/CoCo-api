@@ -25,9 +25,9 @@ exports.getList = function (req, res) {
 };
 
 exports.getMessageLog = function (req, res) {
-    var classId = req.params.id;
+    var classNumber = req.params.classNumber;
 
-    mongodb.getMessage(req.body.mode, classId, function (result) {
+    mongodb.getMessage(req.body.mode, classNumber, function (result) {
         process.nextTick( function () {
             if(result) {
                 res.status(200).send(result.log);
@@ -39,7 +39,7 @@ exports.getMessageLog = function (req, res) {
 };
 
 exports.sendMessage = function (req, res) {
-    var classId = req.params.id;
+    var classNumer = req.params.classNumer
     var current = new Date().toISOString().
     replace(/T/, ' ').      // replace T with a space
     replace(/\..+/, '');     // delete the dot and everything after
@@ -50,8 +50,8 @@ exports.sendMessage = function (req, res) {
         date: current
     };
 
-    mongodb.insertMessage(req.body.mode, classId, message);
-    req.app.get('dataHandler').sendChatMsg(classId, message);
+    mongodb.insertMessage(req.body.mode, classNumer, message);
+    req.app.get('dataHandler').sendChatMsg(classNumer, message);
 
     res.status(200).send();
 };

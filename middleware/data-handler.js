@@ -7,17 +7,17 @@ exports.init = function (io) {
     dataSocket.on('connection', function(socket) {
         console.log('update connection 생성');
 
-        socket.on('join room', function (classId) {
-            socket.join(classId);
-            console.log(classId, '에 join');
+        socket.on('join room', function (classNumber) {
+            socket.join(classNumber);
+            console.log(classNumber, '에 join');
         })
     });
 };
 
-exports.sendDirectory = function (classId, object) {
-    dataSocket.to(classId).emit('directory', object);
+exports.sendDirectory = function (classNumber, object) {
+    dataSocket.to(classNumber).emit('directory', object);
 };
 
-exports.sendChatMsg = function (classId, message) {
-    dataSocket.to(classId).emit('chat', message);
+exports.sendChatMsg = function (classNumber, message) {
+    dataSocket.to(classNumber).emit('chat', message);
 };
