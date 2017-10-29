@@ -8,4 +8,5 @@ Middleware.init = function (server, app) {
 
     share.init(server);
     app.set('dataHandler', require('./data-handler'));
+    app.set('stream', require('./stream-service'));
 };

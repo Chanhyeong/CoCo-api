@@ -17,7 +17,7 @@ var middleware = require('./middleware');
 
 // initialize custom middlewares
 middleware.init(server, app);
-
+app.get('stream').init(io);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({
