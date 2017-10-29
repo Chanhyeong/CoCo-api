@@ -43,7 +43,7 @@ exports.init = function (io) {
             console.log('thisRoom', thisRoom);
 
             // 유저 정보 추가
-            io.sockets.in(roomId).emit('joinRoom', roomId, thisRoom);
+            socket.emit('joinRoom', roomId, thisRoom);
             //console.log('ROOM LIST', io.sockets.adapter.rooms);
             console.log('ROOM LIST', rooms);
         });
