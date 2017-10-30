@@ -53,7 +53,7 @@ exports.signUp = function(req,res){
                 res.status(401).json({ errors: '해당아이디가 이미 존재합니다' });
             } else {
                 sql = "insert into User SET ?";
-                mysql.query(sql, user, function(err, result) {
+                mysql.query(sql, user, function(err) {
                     if (err) {
                         console.log('DB insert err :' + err);
                         res.status(500).json({ error: err });

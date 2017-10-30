@@ -1,14 +1,15 @@
 var mysql = require('../../../middleware/database')('mysql');
 var mongodb = require('../../../middleware/database')('mongodb');
-var model = require('../board/model')
+var model = require('../board/model');
 
 exports.getList = function (req, res) {
     var nickname = req.user.nickname;
 
-    var statement = "select num, title, tutorNick, studentNick " +
-        "from Class where tutorNick = ? OR studentNick = ? AND status - ?";
+    var statement = "select c.num, c.title, c.tutorNick, c.studentNick, ch.num as chatNum " +
+        "from Class AS c inner join Chat AS ch ON c.num = ch.classNum " +
+        "where tutorNick = ? OR studentNick = ?";
 
-    mysql.query(statement, nickname, nickname, model.getConst('ON'), function(err, result){
+    mysql.query(statement, nickname, nickname, function(err, result){
         if (err) {
             res.status(404).json(err)
         } else {
@@ -26,9 +27,9 @@ exports.getList = function (req, res) {
  */
 
 exports.getMessageLog = function (req, res) {
-    var classNumber = parseInt(req.params.classNumber);
+    var chatNumber = parseInt(req.params.chatNumber);
 
-    mongodb.getMessage(req.params.mode, classNumber, function (result) {
+    mongodb.getMessage(req.params.mode, chatNumber, function (result) {
         process.nextTick( function () {
             if(result) {
                 res.status(200).send({ log : result.log });
@@ -40,7 +41,7 @@ exports.getMessageLog = function (req, res) {
 };
 
 exports.sendMessage = function (req, res) {
-    var classNumber = parseInt(req.params.classNumber);
+    var chatNumber = parseInt(req.params.chatNumber);
 
     // Format: 2017-10-27 17:19:33
     var current = new Date().toISOString().
@@ -53,8 +54,13 @@ exports.sendMessage = function (req, res) {
         date: current
     };
 
-    mongodb.insertMessage(req.params.mode, classNumer, message);
-    req.app.get('dataHandler').sendChatMsg(classNumer, message);
+    mongodb.insertMessage(req.params.mode, chatNumber, message);
+    req.app.get('dataHandler').sendChatMsg(chatNumber, message);
 
     res.status(200).send();
+};
+
+// TODO: 채팅방 삭제 구현
+exports.expireChat = function () {
+
 };
