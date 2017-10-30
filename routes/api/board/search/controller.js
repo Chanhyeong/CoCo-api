@@ -3,7 +3,7 @@ var mysql = require('../../model/mysql.js');
 exports.search = function (req, res) {
     var group, language, keyword = "";
 
-    if (req.query.keyword != ""){
+    if (req.query.keyword !== ""){
         var str = req.query.keyword.split(" ");
 
         for (var i=0; i<str.length; i++){
@@ -15,9 +15,11 @@ exports.search = function (req, res) {
     }
 
     // 검색
+    group = "select num from Class"
     switch (req.query.group){
         // 전체 검색
-        case 0 : group = "select num from Class";
+        case 0 :
+            break;
         // 학생 검색
         case 1 : group += "where Status = 1";
             break;
@@ -26,9 +28,10 @@ exports.search = function (req, res) {
             break;
     }
 
+    language = "select num from Class";
     switch (req.query.language){
         // 전체 검색
-        case 0 : language = "select num from Class";
+        case 0 :
         case 1 : language += "language = 'C'";
             break;
         case 2 : language += "language = 'JAVA'";
