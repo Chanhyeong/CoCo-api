@@ -1,9 +1,10 @@
 var express = require('express');
 var router = express.Router();
+var controller = require('./controller');
 
-router.get('/');
+router.get('/', controller.create);
 router.post('/');
 router.put('/');
-router.delete('/');
+router.delete('/:num');
 
 module.exports = router;

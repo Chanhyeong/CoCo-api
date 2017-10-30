@@ -1,8 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var assert = require('assert');
-var updateSocket = require('./model/update-socket');
-var passport = require('./model/passport');
+var updateSocket = require('./middleware/data-handler');
 
 // REST API Reference: http://meetup.toast.com/posts/92
 
@@ -45,36 +44,36 @@ e
 
 // 프로젝트의 디렉토리 변경 시
 // /api/updateDirectory/8001로 axios 보내면 테스트 가능
-router.put('/directory/:_id', function (req, res, next) {
-    console.log("_id", req.params._id, "디렉토리 업데이트");
-
-    req.app.db.collection('projects').findOne({ _id: req.params._id }, function (err, result) {
-
-    });
-
-    var object = {
-        type: 'directory',
-        data: {
-            test: '디렉토리 업데이트'
-        }
-    };
-    // TODO: react에서 받는 데이터 넣기
-    updateSocket.update(req.params._id, object);
-});
+// router.put('/directory/:_id', function (req, res, next) {
+//     console.log("_id", req.params._id, "디렉토리 업데이트");
+//
+//     req.app.db.collection('projects').findOne({ _id: req.params._id }, function (err, result) {
+//
+//     });
+//
+//     var object = {
+//         type: 'directory',
+//         data: {
+//             test: '디렉토리 업데이트'
+//         }
+//     };
+//     // TODO: react에서 받는 데이터 넣기
+//     updateSocket.update(req.params._id, object);
+// });
 
 // 프로젝트에 유저 목록 추가
-router.post('/user/:_id', function (req, res, next) {
-    console.log("_id", req.params._id, "유저 접속 추가");
-
-    var object = {
-        type: 'usr',
-        data: {
-            test: '유저접속 추가'
-        }
-    };
-    // TODO: react에서 받는 데이터 넣기
-    updateSocket.update(req.params._id, object);
-});
+// router.post('/user/:_id', function (req, res, next) {
+//     console.log("_id", req.params._id, "유저 접속 추가");
+//
+//     var object = {
+//         type: 'usr',
+//         data: {
+//             test: '유저접속 추가'
+//         }
+//     };
+//     // TODO: react에서 받는 데이터 넣기
+//     updateSocket.update(req.params._id, object);
+// });
 
 router.get('/check', function (req, res, next) {
     if (req.isAuthenticated()) {
@@ -91,16 +90,5 @@ router.get('/auth', function (req, res) {
     else {
         res.redirect('/api/auth/google') }
 });
-
-router.get('/auth/google',
-    passport.authenticate('google', { scope: ['https://www.googleapis.com/auth/plus.login'] }));
-
-router.get('/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/' }),
-    function(req, res) {
-    //TODO: 테스트한 사람의 ip로 어떻게 보내는가
-    	//res.redirect('http://:4001');
-        res.json(req.user)
-    });
 
 module.exports = router;
