@@ -7,7 +7,7 @@ exports.search = function (req, res) {
         var str = req.query.keyword.split(" ");
         console.log(str);
         for (var i=0; i<str.length; i++){
-            keyword += "*" + str[i] + "*";
+            keyword += str[i] + "*";
         }
         keyword = "select num from Class where match (title, content, language) against ('"+keyword+"' in boolean mode)"
     }else {
