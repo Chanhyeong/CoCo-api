@@ -1,4 +1,4 @@
-var mysql = require('../../model/mysql.js');
+var mysql = require('../../../model/mysql');
 
 
 exports.getUser = function (req, res){
