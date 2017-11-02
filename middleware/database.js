@@ -23,16 +23,15 @@ mysqlDb.connect(function(err) {
 
 function MongoDB() {}
 
+// 특정 Document의 message 반환
 // result 값이 router로 전달되지 않아서 callback으로 설계
 // mode: 'matching' (매칭 중일 때의 채팅) or 'class' (에디터 접속 후 채팅)
-MongoDB.getMessage = function (mode, classNumber, callback) {
+MongoDB.getMessage = function (mode, chatNumber, callback) {
     MongoClient.connect(mongoUrl, function (err, db) {
         assert.equal(err, null);
 
-        console.log(mode, classNumber);
-        db.collection(mode).findOne( { _id : classNumber }, function (err, result) {
+        db.collection(mode).findOne( { _id : chatNumber }, function (err, result) {
             assert.equal(err, null);
-
             console.log(result);
             callback(result);
         });
@@ -41,12 +40,34 @@ MongoDB.getMessage = function (mode, classNumber, callback) {
     });
 };
 
-MongoDB.insertMessage = function (mode, classNumber, message) {
+// 기존 Document에 메시지 추가
+MongoDB.insertMessage = function (mode, chatNumber, message, callback) {
     MongoClient.connect(mongoUrl, function (err, db) {
-        assert(err, equal);
+        assert.equal(err, null);
 
-        db.collection(mode).update( { _id: classNumber }, {
+        db.collection(mode).update( { _id: chatNumber }, {
             $push: { log: message }
+        }, function (err){
+            if (err) {
+                callback(err)
+            } else {
+                callback(null);
+            }
+        });
+    });
+};
+
+// 새로운 Document 생성
+MongoDB.createChat = function (mode, chatNumber, form, callback) {
+    MongoClient.connect(mongoUrl, function (err, db) {
+        assert.equal(err, null);
+
+        db.collection(mode).insert(form, function (err) {
+            if (err) {
+                callback(err);
+            } else {
+                callback(null);
+            }
         });
     });
 };

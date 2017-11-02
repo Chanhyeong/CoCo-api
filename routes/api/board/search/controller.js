@@ -1,4 +1,4 @@
-var mysql = require('../../../../model/mysql');
+var mysql = require('../../../../middleware/database')('mysql');
 
 exports.search = function (req, res) {
     var group, language, keyword = "";
@@ -10,7 +10,7 @@ exports.search = function (req, res) {
             keyword += str[i] + "*";
         }
         keyword = "select num from Class where match (title, content, language) against ('"+keyword+"' in boolean mode)"
-    }else {
+    } else {
         keyword = "select num from Class"
     }
 

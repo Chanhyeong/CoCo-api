@@ -1,29 +1,44 @@
 var mysql = require('../../../middleware/database')('mysql');
+var model = require('./model');
+
+exports.getList = function (req, res) {
+    model.getList( function (err, result) {
+        if (err) {
+            console.log('DB select err: ', err);
+            res.status(500).send('Err: DB select Error');
+        } else{
+            res.status(200).send({
+                list: result
+            });
+        }
+    });
+};
 
 exports.create = function (req, res) {
     var data = req.body;
-    data['Status'] = 'NOT_MATCHED';
-    data['Student'] = '';
 
-    var statement = 'select * from TUTORING where Title = ? AND tutorNick = ? AND Status = \'NOT_MATCHED\'';
-    mysql.query(statement, req.body.Title, req.body.nickName, function (err, result) {
-        if (err) { console.log('err: ', err); }
-        else{
-            if(result.length !== 0){
-                res.status(409).send('동일 제목으로 생성된 게시글이 이미 존재합니다.');
-            } else {
-                statement = 'insert into TUTORING SET ?';
-                mysql.query(statement, data, function (err, result) {
-                    if (err) { console.log ('err: ', err); }
-                    else { res.send(200); }
-                })
+    model.create(data, function (err) {
+        if (Number.isInteger(err)) {
+            switch (err) {
+                case 400: res.status(400).send('Check the status number'); break;
+                case 409: res.status(409).send('동일 제목한 제목으로 이미 게시글을 생성하였습니다.');
             }
+        } else if (err) {
+            console.log('DB select err: ', err);
+            res.status(500).send('Err: DB select Error');
+        } else {
+            res.status(200).send();
         }
-    });
- };
+    })
+};
 
 exports.delete = function (req, res) {
-    console.log(req.params.num)
-    var statement = 'alter table TUTORING where tNum = ?';
-    mysql.query(statement, req.param)
-}
+    model.delete(req.params.num, function (err) {
+        if (err) {
+            console.log ('DB delete err: ', err);
+            res.status(500).send('Err: DB delete Error');
+        } else {
+            res.status(200).send();
+        }
+    });
+};

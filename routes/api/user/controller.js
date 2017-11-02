@@ -1,4 +1,4 @@
-var mysql = require('../../../model/mysql');
+var mysql = require('../../../middleware/database')('mysql');
 
 
 exports.getUser = function (req, res){
