@@ -19,7 +19,7 @@ var status = {
 
 exports.getList = function (callback) {
     // IFNULL, http://ra2kstar.tistory.com/75
-    var statement = 'select title, content, language, IFNULL(tutorNick, studentNick) AS nickname, status, date ' +
+    var statement = 'select num, title, content, language, IFNULL(tutorNick, studentNick) AS nickname, status, date ' +
         'from Class where status IN (?, ?)';
     var filter = [status['STUDENT'], status['TUTOR']];
 
