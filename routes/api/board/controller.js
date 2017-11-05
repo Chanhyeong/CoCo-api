@@ -32,6 +32,11 @@ exports.create = function (req, res) {
     })
 };
 
+//TODO: 글 수정 api
+exports.modify = function (req, res) {
+
+};
+
 exports.delete = function (req, res) {
     model.delete(req.params.num, function (err) {
         if (err) {

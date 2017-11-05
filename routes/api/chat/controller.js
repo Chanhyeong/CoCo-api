@@ -1,16 +1,10 @@
 var mysql = require('../../../middleware/database')('mysql');
 var mongodb = require('../../../middleware/database')('mongodb');
-var model = require('../board/model');
+var model = require('./model');
 
 // 해당 유저에 대한 전체 리스트 가져오기
 exports.getList = function (req, res) {
-    var nickname = req.user.nickname;
-
-    var statement = "select c.num, c.title, c.tutorNick, c.studentNick, ch.num as chatNum " +
-        "from Class AS c inner join Chat AS ch ON c.num = ch.classNum " +
-        "where tutorNick = ? OR studentNick = ?";
-
-    mysql.query(statement, nickname, nickname, function(err, result){
+    model.getList(req.user.nickname, function (err, result) {
         if (err) {
             console.log('DB select error', err);
             res.status(500).send('Err: DB select error');
@@ -28,7 +22,8 @@ exports.getList = function (req, res) {
 exports.getMessageLog = function (req, res) {
     var chatNumber = parseInt(req.params.chatNumber);
 
-    mongodb.getMessage(req.params.mode, chatNumber, function (result) {
+    model.getMessage(req.params.mode, chatNumber, function (result) {
+        // mongodb에서 검색된 내용이 바로 채워지지 않아서 nextTick 추가
         process.nextTick( function () {
             if(result) {
                 res.status(200).send({ log : result.log });
@@ -54,7 +49,7 @@ exports.sendMessage = function (req, res) {
         date: time
     };
 
-    mongodb.insertMessage(req.params.mode, chatNumber, message, function (err) {
+    model.insertMessage(req.params.mode, chatNumber, message, function (err) {
         if (err) {
             console.log('DB insert error, mongo');
             res.status(500).send('Err: DB insert Error');

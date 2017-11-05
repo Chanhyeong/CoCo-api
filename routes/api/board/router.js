@@ -4,8 +4,8 @@ var controller = require('./controller');
 
 router.get('/', controller.getList);
 router.post('/', controller.create);
-router.put('/:num');
-router.delete('/:num');
+router.put('/:num', controller.modify);
+router.delete('/:num', controller.delete);
 
 router.use('/search', require('./search/router'));
 
