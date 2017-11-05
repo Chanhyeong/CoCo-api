@@ -12,3 +12,6 @@ tatu
 
 # etc
 package-lock.json
+
+# log file
+coco.out

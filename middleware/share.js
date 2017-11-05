@@ -5,7 +5,7 @@ var WebSocketJSONStream = require('websocket-json-stream');
 var ShareDBMongo = require('sharedb-mongo');
 
 var mongoDB = require('mongodb');
-var url = "mongodb://external.sopad.ml:27017/sopad";
+var url = "mongodb://external.cocotutor.ml:27017/editor";
 
 exports.init = function (server){
     var webSocketServer = new WebSocketServer({server: server});

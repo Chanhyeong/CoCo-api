@@ -1,3 +1,4 @@
-# CoCo-api [![Build Status](https://secure.travis-ci.org/Chanhyeong/CoCo-api.png)](http://travis-ci.org/Chanhyeong/CoCo-api)
+# box-api
+The backend of [sopad](https://github.com/highalps/sopad)
 
-The back-end of [CoCo](https://github.com/highalps/coco)
+structure reference: [auth-example-api](https://github.com/kimdhoe/auth-example-api/)

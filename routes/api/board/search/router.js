@@ -1,9 +1,7 @@
 var express = require('express');
 var router = express.Router();
+var controller = require('./controller')
 
-router.get('/');
-router.post('/');
-router.put('/');
-router.delete('/');
+router.get('/', controller.search);
 
 module.exports = router;
