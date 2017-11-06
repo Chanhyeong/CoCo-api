@@ -45,12 +45,14 @@ exports.search = function (req, res) {
 
     mysql.query(sql, function (err, result) {
         if (err) {
-            res.status(404).json({error: err})
+            res.status(500).json({error: err})
         } else {
             if (!result.length) {
                 res.status(401).send("해당 검색 내용이 없습니다.");
             } else {
-                res.status(200).send({list: result});
+                res.status(200).send({
+                    list: result
+                });
             }
         }
     });
