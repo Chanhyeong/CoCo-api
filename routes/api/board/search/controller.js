@@ -49,7 +49,7 @@ exports.search = function (req, res) {
             if (!result.length) {
                 res.status(401).json("해당 검색 내용이 없습니다.");
             } else {
-                res.status(200).json(result)
+                res.status(200).json(result);
             }
         }
     });
