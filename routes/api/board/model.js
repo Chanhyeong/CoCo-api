@@ -7,22 +7,11 @@ var status = {
     'END': 4
 };
 
-// function Board () {
-//     this.num;
-//     this.title;
-//     this.content;
-//     this.language;
-//     this.status;
-//     this.tutorNick;
-//     this.studentNick;
-//     this.date;
-// }
-
 exports.getList = function (callback) {
     // IFNULL, http://ra2kstar.tistory.com/75
     var statement = 'select num, title, content, language, IFNULL(tutorNick, studentNick) AS nickname, status, date ' +
         'from Class where status IN (?, ?)';
-    var filter = [status['STUDENT'], status['TUTOR']];
+    var filter = [status.STUDENT, status.TUTOR];
 
     mysql.query(statement, filter, callback);
 };
@@ -39,15 +28,15 @@ exports.create = function (data, callback) {
     var statement;
 
     // Format: 2017-10-27
-    data['date'] = new Date().toISOString().split('T')[0];
+    data.date = new Date().toISOString().split('T')[0];
 
-    if (data.status === status['STUDENT']) {
-        data['studentNick'] = data['nickname'];
-        data['tutorNick'] = '';
+    if (data.status === status.STUDENT) {
+        data.studentNick = data.nickname;
+        data.tutorNick = '';
         statement = 'select * from Class where title = ? AND studentNick = ? AND status IN (?, ?)';
-    } else if (data.status === status['TUTOR']) {
-        data['tutorNick'] = data['nickname'];
-        data['studentNick'] = '';
+    } else if (data.status === status.TUTOR) {
+        data.tutorNick = data.nickname;
+        data.studentNick = '';
         statement = 'select * from Class where title = ? AND tutorNick = ? AND status IN (?, ?)';
     } else {
         callback(400);
@@ -55,10 +44,12 @@ exports.create = function (data, callback) {
 
     delete data.nickname;
 
-    var filter = [data.title, data.nickname, data,status, status['STUDENT'], status['TUTOR']]
+    var filter = [data.title, data.nickname, status.STUDENT, status.TUTOR];
 
     if (!duplicateCheck(statement, filter, callback)) {
-        var insertStatement = 'insert into Class SET ?';
+        var insertStatement = 'insert into Class (title, content, language, status, tutorNick, studentNick, date) ' +
+                            'values ?';
+
         mysql.query(insertStatement, data, callback);
     }
 
