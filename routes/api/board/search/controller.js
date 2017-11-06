@@ -40,7 +40,7 @@ exports.search = function (req, res) {
             break;
     }
 
-    var sql = "select num, title, content, language, IFNULL(tutorNick, studentNick) AS nickname, status, date"+
+    var sql = "select num, title, content, language, IFNULL(tutorNick, studentNick) AS nickname, status, date "+
               "from Class where num in ("+group+") and num in ("+language+") and num in ("+ keyword + ");";
 
     mysql.query(sql, function (err, result) {
