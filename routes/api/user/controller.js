@@ -1,6 +1,5 @@
 var mysql = require('../../../middleware/database')('mysql');
 
-
 exports.getUser = function (req, res) {
     var userID = req.params.id;
 
