@@ -40,16 +40,17 @@ exports.search = function (req, res) {
             break;
     }
 
-    var sql = "select * from Class where num in ("+group+") and num in ("+language+") and num in ("+ keyword + ");";
+    var sql = "select num, title, content, language, IFNULL(tutorNick, studentNick) AS nickname, status, date"+
+              "from Class where num in ("+group+") and num in ("+language+") and num in ("+ keyword + ");";
 
     mysql.query(sql, function (err, result) {
         if (err) {
             res.status(404).json({error: err})
         } else {
             if (!result.length) {
-                res.status(401).json("해당 검색 내용이 없습니다.");
+                res.status(401).send("해당 검색 내용이 없습니다.");
             } else {
-                res.status(200).json(result);
+                res.status(200).send({list: result});
             }
         }
     });

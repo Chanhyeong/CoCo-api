@@ -7,9 +7,9 @@ exports.getUser = function (req, res) {
     var sql = "select id, email, nickname, tutor from User where id = ?";
     mysql.query(sql, userID, function (err, result) {
         if (err) {
-            res.status(500).json({error: err})
+            res.status(500).send({error: err})
         } else {
-            res.status(200).json(result[0]);
+            res.status(200).send({list : result[0]});
         }
     });
 };
@@ -24,9 +24,9 @@ exports.getClass = function (req, res) {
             res.status(500).json({error: err})
         } else {
             if (!result.length) {
-                res.status(401).json("수강중인 목록이 없습니다");
+                res.status(401).send("수강중인 목록이 없습니다");
             } else {
-                res.status(200).json(result);
+                res.status(200).send({list : result});
             }
         }
     });
@@ -43,9 +43,9 @@ exports.getWriter = function(req, res) {
             res.status(500).json({error: err})
         } else {
             if (!result.length) {
-                res.status(401).json("신청한 받은 목록이 없습니다.");
+                res.status(401).send("신청한 받은 목록이 없습니다.");
             } else {
-                res.status(200).json(result);
+                res.status(200).send({list : result});
             }
         }
     });
@@ -61,9 +61,9 @@ exports.getApplicant = function(req, res){
             res.status(500).json({ error: err })
         } else {
             if(!result.length) {
-                res.status(401).json("신청한 목록이 없습니다.");
+                res.status(401).send("신청한 목록이 없습니다.");
             } else {
-                res.status(200).json(result);
+                res.status(200).send({list : result});
             }
         }
     });
@@ -83,9 +83,22 @@ exports.regist = function(req, res){
 
     mysql.query(sql, [userID, info.degree, info.intro, info.github, info.career] , function(err, result){
         if (err) {
-            res.status(500).json({ error: err })
+            res.status(500).send({ error: err })
         } else {
-            res.status(200).json(result);
+            res.status(200).send({list : result});
         }
     });
-}
+};
+
+exports.getTutor = function(req, res){
+    var userID = req.params.id;
+
+    var sql = "select * from Tutor where id = ?";
+    mysql.query(sql, userID, function (err, result) {
+        if (err) {
+            res.status(500).send({error: err})
+        } else {
+            res.status(200).send({list : result[0]});
+        }
+    });
+};
