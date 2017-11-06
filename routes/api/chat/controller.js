@@ -1,16 +1,13 @@
 var mysql = require('../../../middleware/database')('mysql');
 var mongodb = require('../../../middleware/database')('mongodb');
-var model = require('../board/model')
+var model = require('./model');
 
+// 해당 유저에 대한 전체 리스트 가져오기
 exports.getList = function (req, res) {
-    var nickname = req.user.nickname;
-
-    var statement = "select num, title, tutorNick, studentNick " +
-        "from Class where tutorNick = ? OR studentNick = ? AND status - ?";
-
-    mysql.query(statement, nickname, nickname, model.getConst('ON'), function(err, result){
+    model.getList(req.user.nickname, function (err, result) {
         if (err) {
-            res.status(404).json(err)
+            console.log('DB select error', err);
+            res.status(500).send('Err: DB select error');
         } else {
             if(result.length !== 0) {
                 res.status(204).json({ list: null });
@@ -21,14 +18,12 @@ exports.getList = function (req, res) {
     });
 };
 
-/**
- * req.body: id, message;
- */
-
+// 채팅방번호에 맞는 채팅 로그
 exports.getMessageLog = function (req, res) {
-    var classNumber = parseInt(req.params.classNumber);
+    var chatNumber = parseInt(req.params.chatNumber);
 
-    mongodb.getMessage(req.params.mode, classNumber, function (result) {
+    model.getMessage(req.params.mode, chatNumber, function (result) {
+        // mongodb에서 검색된 내용이 바로 채워지지 않아서 nextTick 추가
         process.nextTick( function () {
             if(result) {
                 res.status(200).send({ log : result.log });
@@ -39,22 +34,28 @@ exports.getMessageLog = function (req, res) {
     });
 };
 
+// 채팅방번호에 새로운 메시지 라인 추가
 exports.sendMessage = function (req, res) {
-    var classNumber = parseInt(req.params.classNumber);
+    var chatNumber = parseInt(req.params.chatNumber);
 
     // Format: 2017-10-27 17:19:33
-    var current = new Date().toISOString().
+    var time = new Date().toISOString().
     replace(/T/, ' ').      // replace T with a space
     replace(/\..+/, '');     // delete the dot and everything after
 
     var message = {
         id: req.body.id,
         message: req.body.message,
-        date: current
+        date: time
     };
 
-    mongodb.insertMessage(req.params.mode, classNumer, message);
-    req.app.get('dataHandler').sendChatMsg(classNumer, message);
+    model.insertMessage(req.params.mode, chatNumber, message, function (err) {
+        if (err) {
+            console.log('DB insert error, mongo');
+            res.status(500).send('Err: DB insert Error');
+        }
 
-    res.status(200).send();
+        req.app.get('dataHandler').sendChatMsg(chatNumber, message);
+        res.status(200).send();
+    });
 };

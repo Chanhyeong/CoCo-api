@@ -1,15 +1,11 @@
 var bodyParser = require('body-parser');
 var http = require('http');
 var express = require('express');
-var share = require('./middleware/share');
 
 var app = express();
 var port = 3000;
 
 var server = http.createServer(app);
-
-var flash = require('connect-flash'); // session 관련해서 사용됨. 로그인 실패시 session등 클리어하는 기능으로 보임.
-var session = require('express-session');
 
 var io = require('socket.io')(server);
 
@@ -20,13 +16,6 @@ middleware.init(server, app);
 app.get('stream').init(io);
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(session({
-    secret: '@#@$MYSIGN#@$#$',
-    resave: false,
-    saveUninitialized: true,
-    cookie: {maxAge: 10000}
-}));
-app.use(flash());
 
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");

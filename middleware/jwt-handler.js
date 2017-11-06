@@ -1,5 +1,4 @@
 var jwt = require('jsonwebtoken');
-var pick = require('lodash/pick');
 
 var SECRET = process.env.JWT || 'coco_token_secret';
 var EXPIRES = 60*60; // 1 hour
