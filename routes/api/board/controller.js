@@ -1,5 +1,6 @@
 var mysql = require('../../../middleware/database')('mysql');
 var model = require('./model');
+var chatModel = require('../chat/model');
 
 exports.getList = function (req, res) {
     model.getList( function (err, result) {
@@ -9,6 +10,19 @@ exports.getList = function (req, res) {
         } else{
             res.status(200).send({
                 list: result
+            });
+        }
+    });
+};
+
+exports.getOne = function (req, res) {
+    model.getInstance(req.params.num, function (err, result) {
+        if (err) {
+            console.log('DB select err: ', err);
+            res.status(500).send('Err: DB select Error');
+        } else{
+            res.status(200).send({
+                class: result
             });
         }
     });
@@ -30,6 +44,13 @@ exports.create = function (req, res) {
             res.status(200).send();
         }
     })
+};
+
+// 게시된 클래스에 매칭 신청 시 채팅방 생성
+exports.request = function (req, res) {
+    chatModel.create(function (err) {
+
+    });
 };
 
 //TODO: 글 수정 api

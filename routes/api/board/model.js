@@ -15,6 +15,7 @@ var status = {
 //     this.status;
 //     this.tutorNick;
 //     this.studentNick;
+//     this.date;
 // }
 
 exports.getList = function (callback) {
@@ -22,6 +23,14 @@ exports.getList = function (callback) {
     var statement = 'select num, title, content, language, IFNULL(tutorNick, studentNick) AS nickname, status, date ' +
         'from Class where status IN (?, ?)';
     var filter = [status['STUDENT'], status['TUTOR']];
+
+    mysql.query(statement, filter, callback);
+};
+
+exports.getInstance = function (num, callback) {
+    var statement = 'select num, title, content, language, IFNULL(tutorNick, studentNick) AS nickname, ' +
+        'status, date from Class where num = ?';
+    var filter = num;
 
     mysql.query(statement, filter, callback);
 };
@@ -72,6 +81,10 @@ function duplicateCheck (statement, filter, callback) {
         }
     });
 }
+
+exports.handleMatch = function () {
+
+};
 
 exports.delete = function (num, callback) {
     var statement = 'delete from Class where num = ?';
