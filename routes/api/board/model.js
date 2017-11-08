@@ -59,9 +59,10 @@ exports.create = function (data, callback) {
     if (!duplicateCheck(statement, filter, callback)) {
         var insertStatement = 'insert into Class (title, content, language, status, tutorNick, studentNick, date) ' +
                             'values ?';
+        filter = [data.title, data,content, data.language, data.status, data.tutorNick, data.studentNick, data.date];
 
         // Class에 정보 저장
-        mysql.query(insertStatement, data, callback);
+        mysql.query(insertStatement, filter, callback);
 
         // TODO: 맞는 설계인지 확인 필요
         // 다른 요청이 잡고있지 않을 경우
