@@ -38,7 +38,7 @@ exports.create = function (req, res) {
                 case 409: res.status(409).send('동일 제목한 제목으로 이미 게시글을 생성하였습니다.');
             }
         } else if (err) {
-            console.log('DB select err: ', err);
+            console.log('DB err: ', err);
             res.status(500).send('Err: DB select Error');
         } else {
             res.status(200).send();

@@ -6,7 +6,7 @@ var EXPIRES = 60*60; // 1 hour
 exports.signToken = function (user) {
     console.log('jwt-handler.js: signToken');
     return jwt.sign({ user: user }, SECRET, { expiresIn : EXPIRES });
-}
+};
 
 // 토큰을 해독한 후, 사용자 ID를 request에 추가합니다.
 exports.decodeToken = function (req, res, next) {
@@ -34,4 +34,4 @@ exports.decodeToken = function (req, res, next) {
     else {
         res.status(403).send('토큰이 필요합니다.')
     }
-}
+};

@@ -1,5 +1,12 @@
 var mysql = require('../../../middleware/database')('mysql');
 
+// Tmeporary value: mutex
+// 동시에 여러 개의 글 생성 요청이 들어올 경우 한 번에 하나만
+// create시 LAST_INSERT_ID(); 가 겹치는 경우를 방지
+var HOLD = 0;
+var FREE = 1;
+var holdValue = FREE;
+
 var status = {
     'STUDENT': 1,
     'TUTOR': 2,
@@ -27,9 +34,6 @@ exports.getInstance = function (num, callback) {
 exports.create = function (data, callback) {
     var statement;
 
-    // Format: 2017-10-27
-    data.date = new Date().toISOString().split('T')[0];
-
     if (data.status === status.STUDENT) {
         data.studentNick = data.nickname;
         data.tutorNick = '';
@@ -40,9 +44,15 @@ exports.create = function (data, callback) {
         statement = 'select * from Class where title = ? AND tutorNick = ? AND status IN (?, ?)';
     } else {
         callback(400);
+        return;
     }
 
+    // Format: 2017-10-27
+    data.date = new Date().toISOString().split('T')[0];
+    var timeData = data.time;
+
     delete data.nickname;
+    delete data.time;
 
     var filter = [data.title, data.nickname, status.STUDENT, status.TUTOR];
 
@@ -50,7 +60,30 @@ exports.create = function (data, callback) {
         var insertStatement = 'insert into Class (title, content, language, status, tutorNick, studentNick, date) ' +
                             'values ?';
 
+        // Class에 정보 저장
         mysql.query(insertStatement, data, callback);
+
+        // TODO: 맞는 설계인지 확인 필요
+        // 다른 요청이 잡고있지 않을 경우
+        while (holdValue === FREE) {
+            holdValue = HOLD;
+            // 마지막 입력한 클래스 번호를 받아서 Classtime에 저장
+            mysql.query('SELECT LAST_INSERT_ID();', function (err, num) {
+                if (err) {
+                    callback(err);
+                } else {
+                    for (var prop in timeData) {
+                        prop['classNum'] = num;
+                    }
+
+                    insertStatement = 'insert into Classtime SET ?;'
+
+                    mysql.query(insertStatement, timeData, callback);
+                }
+
+            });
+        }
+        holdValue = FREE;
     }
 
 };
