@@ -26,21 +26,20 @@ exports.getList = function (callback) {
 exports.getInstance = function (num, callback) {
     var statement = 'select num, title, content, language, IFNULL(tutorNick, studentNick) AS nickname, ' +
         'status, date from Class where num = ?';
-    var filter = num;
 
-    mysql.query(statement, filter, callback);
+    mysql.query(statement, num, callback);
 };
 
 exports.create = function (data, callback) {
     var statement;
 
     if (data.status === status.STUDENT) {
-        data.studentNick = data.nickname;
-        data.tutorNick = '';
+        data['studentNick'] = data.nickname;
+        data['tutorNick'] = '';
         statement = 'select * from Class where title = ? AND studentNick = ? AND status IN (?, ?)';
     } else if (data.status === status.TUTOR) {
-        data.tutorNick = data.nickname;
-        data.studentNick = '';
+        data['tutorNick'] = data.nickname;
+        data['studentNick'] = '';
         statement = 'select * from Class where title = ? AND tutorNick = ? AND status IN (?, ?)';
     } else {
         callback(400);
@@ -56,35 +55,40 @@ exports.create = function (data, callback) {
 
     var filter = [data.title, data.nickname, status.STUDENT, status.TUTOR];
 
-    if (!duplicateCheck(statement, filter, callback)) {
+    if (duplicateCheck(statement, filter, callback) === null) {
         var insertStatement = 'insert into Class (title, content, language, status, tutorNick, studentNick, date) ' +
                             'values ?';
         filter = [data.title, data,content, data.language, data.status, data.tutorNick, data.studentNick, data.date];
 
         // Class에 정보 저장
-        mysql.query(insertStatement, filter, callback);
+        mysql.query(insertStatement, filter, function (err) {
+            if (err) {
+                callback(err);
+            } else {
+                // TODO: 맞는 설계인지 확인 필요
+                // 다른 요청이 잡고있지 않을 경우 (mutex 구현)
+                while (holdValue === FREE) {
+                    holdValue = HOLD;
+                    // 마지막 입력한 클래스 번호를 받아서 Classtime에 저장
+                    mysql.query('SELECT LAST_INSERT_ID();', function (err, num) {
+                        if (err) {
+                            callback(err);
+                        } else {
+                            for (var prop in timeData) {
+                                prop['classNum'] = num;
+                            }
 
-        // TODO: 맞는 설계인지 확인 필요
-        // 다른 요청이 잡고있지 않을 경우
-        while (holdValue === FREE) {
-            holdValue = HOLD;
-            // 마지막 입력한 클래스 번호를 받아서 Classtime에 저장
-            mysql.query('SELECT LAST_INSERT_ID();', function (err, num) {
-                if (err) {
-                    callback(err);
-                } else {
-                    for (var prop in timeData) {
-                        prop['classNum'] = num;
-                    }
+                            insertStatement = 'insert into Classtime SET ?;';
 
-                    insertStatement = 'insert into Classtime SET ?;'
-
-                    mysql.query(insertStatement, timeData, callback);
+                            mysql.query(insertStatement, timeData, callback);
+                        }
+                    });
                 }
-
-            });
-        }
-        holdValue = FREE;
+                holdValue = FREE;
+            }
+        });
+    } else { // 이미 값이 존재할 때
+        callback(409);
     }
 
 };
@@ -97,12 +101,7 @@ function duplicateCheck (statement, filter, callback) {
             callback(err);
             return true;
         } else {
-            if (result) { // 이미 값이 존재할 때
-                callback(409);
-                return true;
-            } else {
-                return false;
-            }
+            return result;
         }
     });
 }
@@ -111,8 +110,17 @@ exports.handleMatch = function () {
 
 };
 
-exports.delete = function (num, callback) {
-    var statement = 'delete from Class where num = ?';
+exports.delete = function (nickname, num, callback) {
+    var matchStatement = 'select  * from Class where num = ? AND status IN (?, ?) ' +
+        'AND tutorNick = ? or studentNick = ?';
+    var filter = [num, status.STUDENT, status.TUTOR, nickname, nickname];
+    
+    // result 값이 있다면 정보가 일치함
+    if(duplicateCheck(matchStatement, filter) !== null) {
+        var deleteStatement = 'delete from Class where num = ?';
 
-    mysql.query(statement, num, callback)
+        mysql.query(deleteStatement, num, callback);
+    } else {
+        callback(401);
+    }
 };
