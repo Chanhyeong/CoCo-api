@@ -88,9 +88,8 @@ exports.getApplicant = function(req, res){
 };
 
 exports.regist = function(req, res){
-    var userID = req.params.id;
-
     var info = {
+        'id' : req.body.id,
         'degree' : req.body.degree,
         'intro' : req.body.intro,
         'github' : req.body.github,
@@ -99,7 +98,7 @@ exports.regist = function(req, res){
     };
 
     var sql = "insert into Tutor values (?, ?, ?, ?, ?, ?)";
-    var filter = [userID, info.degree, info.intro, info.github, info.career, info.language];
+    var filter = [info.id, info.degree, info.intro, info.github, info.career, info.language];
 
     mysql.query(sql, filter , function(err, result){
         if (err) {
