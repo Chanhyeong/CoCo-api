@@ -94,11 +94,12 @@ exports.regist = function(req, res){
         'degree' : req.body.degree,
         'intro' : req.body.intro,
         'github' : req.body.github,
-        'career' : req.body.career
+        'career' : req.body.career,
+        'language' : req.body.language
     };
 
-    var sql = "insert into Tutor values (?, ?, ?, ?, ?)";
-    var filter = [userID, info.degree, info.intro, info.github, info.career];
+    var sql = "insert into Tutor values (?, ?, ?, ?, ?, ?)";
+    var filter = [userID, info.degree, info.intro, info.github, info.career, info.language];
 
     mysql.query(sql, filter , function(err, result){
         if (err) {
