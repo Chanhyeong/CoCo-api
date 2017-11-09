@@ -50,12 +50,12 @@ exports.create = function (data, callback) {
     data.date = new Date().toISOString().split('T')[0];
     var timeData = data.time;
 
+    var filter = [data.title, data.nickname, data.nickname, status.STUDENT, status.TUTOR];
+
     delete data.nickname;
     delete data.time;
 
-    var filter = [data.title, data.nickname, status.STUDENT, status.TUTOR];
-
-    if (duplicateCheck(statement, filter, callback) === null) {
+    if (duplicateCheck(statement, filter, callback).length === 0) {
         var insertStatement = 'insert into Class (title, content, language, status, tutorNick, studentNick, date) ' +
                             'values ?';
         filter = [data.title, data,content, data.language, data.status, data.tutorNick, data.studentNick, data.date];
@@ -116,7 +116,7 @@ exports.delete = function (nickname, num, callback) {
     var filter = [num, status.STUDENT, status.TUTOR, nickname, nickname];
     
     // result 값이 있다면 정보가 일치함
-    if(duplicateCheck(matchStatement, filter) !== null) {
+    if(duplicateCheck(matchStatement, filter).length !== 0) {
         var deleteStatement = 'delete from Class where num = ?';
 
         mysql.query(deleteStatement, num, callback);
