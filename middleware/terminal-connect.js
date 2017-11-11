@@ -29,8 +29,8 @@ function TerminalConnect(io, _id){
         }).connect({
             host: 'external.cocotutor.ml',
             port: _id,
-            username: 'root',
-            password: 'syspwd128'
+            username: 'coco',
+            password: 'whdtjf123@'
         });
     })
 }
