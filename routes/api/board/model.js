@@ -23,6 +23,7 @@ exports.getInstance = function (num, callback) {
     mysql.query(statement, num, callback);
 };
 
+// TODO: JWT에서 닉네임 받아서 넣어야함
 exports.create = function (data, callback) {
     var statement;
 
@@ -41,13 +42,11 @@ exports.create = function (data, callback) {
 
     // Format: 2017-10-27
     data.date = new Date().toISOString().split('T')[0];
+
     var timeData = data.time;
-
-    var filter = [data.title, data.nickname, data.nickname, status.STUDENT, status.TUTOR];
-
-    // TODO: nickname 지우기
-    delete data.nickname;
     delete data.time;
+
+    var filter = [data.title, '', status.STUDENT, status.TUTOR];
 
     if (duplicateCheck(statement, filter, callback) !== true) {
         var insertStatement = 'insert into Class SET ?';
