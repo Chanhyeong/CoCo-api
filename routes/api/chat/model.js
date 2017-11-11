@@ -47,14 +47,14 @@ exports.insertMessage = function (mode, chatNumber, message, callback) {
 // TODO: 매칭 신청 시 동시에 동작하도록
 // 매칭 신청 시 새로운 채팅방 생성, 관리자 안내 메시지 추가
 // mode: 'matching', 'class'
-exports.create = function (mode, callback) {
-    var statement2= "";
-    var statement = "select c.num, c.title, c.tutorNick, c.studentNick, ch.num AS chatNum " +
-        "from Class AS c inner join Chat AS ch ON c.num = ch.classNum " +
-        "where tutorNick = ? OR studentNick = ?";
-    var filter = [nickname, nickname];
+exports.create = function (mode, data, callback) {
+    var statement= "insert into Chat SET ?";
 
-    var chatNumber;
+    mysql.query(statement, data, function (err) {
+        if (err) {
+            callback(err);
+        }
+    });
 
     var time = new Date().toISOString().
     replace(/T/, ' ').      // replace T with a space

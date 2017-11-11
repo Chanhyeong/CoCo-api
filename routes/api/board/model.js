@@ -1,4 +1,5 @@
 var mysql = require('../../../middleware/database')('mysql');
+var chatModel = require('../chat/model');
 
 var status = {
     'STUDENT': 1,
