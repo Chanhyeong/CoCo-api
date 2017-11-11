@@ -48,8 +48,13 @@ exports.create = function (req, res) {
 
 // 게시된 클래스에 매칭 신청 시 채팅방 생성
 exports.request = function (req, res) {
-    chatModel.create(function (err) {
-
+    chatModel.create('matching', req.body, function (err) {
+        if (err) {
+            console.log('DB insert err: ', err);
+            res.status(500).send('Err: DB insert Error');
+        } else {
+            res.status(200).send();
+        }
     });
 };
 

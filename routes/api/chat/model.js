@@ -19,7 +19,7 @@ exports.getMessage = function (mode, chatNumber, callback) {
             if (err) {
                 callback(err);
             } else {
-                callback(result);
+                callback(null, result);
             }
         });
 
@@ -33,11 +33,7 @@ exports.insertMessage = function (mode, chatNumber, message, callback) {
         db.collection(mode).update( { _id: chatNumber }, {
             $push: { log: message }
         }, function (err){
-            if (err) {
-                callback(err)
-            } else {
-                callback(null);
-            }
+            callback(err);
         });
 
         db.close();
@@ -49,12 +45,6 @@ exports.insertMessage = function (mode, chatNumber, message, callback) {
 // mode: 'matching', 'class'
 exports.create = function (mode, data, callback) {
     var statement= "insert into Chat SET ?";
-
-    mysql.query(statement, data, function (err) {
-        if (err) {
-            callback(err);
-        }
-    });
 
     var time = new Date().toISOString().
     replace(/T/, ' ').      // replace T with a space
@@ -71,21 +61,27 @@ exports.create = function (mode, data, callback) {
         ]
     };
 
-    mongodb(function (db) {
-        db.collection(mode).insert(form, function (err) {
-            if (err) {
-                callback(err);
-            } else {
-                callback(null);
-            }
-        });
+    mysql.query(statement, data, function (err) {
+        if (err) {
+            callback(err);
+        } else {
+            mongodb(function (db) {
+                db.collection(mode).insert(form, function (err) {
+                    callback(err);
+                });
 
-        db.close();
+                db.close();
+            });
+        }
     });
 };
 
 
 // TODO: 채팅방 삭제 구현
-exports.delete = function () {
-
+exports.delete = function (num, callback) {
+    mongodb(function (db) {
+        db.collection('matching').delete({_id: num}, function (err) {
+            callback(err);
+        });
+    });
 };

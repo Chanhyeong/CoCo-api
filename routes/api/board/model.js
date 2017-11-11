@@ -1,11 +1,22 @@
 var mysql = require('../../../middleware/database')('mysql');
-var chatModel = require('../chat/model');
 
 var status = {
     'STUDENT': 1,
     'TUTOR': 2,
     'MATCHED': 3,
     'END': 4
+};
+
+exports.changeStatus = function (num, value, callback) {
+    var statement = 'update Class set status = ? where num = ?';
+    var filter;
+
+    if (typeof value === 'string')
+        filter = [num, status[value]];
+    else
+        filter = [num, value];
+
+    mysql.query(statement, filter, callback);
 };
 
 exports.getList = function (callback) {

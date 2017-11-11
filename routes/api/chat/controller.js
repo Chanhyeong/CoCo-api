@@ -1,6 +1,7 @@
 var mysql = require('../../../middleware/database')('mysql');
 var mongodb = require('../../../middleware/database')('mongodb');
 var model = require('./model');
+var boardModel = require('../board/model')''
 
 // 해당 유저에 대한 전체 리스트 가져오기
 exports.getList = function (req, res) {
@@ -22,13 +23,14 @@ exports.getList = function (req, res) {
 exports.getMessageLog = function (req, res) {
     var chatNumber = parseInt(req.params.chatNumber);
 
-    model.getMessage(req.params.mode, chatNumber, function (result) {
+    model.getMessage(req.params.mode, chatNumber, function (err, result) {
         // mongodb에서 검색된 내용이 바로 채워지지 않아서 nextTick 추가
         process.nextTick( function () {
-            if(result) {
-                res.status(200).send({ log : result.log });
+            if (err) {
+                console.log('DB insert error, mongo');
+                res.status(500).send('Error: DB Find Error');
             } else {
-                res.status(401).send('Error; Get msg');
+                res.status(200).send({ log : result.log });
             }
         })
     });
@@ -58,4 +60,23 @@ exports.sendMessage = function (req, res) {
         req.app.get('dataHandler').sendChatMsg(chatNumber, message);
         res.status(200).send();
     });
+};
+
+// TODO 1: 매칭이 되고 + 끝난 클래스에 대한 정보를 남겨두려면 현재 디비 구조로는 안되는데.
+// TODO 2: 매칭이 되면 새로운 row를 추가하여 터미널 번호를 새로 부여하는 방식이 나을 것 같음
+exports.handleMatch = function (req, res) {
+    switch (req.params.mode) {
+        case 'on':
+            break;
+        case 'off':
+            model.delete(req.body.chatNum, function (err) {
+                if (err) {
+                    console.log('DB delete error, mongo');
+                    res.status(500).send('Err: DB delete Error');
+                } else {
+                    res.status(200).send();
+                }
+            });
+            break;
+    }
 };
