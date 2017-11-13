@@ -2,7 +2,7 @@ var http = require('http');
 var express = require('express');
 var cors = require('cors');
 var app = express();
-var port = 80;
+var port = 3000;
 
 var server = http.createServer(app);
 

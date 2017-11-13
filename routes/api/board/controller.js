@@ -31,7 +31,7 @@ exports.getOne = function (req, res) {
 exports.create = function (req, res) {
     var data = req.body;
 
-    model.create(data, function (err) {
+    model.create(req.user.nickname, data, function (err) {
         if (Number.isInteger(err)) {
             switch (err) {
                 case 400: res.status(400).send('Check the \'status\' number'); break;
