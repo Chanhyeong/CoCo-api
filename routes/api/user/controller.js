@@ -125,3 +125,18 @@ exports.getTutor = function(req, res){
         }
     });
 };
+
+exports.TutorInfo = function(req, res){
+    var filter = req.params.id;
+
+    var sql = "select degree, intro, github, career, language from Tutor where id = ?";
+    mysql.query(sql, filter, function (err, result) {
+        if (err) {
+            res.status(500).send({error: err})
+        } else {
+            res.status(200).send({
+                tutor : result[0]
+            });
+        }
+    });
+}
