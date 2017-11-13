@@ -1,7 +1,7 @@
 var mysql = require('../../../middleware/database')('mysql');
 var mongodb = require('../../../middleware/database')('mongodb');
 var model = require('./model');
-var boardModel = require('../board/model')''
+var boardModel = require('../board/model');
 
 // 해당 유저에 대한 전체 리스트 가져오기
 exports.getList = function (req, res) {

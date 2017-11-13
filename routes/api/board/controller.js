@@ -22,7 +22,7 @@ exports.getOne = function (req, res) {
             res.status(500).send('Err: DB select Error');
         } else{
             res.status(200).json({
-                class: result
+                list: result
             });
         }
     });

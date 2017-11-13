@@ -21,7 +21,7 @@ exports.changeStatus = function (num, value, callback) {
 
 exports.getList = function (callback) {
     // IFNULL, http://ra2kstar.tistory.com/75
-    var statement = 'select num, title, content, language, IFNULL(tutorNick, studentNick) AS nickname, status, date ' +
+    var statement = 'select num, title, language, IFNULL(tutorNick, studentNick) AS nickname, status, date ' +
         'from Class where status IN (?, ?)';
     var filter = [status.STUDENT, status.TUTOR];
 
@@ -29,10 +29,22 @@ exports.getList = function (callback) {
 };
 
 exports.getInstance = function (num, callback) {
-    var statement = 'select num, title, content, language, IFNULL(tutorNick, studentNick) AS nickname, ' +
-        'status, date from Class where num = ?';
+    var statement = 'select content from Class where num = ?';
 
-    mysql.query(statement, num, callback);
+    mysql.query(statement, num, function (err, content) {
+        if (err) {
+            callback(err);
+        } else {
+            var timeStatement = 'select day, startTime, endTime from Classtime where classNum = ?'
+
+            mysql.query(timeStatement, num, function (err, time) {
+                callback(err, {
+                    content: content[0].content,
+                    time: time
+                });
+            })
+        }
+    });
 };
 
 // TODO: JWT에서 닉네임 받아서 넣어야함
