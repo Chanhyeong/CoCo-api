@@ -114,7 +114,7 @@ exports.regist = function(req, res){
 exports.getTutor = function(req, res){
     var filter = req.params.id;
 
-    var sql = "select * from Tutor where id = ?";
+    var sql = "select degree, intro, github, career, t.language from Tutor as t, User as u where t.id = u.id and nickname = ?";
     mysql.query(sql, filter, function (err, result) {
         if (err) {
             res.status(500).send({error: err})
