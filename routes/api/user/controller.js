@@ -112,7 +112,7 @@ exports.regist = function(req, res){
 };
 
 exports.getTutor = function(req, res){
-    var filter = req.params.id;
+    var filter = req.params.nickname;
 
     var sql = "select degree, intro, github, career, t.language from Tutor as t, User as u where t.id = u.id and nickname = ?";
     mysql.query(sql, filter, function (err, result) {
