@@ -19,7 +19,7 @@ exports.getMessage = function (mode, chatNumber, callback) {
             if (err) {
                 callback(err);
             } else {
-                callback(result);
+                callback(null, result);
             }
         });
 
@@ -33,11 +33,7 @@ exports.insertMessage = function (mode, chatNumber, message, callback) {
         db.collection(mode).update( { _id: chatNumber }, {
             $push: { log: message }
         }, function (err){
-            if (err) {
-                callback(err)
-            } else {
-                callback(null);
-            }
+            callback(err);
         });
 
         db.close();
@@ -47,14 +43,8 @@ exports.insertMessage = function (mode, chatNumber, message, callback) {
 // TODO: 매칭 신청 시 동시에 동작하도록
 // 매칭 신청 시 새로운 채팅방 생성, 관리자 안내 메시지 추가
 // mode: 'matching', 'class'
-exports.create = function (mode, callback) {
-    var statement2= "";
-    var statement = "select c.num, c.title, c.tutorNick, c.studentNick, ch.num AS chatNum " +
-        "from Class AS c inner join Chat AS ch ON c.num = ch.classNum " +
-        "where tutorNick = ? OR studentNick = ?";
-    var filter = [nickname, nickname];
-
-    var chatNumber;
+exports.create = function (mode, data, callback) {
+    var statement= "insert into Chat SET ?";
 
     var time = new Date().toISOString().
     replace(/T/, ' ').      // replace T with a space
@@ -71,21 +61,27 @@ exports.create = function (mode, callback) {
         ]
     };
 
-    mongodb(function (db) {
-        db.collection(mode).insert(form, function (err) {
-            if (err) {
-                callback(err);
-            } else {
-                callback(null);
-            }
-        });
+    mysql.query(statement, data, function (err) {
+        if (err) {
+            callback(err);
+        } else {
+            mongodb(function (db) {
+                db.collection(mode).insert(form, function (err) {
+                    callback(err);
+                });
 
-        db.close();
+                db.close();
+            });
+        }
     });
 };
 
 
 // TODO: 채팅방 삭제 구현
-exports.delete = function () {
-
+exports.delete = function (num, callback) {
+    mongodb(function (db) {
+        db.collection('matching').delete({_id: num}, function (err) {
+            callback(err);
+        });
+    });
 };
