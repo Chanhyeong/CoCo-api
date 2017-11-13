@@ -3,7 +3,7 @@ var mongodb = require('../../../middleware/database')('mongodb');
 
 exports.getList = function (nickname, callback) {
     var statement = "select c.num, c.title, ch.writer, ch.applicant, " +
-        "c.status, ch.num AS chatNum, ch.time " +
+        "c.status, ch.num AS chatNum, ch.time from Class as c, Chat as ch " +
         "where ch.writer = ? OR ch.applicant = ? AND c.num = ch.classNum";
     var filter = [nickname, nickname];
 
