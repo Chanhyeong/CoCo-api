@@ -40,8 +40,7 @@ exports.insertMessage = function (mode, chatNumber, message, callback) {
     });
 };
 
-// TODO: 매칭 신청 시 동시에 동작하도록
-// 매칭 신청 시 새로운 채팅방 생성, 관리자 안내 메시지 추가
+// 매칭 신청 시 + 매칭 완료 시 각각의 채팅방 생성, 관리자 안내 메시지 추가
 // mode: 'matching', 'class'
 exports.create = function (mode, data, callback) {
     var statement= "insert into Chat SET ?";
@@ -76,8 +75,6 @@ exports.create = function (mode, data, callback) {
     });
 };
 
-
-// TODO: 채팅방 삭제 구현
 exports.delete = function (num, callback) {
     mongodb(function (db) {
         db.collection('matching').delete({_id: num}, function (err) {
