@@ -1,4 +1,3 @@
-var mysql = require('../../../middleware/database')('mysql');
 var model = require('./model');
 var chatModel = require('../chat/model');
 
@@ -51,7 +50,14 @@ exports.create = function (req, res) {
 
 // 게시된 클래스에 매칭 신청 시 채팅방 생성
 exports.request = function (req, res) {
-    chatModel.create('matching', req.body, function (err) {
+    var data = req.body;
+    data['applicant'] = req.user.nickname;
+
+    var time = new Date().toISOString().
+    replace(/T/, ' ').      // replace T with a space
+    replace(/\..+/, '');     // delete the dot and everything after
+
+    chatModel.create('matching', data, time, function (err) {
         if (err) {
             console.log('DB insert err: ', err);
             res.status(500).send('Err: DB insert Error');
@@ -63,7 +69,9 @@ exports.request = function (req, res) {
 
 //TODO: 글 수정 api
 exports.modify = function (req, res) {
-
+    if(req.user.nickname !== req.body.nickname) {
+        res.status(401).send('권한없음: 작성자가 아닙니다.');
+    }
 };
 
 exports.delete = function (req, res) {

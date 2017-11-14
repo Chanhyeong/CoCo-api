@@ -6,8 +6,8 @@ var jwtHandler = require('../../../middleware/jwt-handler');
 router.get('/', controller.getList);
 router.get('/class/:num', controller.getOne);
 router.post('/', jwtHandler.decodeToken, controller.create);
-router.post('/request', controller.request);
-router.put('/:num', controller.modify);
+router.post('/request', jwtHandler.decodeToken, controller.request);
+router.put('/:num', jwtHandler.decodeToken, controller.modify);
 router.delete('/:num', jwtHandler.decodeToken, controller.delete);
 
 router.use('/search', require('./search/router'));

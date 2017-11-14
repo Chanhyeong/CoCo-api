@@ -5,7 +5,7 @@ var jwtHandler = require('../../../middleware/jwt-handler');
 
 router.get('/:mode/:chatNumber', controller.getMessageLog);
 router.get('/list', jwtHandler.decodeToken, controller.getList);
-router.put('/:mode/:chatNumber', controller.sendMessage);
+router.put('/:mode/:chatNumber', jwtHandler.decodeToken, controller.sendMessage);
 router.put('/request/:mode', controller.handleMatch);
 router.delete('/');
 
