@@ -52,11 +52,11 @@ exports.create = function (nickname, data, callback) {
 
     if (data.status === status.STUDENT) {
         data['studentNick'] = nickname;
-        data['tutorNick'] = '';
+        data['tutorNick'] = null;
         statement = 'select * from Class where title = ? AND studentNick = ? AND status IN (?, ?)';
     } else if (data.status === status.TUTOR) {
         data['tutorNick'] = nickname;
-        data['studentNick'] = '';
+        data['studentNick'] = null;
         statement = 'select * from Class where title = ? AND tutorNick = ? AND status IN (?, ?)';
     } else {
         callback(400);
