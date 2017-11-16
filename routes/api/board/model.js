@@ -19,7 +19,7 @@ exports.changeStatus = function (num, value, callback) {
     mysql.query(statement, filter, callback);
 };
 
-exports.getList = function (callback) {
+exports.getClasses = function (callback) {
     // IFNULL, http://ra2kstar.tistory.com/75
     var statement = 'select num, title, language, IFNULL(tutorNick, studentNick) AS nickname, status, date ' +
         'from Class where status IN (?, ?)';

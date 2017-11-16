@@ -2,26 +2,28 @@ var model = require('./model');
 var boardModel = require('../board/model');
 
 // 해당 유저에 대한 전체 리스트 가져오기
-exports.getList = function (req, res) {
-    model.getList(req.user.nickname, function (err, result) {
+exports.getMessages = function (req, res) {
+    model.getMessages(req.user.nickname, function (err, result) {
         if (err) {
             console.log('DB select error', err);
             res.status(500).send('Err: DB select error');
         } else {
-            if(result.length !== 0) {
-                res.status(204).json({ list: null });
-            } else {
-                res.status(200).json({ list: result });
-            }
+            process.nextTick(function() {
+                if (result.length !== 0) {
+                    res.status(204).json({list: null});
+                } else {
+                    res.status(200).json({list: result});
+                }
+            });
         }
     });
 };
 
 // 채팅방번호에 맞는 채팅 로그
-exports.getMessageLog = function (req, res) {
+exports.getMessage = function (req, res) {
     var chatNumber = parseInt(req.params.chatNumber);
 
-    model.getMessage(req.params.mode, chatNumber, function (err, result) {
+    model.getMessage('matching', chatNumber, function (err, result) {
         // mongodb에서 검색된 내용이 바로 채워지지 않아서 nextTick 추가
         process.nextTick( function () {
             if (err) {
