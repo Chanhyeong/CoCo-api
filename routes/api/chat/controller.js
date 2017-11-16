@@ -9,7 +9,7 @@ exports.getMessages = function (req, res) {
             res.status(500).send('Err: DB select error');
         } else {
             process.nextTick(function() {
-                if (result.length !== 0) {
+                if (!result) {
                     res.status(204).json({list: null});
                 } else {
                     res.status(200).json({list: result});
