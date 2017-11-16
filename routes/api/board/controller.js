@@ -1,17 +1,19 @@
-var mysql = require('../../../middleware/database')('mysql');
 var model = require('./model');
 var chatModel = require('../chat/model');
 
 exports.getList = function (req, res) {
     model.getList( function (err, result) {
-        if (err) {
-            console.log('DB select err: ', err);
-            res.status(500).send('Err: DB select Error');
-        } else{
-            res.status(200).json({
-                list: result
-            });
-        }
+        // TODO: 테스트 코드라서 에러가 안나면 이대로 두고 아니면 고치기
+        process.nextTick( function() {
+            if (err) {
+                console.log('DB select err: ', err);
+                res.status(500).send('Err: DB select Error');
+            } else {
+                res.status(200).json({
+                    list: result
+                });
+            }
+        });
     });
 };
 
@@ -31,7 +33,7 @@ exports.getOne = function (req, res) {
 exports.create = function (req, res) {
     var data = req.body;
 
-    model.create(data, function (err) {
+    model.create(req.user.nickname, data, function (err) {
         if (Number.isInteger(err)) {
             switch (err) {
                 case 400: res.status(400).send('Check the \'status\' number'); break;
@@ -48,7 +50,14 @@ exports.create = function (req, res) {
 
 // 게시된 클래스에 매칭 신청 시 채팅방 생성
 exports.request = function (req, res) {
-    chatModel.create('matching', req.body, function (err) {
+    var data = req.body;
+    data['applicant'] = req.user.nickname;
+
+    var time = new Date().toISOString().
+    replace(/T/, ' ').      // replace T with a space
+    replace(/\..+/, '');     // delete the dot and everything after
+
+    chatModel.create('matching', data, time, function (err) {
         if (err) {
             console.log('DB insert err: ', err);
             res.status(500).send('Err: DB insert Error');
@@ -60,7 +69,9 @@ exports.request = function (req, res) {
 
 //TODO: 글 수정 api
 exports.modify = function (req, res) {
-
+    if(req.user.nickname !== req.body.nickname) {
+        res.status(401).send('권한없음: 작성자가 아닙니다.');
+    }
 };
 
 exports.delete = function (req, res) {

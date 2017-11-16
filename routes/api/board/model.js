@@ -47,17 +47,16 @@ exports.getInstance = function (num, callback) {
     });
 };
 
-// TODO: JWT에서 닉네임 받아서 넣어야함
-exports.create = function (data, callback) {
+exports.create = function (nickname, data, callback) {
     var statement;
 
     if (data.status === status.STUDENT) {
-        data['studentNick'] = '';
-        data['tutorNick'] = '';
+        data['studentNick'] = nickname;
+        data['tutorNick'] = null;
         statement = 'select * from Class where title = ? AND studentNick = ? AND status IN (?, ?)';
     } else if (data.status === status.TUTOR) {
-        data['tutorNick'] = '';
-        data['studentNick'] = '';
+        data['tutorNick'] = nickname;
+        data['studentNick'] = null;
         statement = 'select * from Class where title = ? AND tutorNick = ? AND status IN (?, ?)';
     } else {
         callback(400);

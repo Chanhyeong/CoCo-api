@@ -1,5 +1,3 @@
-var mysql = require('../../../middleware/database')('mysql');
-var mongodb = require('../../../middleware/database')('mongodb');
 var model = require('./model');
 var boardModel = require('../board/model');
 var fs = require('fs');
@@ -48,7 +46,7 @@ exports.sendMessage = function (req, res) {
     replace(/\..+/, '');     // delete the dot and everything after
 
     var message = {
-        id: req.body.id,
+        id: req.user.id,
         message: req.body.message,
         date: time
     };

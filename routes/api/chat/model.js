@@ -40,31 +40,26 @@ exports.insertMessage = function (mode, chatNumber, message, callback) {
     });
 };
 
-// TODO: 매칭 신청 시 동시에 동작하도록
-// 매칭 신청 시 새로운 채팅방 생성, 관리자 안내 메시지 추가
+// 매칭 신청 시 + 매칭 완료 시 각각의 채팅방 생성, 관리자 안내 메시지 추가
 // mode: 'matching', 'class'
-exports.create = function (mode, data, callback) {
+exports.create = function (mode, data, time, callback) {
     var statement= "insert into Chat SET ?";
 
-    var time = new Date().toISOString().
-    replace(/T/, ' ').      // replace T with a space
-    replace(/\..+/, '');     // delete the dot and everything after
-
-    var form = {
-        _id: chatNumber,
-        log: [
-            {
-                id: 'admin',
-                message: '여기서 강의 내용에 대한 질문/답변을 진행하세요.',
-                date: time
-            }
-        ]
-    };
-
-    mysql.query(statement, data, function (err) {
+    mysql.query(statement, data, function (err, result) {
         if (err) {
             callback(err);
         } else {
+            var form = {
+                _id: result.insertId,
+                log: [
+                    {
+                        id: 'admin',
+                        message: '여기서 강의 내용에 대한 질문/답변을 진행하세요.',
+                        date: time
+                    }
+                ]
+            };
+
             mongodb(function (db) {
                 db.collection(mode).insert(form, function (err) {
                     callback(err);
@@ -76,8 +71,6 @@ exports.create = function (mode, data, callback) {
     });
 };
 
-
-// TODO: 채팅방 삭제 구현
 exports.delete = function (num, callback) {
     mongodb(function (db) {
         db.collection('matching').delete({_id: num}, function (err) {
