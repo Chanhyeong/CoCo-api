@@ -2,6 +2,8 @@ var mysql = require('../../../middleware/database')('mysql');
 var mongodb = require('../../../middleware/database')('mongodb');
 var model = require('./model');
 var boardModel = require('../board/model');
+var fs = require('fs');
+var ps = require('process');
 
 // 해당 유저에 대한 전체 리스트 가져오기
 exports.getList = function (req, res) {
@@ -67,6 +69,13 @@ exports.sendMessage = function (req, res) {
 exports.handleMatch = function (req, res) {
     switch (req.params.mode) {
         case 'on':
+            ps.umask(0);
+            fs.mkdir('/root/store/' + req.body.Classnum, 0777, function (err){
+               if (err){
+                   console.log('file system error, mkdir');
+                   res.status(500).send('Err: server error');
+               }
+            });
             break;
         case 'off':
             model.delete(req.body.chatNum, function (err) {
