@@ -134,9 +134,14 @@ exports.TutorInfo = function(req, res){
         if (err) {
             res.status(500).send({error: err})
         } else {
-            res.status(200).send({
-                tutor : result[0]
-            });
+            if (result[0]) {
+                res.status(200).send({
+                    tutor: result[0]
+                });
+            }
+            else{
+                res.status(401).send('not exist info');
+            }
         }
     });
 };

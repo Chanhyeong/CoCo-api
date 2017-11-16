@@ -2,6 +2,7 @@ var model = require('./model');
 var boardModel = require('../board/model');
 var fs = require('fs');
 var ps = require('process');
+var exec = require('child_process');
 
 // 해당 유저에 대한 전체 리스트 가져오기
 exports.getList = function (req, res) {
@@ -74,6 +75,16 @@ exports.handleMatch = function (req, res) {
                    res.status(500).send('Err: server error');
                }
             });
+
+            exec('docker run -d -p '+ req.body.Classnum +':22 -h Terminal --cpu-quota=25000 --name '+
+                req.body.Classnum +' -v /root/store/'+ req.body.Classnum +':/home/coco coco:0.3',function (err){
+               if (err) console.log('exec error : docker run error');
+            });
+
+            exec('docker stop '+ req.body.Classnum, function (err){
+                if (err) console.log('exec error : docker stop');
+            });
+
             break;
         case 'off':
             model.delete(req.body.chatNum, function (err) {
