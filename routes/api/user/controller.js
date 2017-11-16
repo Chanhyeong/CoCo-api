@@ -119,9 +119,13 @@ exports.getTutor = function(req, res){
         if (err) {
             res.status(500).send({error: err})
         } else {
-            res.status(200).send({
-                tutor : result[0]
-            });
+            if(!result.length) {
+                res.status(401).send("튜터 정보가 없습니다.");
+            } else {
+                res.status(200).send({
+                    tutor : result[0]
+                });
+            }
         }
     });
 };
