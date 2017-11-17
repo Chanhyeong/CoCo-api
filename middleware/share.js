@@ -5,7 +5,7 @@ var WebSocketJSONStream = require('websocket-json-stream');
 var ShareDBMongo = require('sharedb-mongo');
 
 var mongoDB = require('mongodb');
-var url = "mongodb://external.cocotutor.ml:27017/editor";
+var config = require('../config');
 
 exports.init = function (server){
     var webSocketServer = new WebSocketServer({server: server});
@@ -18,7 +18,7 @@ exports.init = function (server){
 
 var db = new ShareDBMongo({
     mongo: function(callback) {
-        mongoDB.connect(url, callback);
+        mongoDB.connect(config.mongoUrl.editor, callback);
     }
 });
 

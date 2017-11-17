@@ -1,6 +1,6 @@
 var jwt = require('jsonwebtoken');
 
-var SECRET = process.env.JWT || 'coco_token_secret';
+var SECRET = require('../config').jwtSecret;
 
 exports.signToken = function (user) {
     console.log('jwt-handler.js: signToken');

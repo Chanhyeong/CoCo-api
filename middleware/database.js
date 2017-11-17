@@ -1,18 +1,9 @@
 var mysql = require('mysql');
 var MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
+var config = require('../config');
 
-var mysqlOptions = {
-    host:'external.cocotutor.ml',
-    port: 3306,
-    user: 'coco',
-    password: 'whdtjf123@',
-    database:'coco'
-};
-
-var mongoUrl = 'mongodb://external.cocotutor.ml:27017/chat';
-
-var mysqlDb = mysql.createConnection(mysqlOptions);
+var mysqlDb = mysql.createConnection(config.mysqlConfig);
 mysqlDb.connect(function(err) {
     if (err) {
         console.error('mysql connection error');
@@ -22,7 +13,7 @@ mysqlDb.connect(function(err) {
 });
 
 function mongoDb (callback) {
-    MongoClient.connect(mongoUrl, function (err, db) {
+    MongoClient.connect(config.mongoUrl.chat, function (err, db) {
         assert.equal(err, null);
         callback(db);
     });
