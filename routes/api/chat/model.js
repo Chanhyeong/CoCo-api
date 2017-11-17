@@ -1,5 +1,5 @@
 var mysql = require('../../../middleware/database')('mysql');
-var mongodb = require('../../../middleware/database')('mongodb');
+var mongodb = require('../../../middleware/database')('mongodb').chatDb;
 
 exports.getMessages = function (nickname, callback) {
     var statement = "select num, writer, applicant from Chat where writer = ? OR applicant = ?;";
