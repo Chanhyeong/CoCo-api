@@ -12,16 +12,25 @@ mysqlDb.connect(function(err) {
     }
 });
 
-function mongoDb (callback) {
+function MongoDb () {}
+
+MongoDb.prototype.chatDb = function (callback) {
     MongoClient.connect(config.mongoUrl.chat, function (err, db) {
         assert.equal(err, null);
         callback(db);
     });
-}
+};
+
+MongoDb.prototype.directoryDb = function (callback) {
+    MongoClient.connect(config.mongoUrl.chat, function (err, db) {
+        assert.equal(err, null);
+        callback(db);
+    });
+};
 
 module.exports = function (name) {
     switch (name) {
         case 'mysql': return mysqlDb; break;
-        case 'mongodb': return mongoDb;
+        case 'mongodb': return MongoDb;
     }
 };
