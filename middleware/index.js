@@ -11,7 +11,7 @@ Middleware.init = function (server, app) {
     share.init(server);
     app.set('dataHandler', require('./data-handler'));
     app.set('stream', require('./stream-service'));
-    app.set('io', require('socket.io')(server));
+    app.set('io', io);
 
     app.get('stream').init(io);
 
