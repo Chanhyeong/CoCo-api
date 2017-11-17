@@ -4,20 +4,31 @@ module.exports = TerminalConnect;
 
 function TerminalConnect(io, _id){
     this.nameIO = io.of('/' + _id);
+    var enteredCommand = null;
 
     this.nameIO.on('connection', function(socket) {
         var conn = new SSHClient();
         conn.on('ready', function() {
             socket.emit('data', '\r\n*** SSH CONNECTION ESTABLISHED ***\r\n');
+	     enteredCommand = null;
 
             conn.shell(function(err, stream) {
                 if (err)
                     return socket.emit('data', '\r\n*** SSH SHELL ERROR: ' + err.message + ' ***\r\n');
                 socket.on('command', function(data) {
-                    stream.write(data + '\n')
+		     enteredCommand = data;
+                    stream.write(data + '\n');
                 });
                 stream.on('data', function(d) {
-                    socket.emit('data', d.toString('binary'));
+		     var printFromContainer = d.toString('binary');
+		     if (enteredCommand) {
+		         printFromContainer = printFromContainer.replace(enteredCommand, '').replace(/\n/, '');
+		     } else {
+		         if(printFromContainer.slice(-2) !== '$ ')
+			     printFromContainer = '';
+		     }
+		     enteredCommand = null;
+                    socket.emit('data', printFromContainer);
                 }).on('close', function() {
                     conn.end();
                 });
