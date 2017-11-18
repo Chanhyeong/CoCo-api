@@ -1,6 +1,7 @@
 var bodyParser = require('body-parser');
 var share = require('./share');
 var cors = require('cors');
+var DataHandler = require('./data-handler');
 
 var Middleware = {};
 module.exports = Middleware ;
@@ -9,7 +10,7 @@ Middleware.init = function (server, app) {
     var io = require('socket.io')(server);
 
     share.init(server);
-    app.set('dataHandler', require('./data-handler'));
+    app.set('dataHandler', new DataHandler);
     app.set('stream', require('./stream-service'));
     app.set('io', io);
 
