@@ -7,53 +7,85 @@ var status = {
     'END': 4
 };
 
-// function Board () {
-//     this.num;
-//     this.title;
-//     this.content;
-//     this.language;
-//     this.status;
-//     this.tutorNick;
-//     this.studentNick;
-// }
-
-exports.getList = function (callback) {
+exports.getClasses = function (callback) {
     // IFNULL, http://ra2kstar.tistory.com/75
-    var statement = 'select title, content, language, IFNULL(tutorNick, studentNick) AS nickname, status, date ' +
+    var statement = 'select num, title, language, IFNULL(tutorNick, studentNick) AS nickname, status, date ' +
         'from Class where status IN (?, ?)';
-    var filter = [status['STUDENT'], status['TUTOR']];
+    var filter = [status.STUDENT, status.TUTOR];
 
     mysql.query(statement, filter, callback);
 };
 
-exports.create = function (data, callback) {
+exports.getInstance = function (num, callback) {
+    var statement = 'select content from Class where num = ?';
+
+    mysql.query(statement, num, function (err, content) {
+        if (err) {
+            callback(err);
+        } else {
+            var timeStatement = 'select day, startTime, endTime from Classtime where classNum = ?'
+
+            mysql.query(timeStatement, num, function (err, time) {
+                callback(err, {
+                    content: content[0].content,
+                    time: time
+                });
+            })
+        }
+    });
+};
+
+exports.create = function (nickname, data, callback) {
     var statement;
 
-    // Format: 2017-10-27
-    data['date'] = new Date().toISOString().split('T')[0];
-
-    if (data.status === status['STUDENT']) {
-        data['studentNick'] = data['nickname'];
-        data['tutorNick'] = '';
+    if (data.status === status.STUDENT) {
+        data['studentNick'] = nickname;
+        data['tutorNick'] = null;
         statement = 'select * from Class where title = ? AND studentNick = ? AND status IN (?, ?)';
-    } else if (data.status === status['TUTOR']) {
-        data['tutorNick'] = data['nickname'];
-        data['studentNick'] = '';
+    } else if (data.status === status.TUTOR) {
+        data['tutorNick'] = nickname;
+        data['studentNick'] = null;
         statement = 'select * from Class where title = ? AND tutorNick = ? AND status IN (?, ?)';
     } else {
         callback(400);
+        return;
     }
 
-    delete data.nickname;
+    // Format: 2017-10-27
+    data.date = new Date().toISOString().split('T')[0];
 
-    var filter = [data.title, data.nickname, data,status, status['STUDENT'], status['TUTOR']]
+    var timeData = data.time;
+    delete data.time;
 
-    if (!duplicateCheck(statement, filter, callback)) {
+    var filter = [data.title, '', status.STUDENT, status.TUTOR];
+
+    if (duplicateCheck(statement, filter, callback) !== true) {
         var insertStatement = 'insert into Class SET ?';
-        mysql.query(insertStatement, data, callback);
+
+        // Class에 정보 저장
+        mysql.query(insertStatement, data, function (err, result) {
+            if (err) {
+                callback(err);
+            } else {
+                callback(timeInsert(result.insertId, timeData));
+            }
+        });
+    } else { // 이미 값이 존재할 때
+        callback(409);
     }
 
 };
+
+// 시간 데이터 추가, 에러면 err, 아니면 null
+function timeInsert (classNumber, data) {
+    for (var prop in data) {
+        data[prop]['classNum'] = classNumber;
+        var insertStatement = 'insert into Classtime SET ?;';
+        mysql.query(insertStatement, data[prop], function(err) {
+            return err;
+        });
+    }
+}
 
 // 중복 체크. return: 중복이면 true 없으면 false
 function duplicateCheck (statement, filter, callback) {
@@ -63,8 +95,7 @@ function duplicateCheck (statement, filter, callback) {
             callback(err);
             return true;
         } else {
-            if (result) { // 이미 값이 존재할 때
-                callback(409);
+            if (result.length !== 0) {
                 return true;
             } else {
                 return false;
@@ -73,8 +104,33 @@ function duplicateCheck (statement, filter, callback) {
     });
 }
 
-exports.delete = function (num, callback) {
-    var statement = 'delete from Class where num = ?';
+exports.modifyClass = function (classNumber, classData, timeData) {
+    var statement = 'update Class set ? where num = ?';
+    var filter = [classData, classNumber];
 
-    mysql.query(statement, num, callback)
+    mysql.query(statement, filter, function (err) {
+        if (err) return err;
+        else {
+            statement = 'delete from Classtime where classNum = ?';
+            mysql.query(statement, classNumber, function (err) {
+                if (err) return err;
+                else timeInsert(classNumber, timeData);
+            })
+        }
+    });
+};
+
+exports.delete = function (nickname, num, callback) {
+    var matchStatement = 'select  * from Class where num = ? AND status IN (?, ?) ' +
+        'AND tutorNick = ? or studentNick = ?';
+    var filter = [num, status.STUDENT, status.TUTOR, nickname, nickname];
+    
+    // result 값이 있다면 정보가 일치함
+    if(duplicateCheck(matchStatement, filter) === true) {
+        var deleteStatement = 'delete from Class where num = ?';
+
+        mysql.query(deleteStatement, num, callback);
+    } else {
+        callback(401);
+    }
 };

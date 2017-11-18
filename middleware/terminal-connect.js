@@ -4,20 +4,30 @@ module.exports = TerminalConnect;
 
 function TerminalConnect(io, _id){
     this.nameIO = io.of('/' + _id);
+    var enteredCommand = '';
 
     this.nameIO.on('connection', function(socket) {
         var conn = new SSHClient();
         conn.on('ready', function() {
             socket.emit('data', '\r\n*** SSH CONNECTION ESTABLISHED ***\r\n');
+            enteredCommand = null;
 
             conn.shell(function(err, stream) {
                 if (err)
                     return socket.emit('data', '\r\n*** SSH SHELL ERROR: ' + err.message + ' ***\r\n');
                 socket.on('command', function(data) {
-                    stream.write(data + '\n')
+                    enteredCommand = data;
+                    stream.write(data + '\n');
                 });
                 stream.on('data', function(d) {
-                    socket.emit('data', d.toString('binary'));
+                    var printFromContainer = d.toString('binary');
+
+                    if(printFromContainer.slice(-2) === '$ '){}
+                    else if (enteredCommand || printFromContainer === '\n' || printFromContainer === ' \n') {
+                        printFromContainer = '';
+                    }
+                    enteredCommand = null;
+                    socket.emit('data', printFromContainer);
                 }).on('close', function() {
                     conn.end();
                 });
@@ -29,8 +39,8 @@ function TerminalConnect(io, _id){
         }).connect({
             host: 'external.cocotutor.ml',
             port: _id,
-            username: 'root',
-            password: 'syspwd128'
+            username: 'coco',
+            password: 'whdtjf123@'
         });
     })
 }

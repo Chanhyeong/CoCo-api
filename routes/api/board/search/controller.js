@@ -15,16 +15,16 @@ exports.search = function (req, res) {
     }
 
     // 검색s
-    group = "select num from Class ";
+    group = "select num from Class, User ";
     switch (req.query.group){
         // 전체 검색
-        case '0' :
+        case '0' : group += "where status = 1 or status = 2";
             break;
         // 학생 검색
-        case '1' : group += "where Status = 1";
+        case '1' : group += "where status = 1";
             break;
         // 튜터 검색
-        case '2' : group += "where Status = 2";
+        case '2' : group += "where status = 2 and tutor = 1";
             break;
     }
 
@@ -34,22 +34,27 @@ exports.search = function (req, res) {
             break;
         case '1' : language += "where language = 'C'";
             break;
-        case '2' : language += "where language = 'JAVA'";
+        case '2' : language += "where language = 'C++";
             break;
-        case '3' : language += "where language = 'python'";
+        case '3' : language += "where language = 'JAVA'";
+            break;
+        case '4' : language += "where language = 'python'";
             break;
     }
 
-    var sql = "select * from Class where num in ("+group+") and num in ("+language+") and num in ("+ keyword + ");";
+    var sql = "select num, title, content, language, IFNULL(tutorNick, studentNick) AS nickname, status, date "+
+              "from Class where num in ("+group+") and num in ("+language+") and num in ("+ keyword + ");";
 
     mysql.query(sql, function (err, result) {
         if (err) {
-            res.status(404).json({error: err})
+            res.status(500).json({error: err})
         } else {
             if (!result.length) {
-                res.status(401).json("해당 검색 내용이 없습니다.");
+                res.status(401).send("해당 검색 내용이 없습니다.");
             } else {
-                res.status(200).json(result)
+                res.status(200).send({
+                    list: result
+                });
             }
         }
     });

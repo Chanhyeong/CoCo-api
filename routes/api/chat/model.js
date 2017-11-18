@@ -1,12 +1,35 @@
 var mysql = require('../../../middleware/database')('mysql');
-var mongodb = require('../../../middleware/database')('mongodb');
+var mongodb = require('../../../middleware/database')('mongodb').chatDb;
 
-exports.getList = function (nickname, callback) {
-    var statement = "select c.num, c.title, c.tutorNick, c.studentNick, ch.num AS chatNum " +
-        "from Class AS c inner join Chat AS ch ON c.num = ch.classNum " +
-        "where tutorNick = ? OR studentNick = ?";
-    var filter = [nickname, nickname];
+exports.getMessages = function (nickName, callback) {
+    var statement = "select num, applicant as nickname from Chat where writer = ? " +
+        "UNION ALL " +
+        "select num, writer as nickname from Chat where applicant = ? " +
+        "order by num;";
+    var filter = [nickName, nickName];
 
+    mysql.query(statement, filter, callback);
+};
+
+
+exports.changeStatus = function (ClassNum, value, callback) {
+    var statement = 'update Class set status = ? where num = ?';
+    var filter = [value, ClassNum];
+
+    mysql.query(statement, filter, callback);
+};
+
+exports.getChatInfo =  function (ChatNum, callback){
+    var statement = "select applicant, classNum from Chat where num = ?";
+    var filter = ChatNum;
+    mysql.query(statement, filter, callback);
+};
+
+exports.Match = function (ClassNum, applicant, callback){
+    var statement = "update Class " +
+                    "set tutorNick = if(tutorNick is null, ?, tutorNick), studentNick = if(studentNick is null, ?, studentNick), status = 3 " +
+                    "where num = ?";
+    var filter = [applicant, applicant, ClassNum];
     mysql.query(statement, filter, callback);
 };
 
@@ -16,9 +39,11 @@ exports.getList = function (nickname, callback) {
 exports.getMessage = function (mode, chatNumber, callback) {
     mongodb(function (db) {
         db.collection(mode).findOne( { _id : chatNumber }, function (err, result) {
-            assert.equal(err, null);
-            console.log(result);
-            callback(result);
+            if (err) {
+                callback(err);
+            } else {
+                callback(null, result);
+            }
         });
 
         db.close();
@@ -31,47 +56,55 @@ exports.insertMessage = function (mode, chatNumber, message, callback) {
         db.collection(mode).update( { _id: chatNumber }, {
             $push: { log: message }
         }, function (err){
-            if (err) {
-                callback(err)
-            } else {
-                callback(null);
-            }
+            callback(err);
         });
+
+        db.close();
     });
 };
 
-// TODO: 클래스 생성 시 동시에 동작하도록
-// 클래스 생성 시 새로운 채팅방 생성, 관리자 안내 메시지 추가
+// 매칭 신청 시 + 매칭 완료 시 각각의 채팅방 생성, 관리자 안내 메시지 추가
 // mode: 'matching', 'class'
-exports.create = function (mode, chatNumber) {
-    var time = new Date().toISOString().
-    replace(/T/, ' ').      // replace T with a space
-    replace(/\..+/, '');     // delete the dot and everything after
+exports.create = function (mode, data, time, callback) {
+    var statement= "insert into Chat SET ?";
 
-    var form = {
-        _id: chatNumber,
-        log: [
-            {
-                id: 'admin',
-                message: '여기서 강의 내용에 대한 질문/답변을 진행하세요.',
-                date: time
-            }
-        ]
-    };
+    mysql.query(statement, data, function (err, result) {
+        if (err) {
+            callback(err);
+        } else {
+            var form = {
+                _id: result.insertId,
+                log: [
+                    {
+                        nickname: 'admin',
+                        message: '여기서 강의 내용에 대한 질문/답변을 진행하세요.',
+                        date: time
+                    }
+                ]
+            };
 
+            mongodb(function (db) {
+                db.collection(mode).insert(form, function (err) {
+                    callback(err);
+                });
+
+                db.close();
+            });
+        }
+    });
+};
+
+exports.delete = function (ChatNum, callback) {
     mongodb(function (db) {
-        db.collection(mode).insert(form, function (err) {
+        db.collection('matching').delete({_id: ChatNum}, function (err) {
             if (err) {
                 callback(err);
             } else {
-                callback(null);
+                var statement= "delet from Chat where num = ?";
+                mysql.query(statement, ChatNum, callback);
             }
         });
     });
-};
 
-
-// TODO: 채팅방 삭제 구현
-exports.delete = function () {
 
 };
