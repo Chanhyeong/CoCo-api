@@ -1,6 +1,7 @@
 
 module.exports = {
     mysqlConfig: {
+        connectionLimit : 10,
         host:'external.cocotutor.ml',
         port: 3306,
         user: 'coco',

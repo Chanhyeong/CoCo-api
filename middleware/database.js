@@ -3,7 +3,7 @@ var MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
 var config = require('../config');
 
-var mysqlDb = mysql.createConnection(config.mysqlConfig);
+var mysqlDb = mysql.createPool(config.mysqlConfig);
 mysqlDb.connect(function(err) {
     if (err) {
         console.error('mysql connection error');
