@@ -74,17 +74,13 @@ exports.modify = function (req, res) {
 
     delete classData.time;
 
-    if(req.user.nickname !== req.body.nickname) {
-        res.status(401).send('권한없음: 작성자가 아닙니다.');
-    } else {
-        var modelStatus = model.modifyClass(req.params.num, classData, timeData);
+    var modelStatus = model.modifyClass(req.params.num, classData, timeData);
 
-        if (modelStatus) {
-            console.log('DB update error', modelStatus);
-            res.status(500).send('DB update Error');
-        } else {
-            res.status(200).send();
-        }
+    if (modelStatus) {
+        console.log('DB update error', modelStatus);
+        res.status(500).send('DB update Error');
+    } else {
+        res.status(200).send();
     }
 };
 
