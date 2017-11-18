@@ -21,10 +21,10 @@ exports.search = function (req, res) {
         case '0' :
             break;
         // 학생 검색
-        case '1' : group += "where Status = 1";
+        case '1' : group += "where status = 1";
             break;
         // 튜터 검색
-        case '2' : group += "where Status = 2";
+        case '2' : group += "where status = 2 and tutor = 1";
             break;
     }
 
