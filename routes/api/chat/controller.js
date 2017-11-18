@@ -91,17 +91,26 @@ exports.handleMatch = function (req, res) {
 
                 exec('docker run -d -p '+ result[0].classNum +':22 -h Terminal --cpu-quota=25000 --name '+
                     result[0].classNum +' -v /root/store/'+ result[0].classNum +':/home/coco coco:0.3',function (err){
-                    if (err) console.log('exec error : docker run error');
+                    if (err) {
+                        console.log('exec error : docker run error');
+                        res.status(500).send('Err: docker run error');
+                    }
                 });
 
                 exec('docker stop '+ result[0].classNum, function (err){
-                    if (err) console.log('exec error : docker stop');
+                    if (err) {
+                        console.log('exec error : docker stop error');
+                        res.status(500).send('Err: docker stop error');
+                    }
                 });
+
+                res.status(200)
+
             });
             break;
 
         case 'off':
-            model.delete(req.body.chatNum, function (err) {
+            model.delete(req.body.Chatnum, function (err) {
                 if (err) {
                     console.log('DB delete error, mongo');
                     res.status(500).send('Err: DB delete Error');

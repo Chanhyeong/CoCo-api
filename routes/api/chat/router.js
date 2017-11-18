@@ -7,6 +7,5 @@ router.get('/list', jwtHandler.decodeToken, controller.getMessages);
 router.get('/:chatNumber', controller.getMessage);
 router.put('/:chatNumber', jwtHandler.decodeToken, controller.sendMessage);
 router.put('/request', controller.handleMatch);
-router.delete('/');
 
 module.exports = router;
