@@ -76,9 +76,15 @@ exports.handleMatch = function (req, res) {
     switch (req.body.mode) {
 
         case 'on':
-            model.getChatInfo(req.body.Chatnum, function (err, result){
+            model.getChatInfo(req.body.chatNum, function (err, result){
+                if(err){
+                    if(err){
+                        console.log('DB Update error, mysql');
+                        res.status(500).send('Err: get ChatInfo Error');
+                    }
+                }
 
-                model.Match(result[0].classNum, result[0].applicant, function (err, result){
+                model.Match(result[0].classNum, result[0].applicant, function (err){
                     if(err){
                         console.log('DB Update error, mysql');
                         res.status(500).send('Err: Match Error');
@@ -114,7 +120,7 @@ exports.handleMatch = function (req, res) {
             break;
 
         case 'off':
-            model.delete(req.body.Chatnum, function (err) {
+            model.delete(req.body.chatNum, function (err) {
                 if (err) {
                     console.log('DB delete error, mongo');
                     res.status(500).send('Err: DB delete Error');

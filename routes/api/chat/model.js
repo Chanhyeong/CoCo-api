@@ -1,36 +1,36 @@
 var mysql = require('../../../middleware/database')('mysql');
 var mongodb = require('../../../middleware/database')('mongodb').chatDb;
 
-exports.getMessages = function (nickname, callback) {
+exports.getMessages = function (nickName, callback) {
     var statement = "select num, applicant as nickname from Chat where writer = ? " +
         "UNION ALL " +
         "select num, writer as nickname from Chat where applicant = ? " +
         "order by num;";
-    var filter = [nickname, nickname];
+    var filter = [nickName, nickName];
 
     mysql.query(statement, filter, callback);
 };
 
 
-exports.changeStatus = function (Classnum, value, callback) {
+exports.changeStatus = function (ClassNum, value, callback) {
     var statement = 'update Class set status = ? where num = ?';
-    var filter = [value, Classnum];
+    var filter = [value, ClassNum];
 
     mysql.query(statement, filter, callback);
 };
 
-exports.getChatInfo =  function (Chatnum, callback){
+exports.getChatInfo =  function (ChatNum, callback){
     var statement = "select applicant, classNum from Chat where num = ?";
-    var filter = Chatnum;
+    var filter = ChatNum;
 
     mysql.query(statement, filter, callback);
 };
 
-exports.Match = function (Classnum, applicant, callback){
+exports.Match = function (ClassNum, applicant, callback){
     var statement = "update Class " +
                     "set tutorNick = if(tutorNick is null, ?, tutorNick), studentNick = if(studentNick is null, ?, studentNick), status = 3 " +
                     "where num = ?";
-    var filter = [applicant, applicant, Classnum];
+    var filter = [applicant, applicant, ClassNum];
 
     mysql.query(statement, filter, callback);
 };
@@ -96,14 +96,14 @@ exports.create = function (mode, data, time, callback) {
     });
 };
 
-exports.delete = function (Chatnum, callback) {
+exports.delete = function (ChatNum, callback) {
     mongodb(function (db) {
-        db.collection('matching').delete({_id: Chatnum}, function (err) {
+        db.collection('matching').delete({_id: ChatNum}, function (err) {
             if (err) {
                 callback(err);
             } else {
                 var statement= "delet from Chat where num = ?";
-                mysql.query(statement, Chatnum, callback);
+                mysql.query(statement, ChatNum, callback);
             }
         });
     });
