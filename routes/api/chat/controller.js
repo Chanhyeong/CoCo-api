@@ -1,6 +1,6 @@
 var model = require('./model');
 var fs = require('fs');
-const exec = require('child_process').exec;
+var exec = require('child_process').exec;
 
 // 해당 유저에 대한 전체 리스트 가져오기
 exports.getMessages = function (req, res) {
@@ -113,7 +113,7 @@ exports.handleMatch = function (req, res) {
                     }
                 });
 
-                res.status(200)
+                res.status(200).send();
 
             });
             break;

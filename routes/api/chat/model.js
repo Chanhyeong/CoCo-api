@@ -22,7 +22,6 @@ exports.changeStatus = function (ClassNum, value, callback) {
 exports.getChatInfo =  function (ChatNum, callback){
     var statement = "select applicant, classNum from Chat where num = ?";
     var filter = ChatNum;
-
     mysql.query(statement, filter, callback);
 };
 
@@ -31,7 +30,6 @@ exports.Match = function (ClassNum, applicant, callback){
                     "set tutorNick = if(tutorNick is null, ?, tutorNick), studentNick = if(studentNick is null, ?, studentNick), status = 3 " +
                     "where num = ?";
     var filter = [applicant, applicant, ClassNum];
-
     mysql.query(statement, filter, callback);
 };
 
