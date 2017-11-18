@@ -2,7 +2,9 @@ var mysql = require('../../../middleware/database')('mysql');
 var mongodb = require('../../../middleware/database')('mongodb').chatDb;
 
 exports.getMessages = function (nickname, callback) {
-    var statement = "select num, writer, applicant from Chat where writer = ? OR applicant = ?;";
+    var statement = "select num, applicant as nickname from Chat where writer = ? " +
+        "UNION ALL " +
+        "select num, writer as nickname from Chat where applicant = ?;";
     var filter = [nickname, nickname];
 
     mysql.query(statement, filter, callback);
