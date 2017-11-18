@@ -12,16 +12,16 @@ mysqlDb.getConnection(function(err) {
     }
 });
 
-function MongoDb () {}
+var MongoDb = {}
 
-MongoDb.prototype.chatDb = function (callback) {
+MongoDb.chatDb = function (callback) {
     MongoClient.connect(config.mongoUrl.chat, function (err, db) {
         assert.equal(err, null);
         callback(db);
     });
 };
 
-MongoDb.prototype.directoryDb = function (callback) {
+MongoDb.directoryDb = function (callback) {
     MongoClient.connect(config.mongoUrl.chat, function (err, db) {
         assert.equal(err, null);
         callback(db);
