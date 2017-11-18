@@ -2,7 +2,9 @@ var mysql = require('../../../middleware/database')('mysql');
 var mongodb = require('../../../middleware/database')('mongodb').chatDb;
 
 exports.getMessages = function (nickname, callback) {
-    var statement = "select num, writer, applicant from Chat where writer = ? OR applicant = ?;";
+    var statement = "select num, applicant as nickname from Chat where writer = ? " +
+        "UNION ALL " +
+        "select num, writer as nickname from Chat where applicant = ?;";
     var filter = [nickname, nickname];
 
     mysql.query(statement, filter, callback);
@@ -75,7 +77,7 @@ exports.create = function (mode, data, time, callback) {
                 _id: result.insertId,
                 log: [
                     {
-                        id: 'admin',
+                        nickname: 'admin',
                         message: '여기서 강의 내용에 대한 질문/답변을 진행하세요.',
                         date: time
                     }
