@@ -4,7 +4,7 @@ module.exports = TerminalConnect;
 
 function TerminalConnect(io, _id){
     this.nameIO = io.of('/' + _id);
-    var enteredCommand = null;
+    var enteredCommand = '';
 
     this.nameIO.on('connection', function(socket) {
         var conn = new SSHClient();
@@ -21,11 +21,10 @@ function TerminalConnect(io, _id){
                 });
                 stream.on('data', function(d) {
 		     var printFromContainer = d.toString('binary');
-		     if (enteredCommand) {
-		         printFromContainer = printFromContainer.replace(enteredCommand, '').replace(/\n/, '');
-		     } else {
-		         if(printFromContainer.slice(-2) !== '$ ')
-			     printFromContainer = '';
+
+		     if(printFromContainer.slice(-2) === '$ '){}
+		     else if (enteredCommand || printFromContainer === '\n' || printFromContainer === ' \n') {
+		         printFromContainer = '';
 		     }
 		     enteredCommand = null;
                     socket.emit('data', printFromContainer);
