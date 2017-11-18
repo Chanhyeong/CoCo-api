@@ -1,7 +1,5 @@
 var model = require('./model');
-var boardModel = require('../board/model');
 var fs = require('fs');
-var ps = require('process');
 var exec = require('child_process');
 
 // 해당 유저에 대한 전체 리스트 가져오기
@@ -70,7 +68,7 @@ exports.sendMessage = function (req, res) {
 exports.handleMatch = function (req, res) {
     switch (req.params.mode) {
         case 'on':
-            ps.umask(0);
+            process.umask(0);
             fs.mkdir('/root/store/' + req.body.Classnum, 0777, function (err){
                if (err){
                    console.log('file system error, mkdir');
