@@ -1,6 +1,6 @@
 // data (update information of directory and chat) handler
 
-var socket = null
+var socket = null;
 
 function dataHandler() {}
 
