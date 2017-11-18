@@ -11,7 +11,7 @@ dataHandler.prototype.init = function (io) {
     socket.on('connection', function(socket) {
         console.log('update connection 생성');
 
-        socket.on('join room', function (classNumber) {
+        socket.on('join', function (classNumber) {
             socket.join(classNumber.toString());
             console.log(classNumber, '에 join');
         })
