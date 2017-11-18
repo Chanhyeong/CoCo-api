@@ -53,7 +53,7 @@ exports.create = function (mode, data, time, callback) {
                 _id: result.insertId,
                 log: [
                     {
-                        id: 'admin',
+                        nickname: 'admin',
                         message: '여기서 강의 내용에 대한 질문/답변을 진행하세요.',
                         date: time
                     }
