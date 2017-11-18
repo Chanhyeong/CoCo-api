@@ -8,6 +8,30 @@ exports.getMessages = function (nickname, callback) {
     mysql.query(statement, filter, callback);
 };
 
+
+exports.changeStatus = function (Classnum, value, callback) {
+    var statement = 'update Class set status = ? where num = ?';
+    var filter = [value, Classnum];
+
+    mysql.query(statement, filter, callback);
+};
+
+exports.getChatInfo =  function (Chatnum, callback){
+    var statement = "select applicant, classNum from Chat where num = ?";
+    var filter = Chatnum;
+
+    mysql.query(statement, filter, callback);
+};
+
+exports.Match = function (Classnum, applicant, callback){
+    var statement = "update Class " +
+                    "set tutorNick = if(tutorNick is null, ?, tutorNick), studentNick = if(studentNick is null, ?, studentNick), status = 3 " +
+                    "where num = ?";
+    var filter = [applicant, applicant, Classnum];
+
+    mysql.query(statement, filter, callback);
+};
+
 // 특정 Document의 message 반환
 // result 값이 router로 전달되지 않아서 callback으로 설계
 // mode: 'matching' (매칭 중일 때의 채팅) or 'class' (에디터 접속 후 채팅)

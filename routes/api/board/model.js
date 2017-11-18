@@ -7,18 +7,6 @@ var status = {
     'END': 4
 };
 
-exports.changeStatus = function (num, value, callback) {
-    var statement = 'update Class set status = ? where num = ?';
-    var filter;
-
-    if (typeof value === 'string')
-        filter = [num, status[value]];
-    else
-        filter = [num, value];
-
-    mysql.query(statement, filter, callback);
-};
-
 exports.getClasses = function (callback) {
     // IFNULL, http://ra2kstar.tistory.com/75
     var statement = 'select num, title, language, IFNULL(tutorNick, studentNick) AS nickname, status, date ' +

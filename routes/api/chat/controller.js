@@ -67,25 +67,36 @@ exports.sendMessage = function (req, res) {
 // TODO 2: 매칭이 되면 새로운 row를 추가하여 터미널 번호를 새로 부여하는 방식이 나을 것 같음
 exports.handleMatch = function (req, res) {
     switch (req.params.mode) {
+
         case 'on':
-            process.umask(0);
-            fs.mkdir('/root/store/' + req.body.Classnum, 0777, function (err){
-               if (err){
-                   console.log('file system error, mkdir');
-                   res.status(500).send('Err: server error');
-               }
-            });
+            model.getChatInfo(req.body.Chatnum, function (err, result){
 
-            exec('docker run -d -p '+ req.body.Classnum +':22 -h Terminal --cpu-quota=25000 --name '+
-                req.body.Classnum +' -v /root/store/'+ req.body.Classnum +':/home/coco coco:0.3',function (err){
-               if (err) console.log('exec error : docker run error');
-            });
+                model.Match(result[0].classNum, result[0].applicant, function (err, result){
+                    if(err){
+                        console.log('DB Update error, mysql');
+                        res.status(500).send('Err: Match Error');
+                    }
+                });
 
-            exec('docker stop '+ req.body.Classnum, function (err){
-                if (err) console.log('exec error : docker stop');
-            });
+                process.umask(0);
+                fs.mkdir('/root/store/' + result[0].classNum, 0777, function (err){
+                    if (err){
+                        console.log('file system error, mkdir');
+                        res.status(500).send('Err: server error');
+                    }
+                });
 
+                exec('docker run -d -p '+ result[0].classNum +':22 -h Terminal --cpu-quota=25000 --name '+
+                    result[0].classNum +' -v /root/store/'+ result[0].classNum +':/home/coco coco:0.3',function (err){
+                    if (err) console.log('exec error : docker run error');
+                });
+
+                exec('docker stop '+ result[0].classNum, function (err){
+                    if (err) console.log('exec error : docker stop');
+                });
+            });
             break;
+
         case 'off':
             model.delete(req.body.chatNum, function (err) {
                 if (err) {

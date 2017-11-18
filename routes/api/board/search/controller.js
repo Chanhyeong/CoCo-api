@@ -15,7 +15,7 @@ exports.search = function (req, res) {
     }
 
     // 검색s
-    group = "select num from Class ";
+    group = "select num from Class, User ";
     switch (req.query.group){
         // 전체 검색
         case '0' :
@@ -34,9 +34,11 @@ exports.search = function (req, res) {
             break;
         case '1' : language += "where language = 'C'";
             break;
-        case '2' : language += "where language = 'JAVA'";
+        case '2' : language += "where language = 'C++";
             break;
-        case '3' : language += "where language = 'python'";
+        case '3' : language += "where language = 'JAVA'";
+            break;
+        case '4' : language += "where language = 'python'";
             break;
     }
 
