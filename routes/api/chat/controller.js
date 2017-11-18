@@ -50,12 +50,12 @@ exports.sendMessage = function (req, res) {
     replace(/\..+/, '');     // delete the dot and everything after
 
     var message = {
-        id: req.user.id,
+        nickname: req.user.nickname,
         message: req.body.message,
         date: time
     };
 
-    model.insertMessage(req.params.mode, chatNumber, message, function (err) {
+    model.insertMessage(req.body.mode, chatNumber, message, function (err) {
         if (err) {
             console.log('DB insert error, mongo');
             res.status(500).send('Err: DB insert Error');
