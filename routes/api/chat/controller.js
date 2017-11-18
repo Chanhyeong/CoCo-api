@@ -31,10 +31,14 @@ exports.getMessage = function (req, res) {
                 console.log('DB insert error, mongo');
                 res.status(500).send('Error: DB Find Error');
             } else {
-                res.status(200).send({
-                    mode: 'matching',
-                    log : result.log
-                });
+                if(!result) {
+                    res.status(409).send('wrong chat number');
+                } else {
+                    res.status(200).send({
+                        mode: 'matching',
+                        log: result.log
+                    });
+                }
             }
         })
     });
