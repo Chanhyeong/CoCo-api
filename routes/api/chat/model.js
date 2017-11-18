@@ -96,10 +96,17 @@ exports.create = function (mode, data, time, callback) {
     });
 };
 
-exports.delete = function (num, callback) {
+exports.delete = function (Chatnum, callback) {
     mongodb(function (db) {
-        db.collection('matching').delete({_id: num}, function (err) {
-            callback(err);
+        db.collection('matching').delete({_id: Chatnum}, function (err) {
+            if (err) {
+                callback(err);
+            } else {
+                var statement= "delet from Chat where num = ?";
+                mysql.query(statement, Chatnum, callback);
+            }
         });
     });
+
+
 };

@@ -50,12 +50,12 @@ exports.sendMessage = function (req, res) {
     replace(/\..+/, '');     // delete the dot and everything after
 
     var message = {
-        id: req.user.id,
+        nickname: req.user.nickname,
         message: req.body.message,
         date: time
     };
 
-    model.insertMessage(req.params.mode, chatNumber, message, function (err) {
+    model.insertMessage(req.body.mode, chatNumber, message, function (err) {
         if (err) {
             console.log('DB insert error, mongo');
             res.status(500).send('Err: DB insert Error');
@@ -69,7 +69,7 @@ exports.sendMessage = function (req, res) {
 // TODO 1: 매칭이 되고 + 끝난 클래스에 대한 정보를 남겨두려면 현재 디비 구조로는 안되는데.
 // TODO 2: 매칭이 되면 새로운 row를 추가하여 터미널 번호를 새로 부여하는 방식이 나을 것 같음
 exports.handleMatch = function (req, res) {
-    switch (req.params.mode) {
+    switch (req.body.mode) {
 
         case 'on':
             model.getChatInfo(req.body.Chatnum, function (err, result){
@@ -91,17 +91,26 @@ exports.handleMatch = function (req, res) {
 
                 exec('docker run -d -p '+ result[0].classNum +':22 -h Terminal --cpu-quota=25000 --name '+
                     result[0].classNum +' -v /root/store/'+ result[0].classNum +':/home/coco coco:0.3',function (err){
-                    if (err) console.log('exec error : docker run error');
+                    if (err) {
+                        console.log('exec error : docker run error');
+                        res.status(500).send('Err: docker run error');
+                    }
                 });
 
                 exec('docker stop '+ result[0].classNum, function (err){
-                    if (err) console.log('exec error : docker stop');
+                    if (err) {
+                        console.log('exec error : docker stop error');
+                        res.status(500).send('Err: docker stop error');
+                    }
                 });
+
+                res.status(200)
+
             });
             break;
 
         case 'off':
-            model.delete(req.body.chatNum, function (err) {
+            model.delete(req.body.Chatnum, function (err) {
                 if (err) {
                     console.log('DB delete error, mongo');
                     res.status(500).send('Err: DB delete Error');
