@@ -4,7 +4,7 @@ var assert = require('assert');
 var config = require('../config');
 
 var mysqlDb = mysql.createPool(config.mysqlConfig);
-mysqlDb.connect(function(err) {
+mysqlDb.getConnection(function(err) {
     if (err) {
         console.error('mysql connection error');
         console.error(err);
