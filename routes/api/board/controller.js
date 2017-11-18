@@ -69,8 +69,22 @@ exports.request = function (req, res) {
 
 //TODO: 글 수정 api
 exports.modify = function (req, res) {
+    var classData = req.body;
+    var timeData = classData.time;
+
+    delete classData.time;
+
     if(req.user.nickname !== req.body.nickname) {
         res.status(401).send('권한없음: 작성자가 아닙니다.');
+    } else {
+        var modelStatus = model.modifyClass(req.params.num, classData, timeData);
+
+        if (modelStatus) {
+            console.log('DB update error', modelStatus);
+            res.status(500).send('DB update Error');
+        } else {
+            res.status(200).send();
+        }
     }
 };
 

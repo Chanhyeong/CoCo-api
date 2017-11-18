@@ -67,11 +67,7 @@ exports.create = function (nickname, data, callback) {
             if (err) {
                 callback(err);
             } else {
-                for (var prop in timeData) {
-                    timeData[prop]['classNum'] = result.insertId;
-                    insertStatement = 'insert into Classtime SET ?;';
-                    mysql.query(insertStatement, timeData[prop], callback);
-                }
+                callback(timeInsert(result.insertId, timeData));
             }
         });
     } else { // 이미 값이 존재할 때
@@ -79,6 +75,17 @@ exports.create = function (nickname, data, callback) {
     }
 
 };
+
+// 시간 데이터 추가, 에러면 err, 아니면 null
+function timeInsert (classNumber, data) {
+    for (var prop in data) {
+        data[prop]['classNum'] = classNumber;
+        var insertStatement = 'insert into Classtime SET ?;';
+        mysql.query(insertStatement, data[prop], function(err) {
+            return err;
+        });
+    }
+}
 
 // 중복 체크. return: 중복이면 true 없으면 false
 function duplicateCheck (statement, filter, callback) {
@@ -97,8 +104,20 @@ function duplicateCheck (statement, filter, callback) {
     });
 }
 
-exports.handleMatch = function () {
+exports.modifyClass = function (classNumber, classData, timeData) {
+    var statement = 'update Class set ? where num = ?';
+    var filter = [classData, classNumber];
 
+    mysql.query(statement, filter, function (err) {
+        if (err) return err;
+        else {
+            statement = 'delete from Classtime where classNum = ?';
+            mysql.query(statement, classNumber, function (err) {
+                if (err) return err;
+                else timeInsert(classNumber, timeData);
+            })
+        }
+    });
 };
 
 exports.delete = function (nickname, num, callback) {
