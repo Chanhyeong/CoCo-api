@@ -78,10 +78,8 @@ exports.handleMatch = function (req, res) {
         case 'on':
             model.getChatInfo(req.body.chatNum, function (err, result){
                 if(err){
-                    if(err){
-                        console.log('DB Update error, mysql');
-                        res.status(500).send('Err: get ChatInfo Error');
-                    }
+                    console.log('DB Update error, mysql');
+                    res.status(500).send('Err: get ChatInfo Error');
                 }
 
                 model.Match(result[0].classNum, result[0].applicant, function (err){
