@@ -31,7 +31,10 @@ exports.getMessage = function (req, res) {
                 console.log('DB insert error, mongo');
                 res.status(500).send('Error: DB Find Error');
             } else {
-                res.status(200).send({ log : result.log });
+                res.status(200).send({
+                    mode: 'matching',
+                    log : result.log
+                });
             }
         })
     });
