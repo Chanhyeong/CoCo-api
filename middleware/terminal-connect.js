@@ -10,23 +10,23 @@ function TerminalConnect(io, _id){
         var conn = new SSHClient();
         conn.on('ready', function() {
             socket.emit('data', '\r\n*** SSH CONNECTION ESTABLISHED ***\r\n');
-	     enteredCommand = null;
+            enteredCommand = null;
 
             conn.shell(function(err, stream) {
                 if (err)
                     return socket.emit('data', '\r\n*** SSH SHELL ERROR: ' + err.message + ' ***\r\n');
                 socket.on('command', function(data) {
-		     enteredCommand = data;
+                    enteredCommand = data;
                     stream.write(data + '\n');
                 });
                 stream.on('data', function(d) {
-		     var printFromContainer = d.toString('binary');
+                    var printFromContainer = d.toString('binary');
 
-		     if(printFromContainer.slice(-2) === '$ '){}
-		     else if (enteredCommand || printFromContainer === '\n' || printFromContainer === ' \n') {
-		         printFromContainer = '';
-		     }
-		     enteredCommand = null;
+                    if(printFromContainer.slice(-2) === '$ '){}
+                    else if (enteredCommand || printFromContainer === '\n' || printFromContainer === ' \n') {
+                        printFromContainer = '';
+                    }
+                    enteredCommand = null;
                     socket.emit('data', printFromContainer);
                 }).on('close', function() {
                     conn.end();
