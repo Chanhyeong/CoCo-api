@@ -51,7 +51,7 @@ exports.getWriter = function(req, res) {
     var filter = req.params.nickname;
 
     // 신청온 목록
-    var sql = "select * from Chat as ch, Class as c where ch.classNum = c.num and writer = ?";
+    var sql = "select ch.num, ch.writer, ch.applicant, c.title, ch.classNum from Chat as ch, Class as c where ch.classNum = c.num and writer = ?";
     mysql.query(sql, filter, function (err, result) {
         if (err) {
             res.status(500).json({error: err})
@@ -71,7 +71,7 @@ exports.getApplicant = function(req, res){
     var filter = req.params.nickname;
 
     // 신청한 목록
-    var sql = "select * from Chat as ch, Class as c where ch.classNum = c.num and applicant = ?";
+    var sql = "select ch.num, ch.writer, ch.applicant, c.title, ch.classNum from Chat as ch, Class as c where ch.classNum = c.num and applicant = ?";
     mysql.query(sql, filter, function(err, result){
         if (err) {
             res.status(500).json({ error: err })
