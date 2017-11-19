@@ -70,8 +70,6 @@ exports.sendMessage = function (req, res) {
     });
 };
 
-// TODO 1: 매칭이 되고 + 끝난 클래스에 대한 정보를 남겨두려면 현재 디비 구조로는 안되는데.
-// TODO 2: 매칭이 되면 새로운 row를 추가하여 터미널 번호를 새로 부여하는 방식이 나을 것 같음
 exports.handleMatch = function (req, res) {
     switch (req.body.mode) {
 

@@ -3,17 +3,14 @@ var chatModel = require('../chat/model');
 
 exports.getClasses = function (req, res) {
     model.getClasses( function (err, result) {
-        // TODO: 테스트 코드라서 에러가 안나면 이대로 두고 아니면 고치기
-        process.nextTick( function() {
-            if (err) {
-                console.log('DB select err: ', err);
-                res.status(500).send('Err: DB select Error');
-            } else {
-                res.status(200).json({
-                    list: result
-                });
-            }
-        });
+        if (err) {
+            console.log('DB select err: ', err);
+            res.status(500).send('Err: DB select Error');
+        } else {
+            res.status(200).json({
+                list: result
+            });
+        }
     });
 };
 
@@ -67,7 +64,6 @@ exports.request = function (req, res) {
     });
 };
 
-//TODO: 글 수정 api
 exports.modify = function (req, res) {
     var classData = req.body;
     var timeData = classData.time;
