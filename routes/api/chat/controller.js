@@ -55,6 +55,7 @@ exports.sendMessage = function (req, res) {
     replace(/\..+/, '');     // delete the dot and everything after
 
     var message = {
+        nickname: req.user.nickname,
         message: req.body.message,
         date: time
     };
