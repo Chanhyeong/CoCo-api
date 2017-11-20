@@ -120,17 +120,9 @@ exports.modifyClass = function (classNumber, classData, timeData) {
     });
 };
 
-exports.delete = function (nickname, num, callback) {
-    var matchStatement = 'select  * from Class where num = ? AND status IN (?, ?) ' +
-        'AND tutorNick = ? or studentNick = ?';
-    var filter = [num, status.STUDENT, status.TUTOR, nickname, nickname];
+exports.delete = function (classNumber, callback) {
+    var deleteStatement = 'delete from Class where num = ?';
 
-    // result 값이 있다면 정보가 일치함
-    if(duplicateCheck(matchStatement, filter) === true) {
-        var deleteStatement = 'delete from Class where num = ?';
+    mysql.query(deleteStatement, classNumber, callback);
 
-        mysql.query(deleteStatement, num, callback);
-    } else {
-        callback(401);
-    }
 };

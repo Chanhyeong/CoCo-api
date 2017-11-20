@@ -81,13 +81,8 @@ exports.modify = function (req, res) {
 };
 
 exports.delete = function (req, res) {
-    model.delete(req.user.nickname, req.params.num, function (err) {
-        if (Number.isInteger(err)) {
-            switch (err) {
-                case 400: res.status(400).send('Check the \'status\' number'); break;
-                case 401: res.status(401).send('권한없음: 작성자가 아닙니다.');
-            }
-        } else if (err) {
+    model.delete(req.params.num, function (err) {
+        if (err) {
             console.log ('DB delete err: ', err);
             res.status(500).send('Err: DB delete Error');
         } else {
