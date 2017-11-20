@@ -1,5 +1,13 @@
 var model = require('./model');
 
+exports.getDirectoryInformation = function (req, res, next) {
+    var classNumber = req.params.classNumber;
+
+    model.getDirectoryFromContainer(classNumber, function () {
+
+    })
+};
+
 exports.update = function (req, res) {
     var data = req.body;
     var classNumber = data.classNumber;

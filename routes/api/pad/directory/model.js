@@ -1,5 +1,7 @@
+var mysql = require('../../../../middleware/database')('mysql');
+var exec = require('child_process').exec;
 
-exports.getDirectoryFromContainer = function () {
+exports.getDirectoryFromContainer = function (classNumber) {
 
 };
 
