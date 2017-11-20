@@ -11,8 +11,8 @@ exports.getMessages = function (nickName, callback) {
     mysql.query(statement, filter, callback);
 };
 
-exports.getChatOpponentNickname = function (userNickname, chatRoomNumber) {
-    var statement = "select writer, applicant from Chat where chatRoomNumber = ?";
+function getChatOpponentNickname (userNickname, chatRoomNumber) {
+    var statement = "select writer, applicant from Chat where chat = ?";
 
     mysql.query(statement, chatRoomNumber, function (err, result) {
         if (err) {
@@ -25,7 +25,7 @@ exports.getChatOpponentNickname = function (userNickname, chatRoomNumber) {
             }
         }
     })
-};
+}
 
 exports.changeStatus = function (classNum, value, callback) {
     var statement = 'update Class set status = ? where num = ?';
@@ -51,13 +51,15 @@ exports.Match = function (ClassNum, applicant, callback){
 // 특정 Document의 message 반환
 // result 값이 router로 전달되지 않아서 callback으로 설계
 // mode: 'matching' (매칭 중일 때의 채팅) or 'class' (에디터 접속 후 채팅)
-exports.getMessage = function (mode, chatNumber, callback) {
+exports.getMessage = function (mode, userNickname, chatNumber, callback) {
+    var opponentNickname = getChatOpponentNickname(userNickname, chatNumber);
+
     mongodb(function (db) {
         db.collection(mode).findOne( { _id : chatNumber }, function (err, result) {
             if (err) {
                 callback(err);
             } else {
-                callback(null, result);
+                callback(null, result, opponentNickname);
             }
         });
 
@@ -114,6 +116,4 @@ exports.delete = function (ChatNum, callback) {
             }
         });
     });
-
-
 };

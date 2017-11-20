@@ -24,15 +24,7 @@ exports.getMessages = function (req, res) {
 exports.getMessage = function (req, res) {
     var chatNumber = parseInt(req.params.chatNumber);
 
-    var opponentNickname = model.getChatOpponentNickname(req.user.nickname, chatNumber);
-
-    // 20: limits of length of user nickname
-    if (opponentNickname.length > 20) {
-        console.log('DB insert error');
-        res.status(500).send('Error: DB Find Error');
-    }
-
-    model.getMessage('matching', chatNumber, function (err, result) {
+    model.getMessage('matching', req.user.nickname, chatNumber, function (err, result, opponent) {
         // mongodb에서 검색된 내용이 바로 채워지지 않아서 nextTick 추가
         process.nextTick( function () {
             if (err) {
@@ -43,7 +35,7 @@ exports.getMessage = function (req, res) {
                     res.status(409).send('wrong chat number');
                 } else {
                     res.status(200).send({
-                        opponent: opponentNickname,
+                        opponent: opponent,
                         mode: 'matching',
                         log: result.log
                     });
