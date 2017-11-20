@@ -67,7 +67,7 @@ exports.sendMessage = function (req, res) {
         }
 
         req.app.get('dataHandler').sendMessage(chatNumber, message);
-        res.status(200).send();
+        res.status(200).json(message);
     });
 };
 
