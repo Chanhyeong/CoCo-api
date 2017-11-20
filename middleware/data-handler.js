@@ -1,14 +1,14 @@
 // data (update information of directory and chat) handler
 
-var socket = null;
+var dataSocket = null;
 
 function DataHandler() {}
 
 module.exports = DataHandler;
 
 DataHandler.prototype.init = function (io) {
-    socket = io.of('/data');
-    socket.on('connect', function(socket) {
+    dataSocket = io.of('/data');
+    dataSocket.on('connection', function (socket) {
         console.log('update connect 생성');
 
         socket.on('join', function (classNumber) {
@@ -18,6 +18,10 @@ DataHandler.prototype.init = function (io) {
     });
 };
 
+DataHandler.prototype.sendDirectory = function (classNumber, object) {
+    dataSocket.to(classNumber).emit('chat', object);
+};
+
 DataHandler.prototype.sendMessage = function (classNumber, message) {
-    socket.to(classNumber).emit('chat', message);
+    dataSocket.to(classNumber).emit('chat', message);
 };
