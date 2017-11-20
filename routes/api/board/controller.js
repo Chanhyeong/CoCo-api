@@ -19,7 +19,7 @@ exports.getClass = function (req, res) {
         if (err) {
             console.log('DB select err: ', err);
             res.status(500).send('Err: DB select Error');
-        } else{
+        } else {
             res.status(200).json({
                 list: result
             });

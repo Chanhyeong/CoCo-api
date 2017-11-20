@@ -2,11 +2,11 @@
 
 var socket = null;
 
-function dataHandler() {}
+function DataHandler() {}
 
-module.exports = dataHandler;
+module.exports = DataHandler;
 
-dataHandler.prototype.init = function (io) {
+DataHandler.prototype.init = function (io) {
     socket = io.of('/data');
     socket.on('connection', function(socket) {
         console.log('update connection 생성');
@@ -18,10 +18,10 @@ dataHandler.prototype.init = function (io) {
     });
 };
 
-dataHandler.prototype.sendDirectory = function (classNumber, object) {
+DataHandler.prototype.sendDirectory = function (classNumber, object) {
     socket.to(classNumber).emit('directory', object);
 };
 
-dataHandler.prototype.sendChatMsg = function (classNumber, message) {
+DataHandler.prototype.sendMessage = function (classNumber, message) {
     socket.to(classNumber).emit('chat', message);
 };

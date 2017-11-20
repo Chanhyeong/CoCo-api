@@ -1,25 +1,18 @@
-var mongodb = require('../../../../middleware/database')('mongodb').directoryDb;
 
-exports.create = function (num) {
-    var defaultDirectoryForm = {
-        _id: num,
-        subdir: [
-            {
-                name: 'src',
-                type: 'directory'
-                subdir: [
-                    {
-                        name: 'main.c',
-                        type: 'file'
-                    }
-                ]
-            }
-        ]
-    }
-
+exports.getDirectoryFromContainer = function () {
 
 };
 
-exports.update = function (num) {
-
+exports.update = function (mode, classNumber, data) {
+    switch (mode) {
+        case 'create':
+            break;
+        case 'rename':
+            break;
+        case 'delete':
+            break;
+        case 'move':
+            break;
+        default: console.log('wrong mode'); return false;
+    }
 };

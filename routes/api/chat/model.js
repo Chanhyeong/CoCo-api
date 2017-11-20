@@ -11,18 +11,33 @@ exports.getMessages = function (nickName, callback) {
     mysql.query(statement, filter, callback);
 };
 
+exports.getChatOpponentNickname = function (userNickname, chatRoomNumber) {
+    var statement = "select writer, applicant from Chat where chatRoomNumber = ?";
 
-exports.changeStatus = function (ClassNum, value, callback) {
+    mysql.query(statement, chatRoomNumber, function (err, result) {
+        if (err) {
+            return err;
+        } else {
+            if (result[0].writer === userNickname) {
+                return result[0].applicant;
+            } else {
+                return result[0].writer;
+            }
+        }
+    })
+};
+
+exports.changeStatus = function (classNum, value, callback) {
     var statement = 'update Class set status = ? where num = ?';
-    var filter = [value, ClassNum];
+    var filter = [value, classNum];
 
     mysql.query(statement, filter, callback);
 };
 
-exports.getChatInfo =  function (ChatNum, callback){
+exports.getChatInfo =  function (chatNum, callback){
     var statement = "select applicant, classNum from Chat where num = ?";
-    var filter = ChatNum;
-    mysql.query(statement, filter, callback);
+
+    mysql.query(statement, chatNum, callback);
 };
 
 exports.Match = function (ClassNum, applicant, callback){
@@ -74,13 +89,7 @@ exports.create = function (mode, data, time, callback) {
         } else {
             var form = {
                 _id: result.insertId,
-                log: [
-                    {
-                        nickname: 'admin',
-                        message: '여기서 강의 내용에 대한 질문/답변을 진행하세요.',
-                        date: time
-                    }
-                ]
+                log: []
             };
 
             mongodb(function (db) {

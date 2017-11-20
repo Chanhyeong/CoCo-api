@@ -53,7 +53,7 @@ exports.init = function (io) {
         socket.on('message', function(data) {
             //console.log('message: ' + data);
 
-            if (data.to == 'all') {
+            if (data.to === 'all') {
                 // for broadcasting without me
                 socket.broadcast.to(data.roomId).emit('message', data);
             } else {

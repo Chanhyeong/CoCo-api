@@ -12,16 +12,8 @@ mysqlDb.getConnection(function(err) {
     }
 });
 
-var MongoDb = {}
-
+var MongoDb = {};
 MongoDb.chatDb = function (callback) {
-    MongoClient.connect(config.mongoUrl.chat, function (err, db) {
-        assert.equal(err, null);
-        callback(db);
-    });
-};
-
-MongoDb.directoryDb = function (callback) {
     MongoClient.connect(config.mongoUrl.chat, function (err, db) {
         assert.equal(err, null);
         callback(db);
