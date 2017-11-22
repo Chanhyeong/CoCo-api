@@ -10,7 +10,7 @@ exports.getDir = function (req, res) {
         }
         else{
 	    res.status(200).send({
-                dir : stdout
+                dir : JSON.parse(stdout)
             });
         }
     });
