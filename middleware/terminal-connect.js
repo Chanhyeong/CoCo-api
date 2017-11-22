@@ -16,8 +16,12 @@ function TerminalConnect(io, _id){
                 if (err)
                     return socket.emit('data', '\r\n*** SSH SHELL ERROR: ' + err.message + ' ***\r\n');
                 socket.on('command', function(data) {
-                    enteredCommand = data;
-                    stream.write(data + '\n');
+                    if (stream.writable) {
+                        enteredCommand = data;
+                        stream.write(data + '\n');
+                    } else {
+                        socket.emit('data', '\r\n--- Disconnected. Please refresh this page. ---\r\n')
+                    }
                 });
                 stream.on('data', function(d) {
                     var printFromContainer = d.toString('binary');
