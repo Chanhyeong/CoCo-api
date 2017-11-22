@@ -1,4 +1,6 @@
 var model = require('./model');
+var exec = require('child_process').exec;
+
 
 exports.getDir = function (req, res) {
     exec('tree -J store/' + req.classNum, function (err, stdout, stderr){
