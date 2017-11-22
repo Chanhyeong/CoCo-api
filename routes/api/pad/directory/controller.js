@@ -1,11 +1,18 @@
 var model = require('./model');
 
-exports.getDirectoryInformation = function (req, res, next) {
-    var classNumber = req.params.classNumber;
-
-    model.getDirectoryFromContainer(classNumber, function () {
-
-    })
+exports.getDir = function (req, res) {
+    exec('tree -J store/' + req.classNum, function (err, stdout, stderr){
+        if (err) {
+            console.log('exec error : tree error');
+            res.status(500).send('Err: exec tree error');
+        }
+        else{
+            console.log (stdout);
+            res.status(200).send({
+                dir : stdout
+            });
+        }
+    });
 };
 
 exports.update = function (req, res) {

@@ -3,7 +3,7 @@ var router = express.Router();
 var controller = require('./controller');
 var jwtHandler = require('../../../../middleware/jwt-handler');
 
-router.get('/', jwtHandler.decodeToken, controller.getDirectoryInformation);
+router.get('/getDir', jwtHandler.decodeToken, controller.getDir);
 router.put('/', jwtHandler.decodeToken, controller.update);
 
 module.exports = router;
