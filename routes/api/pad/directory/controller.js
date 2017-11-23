@@ -17,17 +17,23 @@ exports.getDir = function (req, res) {
 };
 
 exports.update = function (req, res) {
-    var data = req.body;
-    var classNumber = data.classNumber;
-    var mode = data.mode;
+    var classNum = req.body.classNum;
+    var mode = req.body.mode;
+    var path = req.body.path;
 
-    delete data.classNumber;
-    delete data.mode;
+    switch (mode) {
+        case 'create':
+            exec('docker exec ' + classNum + '');
+            break;
+        case 'rename':
 
-    if(model.update(mode, classNumber, data)) {
-        res.status(200).send();
-    } else {
-        res.status(500).send('MongoDB update error');
+            break;
+        case 'delete':
+
+            break;
+        case 'move':
+
+            break;
+        default: console.log('wrong mode'); return false;
     }
-
 };
