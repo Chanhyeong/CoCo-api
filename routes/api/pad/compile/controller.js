@@ -1,13 +1,25 @@
 var SSHClient = require('ssh2').Client;
 var exec = require('child_process');
+var model = require('./model');
 
 exports.TerminalConnect = function (req, res){
 
-    exec('docker start '+ req.body.Classnum, function (err){
-        if (err) console.log('exec error : docker stop');
+    exec('docker start '+ req.body.classNum, function (err){
+        if (err) console.log('exec error : docker start');
     });
 
-    this.nameIO = req.get('io').of('/' + req.params.Classnum);
+    var enteredCommand = '';
+    var language, statement, classNum = req.params.classNum;
+    model.getLanguage(classNum, function (err, result) {
+        if (err) {
+            console.log('DB select error', err);
+            res.status(500).send('Err: DB select error');
+        } else {
+            language = result[0];
+        }
+    });
+
+    this.nameIO = req.get('io').of('/' + classNum);
 
     this.nameIO.on('connection', function(socket) {
         var conn = new SSHClient();
@@ -17,63 +29,70 @@ exports.TerminalConnect = function (req, res){
             conn.shell(function(err, stream) {
                 if (err)
                     return socket.emit('data', '\r\n*** SSH SHELL ERROR: ' + err.message + ' ***\r\n');
+
                 socket.on('command', function(data) {
-                    stream.write(data + '\n')
+                    if (stream.writable) {
+                        enteredCommand = data;
+                        stream.write(data + '\n');
+                    } else {
+                        socket.emit('data', '\r\n--- Disconnected. Please refresh this page. ---\r\n')
+                    }
+                }).on('compile', function(){
+                    statement = 'docker exec '+ classNum +' bash -c "cd /home/coco && ';
+                    switch(language){
+                        case 'C' :
+                            statement =+ 'gcc -o main -I ~/ *.c"';
+                            break;
+                        case 'JAVA' :
+                            statement =+ 'javac -d . *.java"';
+                            break;
+                        case 'C++' :
+
+                            break;
+                        case 'Python' :
+                    }
+                }).on('run', function(){
+                    statement = 'docker exec '+ classNum +' bash -c "cd /home/coco && ';
+                    switch(language){
+                        case 'C' :
+                            statement =+ './main"';
+                            break;
+                        case 'JAVA' :
+                            statement =+ 'java -cp . Board';
+                            break;
+                        case 'C++' :
+
+                            break;
+                        case 'Python' :
+                    }
                 });
+
                 stream.on('data', function(d) {
-                    socket.emit('data', d.toString('binary'));
+                    var printFromContainer = d.toString('binary');
+
+                    if(printFromContainer.slice(-2) === '$ '){}
+                    else if (enteredCommand || printFromContainer === '\n' || printFromContainer === ' \n') {
+                        printFromContainer = '';
+                    }
+                    enteredCommand = null;
+                    socket.emit('data', printFromContainer);
                 }).on('close', function() {
                     conn.end();
                 });
             });
         }).on('close', function() {
             socket.emit('data', '\r\n*** SSH CONNECTION CLOSED ***\r\n');
+            exec('docker stop '+ req.body.classNum, function (err){
+                if (err) console.log('exec error : docker stop');
+            });
         }).on('error', function(err) {
             socket.emit('data', '\r\n*** SSH CONNECTION ERROR: ' + err.message + ' ***\r\n')
         }).connect({
             host: 'external.cocotutor.ml',
-            port: req.params.Classnum,
+            port: classNum,
             username: 'coco',
             password: 'whdtjf123@'
         });
     })
 };
 
-exports.Compile = function (req, res){
-    language = req.params.language;
-
-    switch(language){
-        case 'C' :
-            exec('docker exec '+ req.params.Classnum +' bash -c "cd /home/coco && gcc -o main -I ~/ *.c"', function (err){
-                if (err) console.log('exec error : Compile error');
-                else {
-                    if(Run(req.params.Classnum)===true){
-                        res.status(200).send();
-                    }
-                    else{
-                        res.status(500).send('Err : server compile error');
-                    }
-                }
-            });
-            break;
-        case 'JAVA' :
-
-            break;
-        case 'C++' :
-
-            break;
-        case 'Python' :
-    }
-};
-
-function Run(num){
-    exec('docker exec '+ num +' bash -c "cd /home/coco && gcc -o main -I ~/ *.c"', function (err){
-        if (err) {
-            console.log('exec error : Run error');
-            return false;
-        }
-        else{
-            return true;
-        }
-    });
-}

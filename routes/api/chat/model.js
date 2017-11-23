@@ -105,14 +105,14 @@ exports.create = function (mode, data, time, callback) {
     });
 };
 
-exports.delete = function (ChatNum, callback) {
+exports.delete = function (chatNum, callback) {
     mongodb(function (db) {
-        db.collection('matching').delete({_id: ChatNum}, function (err) {
+        db.collection('matching').delete({_id: chatNum}, function (err) {
             if (err) {
                 callback(err);
             } else {
-                var statement= "delet from Chat where num = ?";
-                mysql.query(statement, ChatNum, callback);
+                var statement= "delete from Chat where num = ?";
+                mysql.query(statement, chatNum, callback);
             }
         });
     });

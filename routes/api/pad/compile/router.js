@@ -3,8 +3,7 @@ var router = express.Router();
 var controller = require('./controller')
 
 
-router.get('/getConnect', controller.TerminalConnect);
-router.get('/getCompile', controller.Compile);
+router.get('/:classNum', controller.TerminalConnect);
 router.post('/');
 router.put('/');
 router.delete('/');

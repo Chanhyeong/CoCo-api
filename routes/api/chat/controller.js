@@ -129,3 +129,13 @@ exports.handleMatch = function (req, res) {
             break;
     }
 };
+
+exports.delete = function (req, res){
+    model.getMessages(req.params.chatNumber, function (err) {
+        if (err) {
+            res.status(500).send('Err: DB delete error');
+        } else {
+            res.status(200);
+        }
+    });
+};
