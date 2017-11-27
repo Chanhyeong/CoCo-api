@@ -28,14 +28,14 @@ exports.getClass = function (req, res) {
     };
 
     // 내가 수강중인 목록
-    var sql = "select * from Class where studentNick = ? or tutorNick = ? and status = ?";
+    var sql = "select * from Class where (studentNick = ? or tutorNick = ?) and status = ?";
     var filter = [userNick, userNick, status.MATCHED];
 
     mysql.query(sql, filter, function (err, result1) {
         if (err) {
             res.status(500).json({error: err})
         } else {
-            sql = "select * from Class where studentNick = ? or tutorNick = ? and (status = ? or status = ?)";
+            sql = "select * from Class where (studentNick = ? or tutorNick = ?) and (status = ? or status = ?)";
             filter = [userNick, userNick, status.STUDENT, status.TUTOR];
             mysql.query(sql, filter, function (err, result2){
                 if (err) {
