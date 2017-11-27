@@ -97,7 +97,7 @@ exports.handleMatch = function (req, res) {
                 });
 
                 exec('docker run -d -p '+ result[0].classNum +':22 -h Terminal --cpu-quota=25000 --name '+
-                    result[0].classNum +' -v /root/store/'+ result[0].classNum +':/home/coco coco:0.3',function (err, stdout){
+                    result[0].classNum +' -v /root/store/'+ result[0].classNum +':/home/coco coco:0.4',function (err, stdout){
                     if (err) {
                         console.log('exec error : docker run error');
                         res.status(500).send('Err: docker run error');

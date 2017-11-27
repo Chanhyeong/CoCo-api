@@ -1,4 +1,3 @@
-var model = require('./model');
 var exec = require('child_process').exec;
 
 
