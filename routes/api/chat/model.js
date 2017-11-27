@@ -12,24 +12,14 @@ exports.getMessages = function (nickName, callback) {
     mysql.query(statement, filter, callback);
 };
 
-function getChatOpponentNickname (userNickname, chatRoomNumber) {
+function getChatOpponentNickname (chatRoomNumber) {
     var statement = "select writer, applicant, classNum from Chat where chat = ?";
 
     mysql.query(statement, chatRoomNumber, function (err, result) {
         if (err) {
             return err;
         } else {
-            if (result[0].writer === userNickname) {
-                return {
-                    nickname: result[0].applicant,
-                    status: result[0].status
-                };
-            } else {
-                return {
-                    nickname: result[0].writer,
-                    status: result[0].status
-                };
-            }
+            return result[0];
         }
     })
 }
@@ -49,8 +39,8 @@ exports.getChatInfo =  function (chatNum, callback){
 
 exports.Match = function (ClassNum, applicant, callback){
     var statement = "update Class " +
-                    "set tutorNick = if(tutorNick is null, ?, tutorNick), studentNick = if(studentNick is null, ?, studentNick), status = 3 " +
-                    "where num = ?";
+        "set tutorNick = if(tutorNick is null, ?, tutorNick), studentNick = if(studentNick is null, ?, studentNick), status = 3 " +
+        "where num = ?";
     var filter = [applicant, applicant, ClassNum];
     mysql.query(statement, filter, callback);
 };
@@ -60,7 +50,15 @@ exports.Match = function (ClassNum, applicant, callback){
 // mode: 'matching' (매칭 중일 때의 채팅) or 'class' (에디터 접속 후 채팅)
 exports.getMessage = function (mode, userNickname, chatNumber, callback) {
     var classData = getChatOpponentNickname(userNickname, chatNumber);
-    var opponentNickname = classData.nickname;
+
+    var opponentNickname;
+
+    if (classData.writer === userNickname) {
+        opponentNickname = classData.applicant;
+    } else {
+        opponentNickname = classData.writer;
+    }
+
     var classStatusCode = boardModel.getStatus(classData.status);
 
     mongodb(function (db) {
