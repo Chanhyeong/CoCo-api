@@ -3,8 +3,7 @@ var model = require('./../board/model');
 var Connect = require('../../../middleware/terminal-connect');
 
 exports.terminalConnect = function (req, res, next){
-
-    exec('docker start '+ req.body.classNum, function (err){
+    exec('docker start '+ req.params.classNum, function (err){
         if (err) console.log('exec error : docker start');
     });
 
