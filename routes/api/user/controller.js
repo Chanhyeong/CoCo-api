@@ -31,17 +31,23 @@ exports.getClass = function (req, res) {
     var sql = "select * from Class where studentNick = ? or tutorNick = ? and status = ?";
     var filter = [userNick, userNick, status.MATCHED];
 
-    mysql.query(sql, filter, function (err, result) {
+    mysql.query(sql, filter, function (err, result1) {
         if (err) {
             res.status(500).json({error: err})
         } else {
-            if (!result.length) {
-                res.status(401).send("수강중인 목록이 없습니다");
-            } else {
-                res.status(200).send({
-                    list : result
-                });
-            }
+            sql = "select * from Class where studentNick = ? or tutorNick = ? and (status = ? or status = ?)";
+            filter = [userNick, userNick, status.STUDENT, status.TUTOR];
+            mysql.query(sql, filter, function (err, result2){
+                if (err) {
+                    res.status(500).json({error: err})
+                } else {
+                    res.status(200).send({
+                        matchList : result1,
+                        myList : result2
+                    });
+                }
+            });
+
         }
     });
 
