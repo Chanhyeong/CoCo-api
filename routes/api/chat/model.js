@@ -1,6 +1,7 @@
 var mysql = require('../../../middleware/database')('mysql');
 var mongodb = require('../../../middleware/database')('mongodb').chatDb;
 var boardModel = require('../board/model');
+var knex = require('../../../middleware/database')('knex');
 
 exports.getMessages = function (nickName, callback) {
     var statement = "select num, applicant as nickname from Chat where writer = ? " +
@@ -13,15 +14,9 @@ exports.getMessages = function (nickName, callback) {
 };
 
 function getChatOpponentNickname (chatRoomNumber) {
-    var statement = "select writer, applicant, classNum from Chat where chat = ?";
-
-    mysql.query(statement, chatRoomNumber, function (err, result) {
-        if (err) {
-            return err;
-        } else {
-            return result[0];
-        }
-    })
+    return knex('Chat').where({
+        num: chatRoomNumber
+    }).select('writer', 'applicant', 'classNum');
 }
 
 exports.changeStatus = function (classNum, value, callback) {
