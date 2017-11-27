@@ -117,7 +117,7 @@ exports.delete = function (req, res){
         if (err) {
             res.status(500).send('Err: DB delete error');
         } else {
-            res.status(200);
+            res.status(200).send();
         }
     });
 };
