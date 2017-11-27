@@ -1,5 +1,6 @@
 var mysql = require('../../../middleware/database')('mysql');
 var mongodb = require('../../../middleware/database')('mongodb').chatDb;
+var boardModel = require('../board/model');
 
 exports.getMessages = function (nickName, callback) {
     var statement = "select num, applicant as nickname from Chat where writer = ? " +
@@ -12,16 +13,22 @@ exports.getMessages = function (nickName, callback) {
 };
 
 function getChatOpponentNickname (userNickname, chatRoomNumber) {
-    var statement = "select writer, applicant from Chat where chat = ?";
+    var statement = "select writer, applicant, classNum from Chat where chat = ?";
 
     mysql.query(statement, chatRoomNumber, function (err, result) {
         if (err) {
             return err;
         } else {
             if (result[0].writer === userNickname) {
-                return result[0].applicant;
+                return {
+                    nickname: result[0].applicant,
+                    status: result[0].status
+                };
             } else {
-                return result[0].writer;
+                return {
+                    result[0].writer,
+                    status: result[0].status
+                };
             }
         }
     })
@@ -52,14 +59,16 @@ exports.Match = function (ClassNum, applicant, callback){
 // result 값이 router로 전달되지 않아서 callback으로 설계
 // mode: 'matching' (매칭 중일 때의 채팅) or 'class' (에디터 접속 후 채팅)
 exports.getMessage = function (mode, userNickname, chatNumber, callback) {
-    var opponentNickname = getChatOpponentNickname(userNickname, chatNumber);
+    var classData = getChatOpponentNickname(userNickname, chatNumber);
+    var opponentNickname = classData.nickname;
+    var classStatusCode = boardModel.getStatus(classData.status);
 
     mongodb(function (db) {
         db.collection(mode).findOne( { _id : chatNumber }, function (err, result) {
             if (err) {
                 callback(err);
             } else {
-                callback(null, result, opponentNickname);
+                callback(null, result, opponentNickname, classStatusCode);
             }
         });
 

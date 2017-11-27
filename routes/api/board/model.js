@@ -16,6 +16,19 @@ exports.getClasses = function (callback) {
     mysql.query(statement, filter, callback);
 };
 
+exports.getStatus = function (classNum) {
+    var statement = "select status from Class where num = ?";
+
+    mysql.query(statement, classNum, function (err, result) {
+        if (err) {
+            return err;
+        } else {
+            return result[0].status;
+        }
+
+    })
+}
+
 exports.getLanguage = function (num, callback){
     var statement = 'select language from Class where num = ?';
 
@@ -29,7 +42,7 @@ exports.getInstance = function (num, callback) {
         if (err) {
             callback(err);
         } else {
-            var timeStatement = 'select day, startTime, endTime from Classtime where classNum = ?'
+            var timeStatement = 'select day, startTime, endTime from Classtime where classNum = ?';
 
             mysql.query(timeStatement, num, function (err, time) {
                 callback(err, {
