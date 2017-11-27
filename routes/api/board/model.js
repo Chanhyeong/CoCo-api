@@ -16,6 +16,12 @@ exports.getClasses = function (callback) {
     mysql.query(statement, filter, callback);
 };
 
+exports.getLanguage = function (num, callback){
+    var statement = 'select language from Class where num = ?';
+
+    mysql.query(statement, num, callback);
+};
+
 exports.getInstance = function (num, callback) {
     var statement = 'select content from Class where num = ?';
 

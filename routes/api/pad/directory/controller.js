@@ -1,7 +1,7 @@
 var exec = require('child_process').exec;
 
 
-exports.getDir = function (req, res) {
+exports.getDirectory = function (req, res) {
     exec('tree -J ~/store/' + req.params.classNum , function (err, stdout){
         if (err) {
             console.log('exec error : tree error');

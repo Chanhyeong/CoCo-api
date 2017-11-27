@@ -1,8 +1,8 @@
 var exec = require('child_process');
-var model = require('./model');
-var Connect = require('../../../../middleware/terminal-connect');
+var model = require('./../board/model');
+var Connect = require('../../../middleware/terminal-connect');
 
-exports.TerminalConnect = function (req, res){
+exports.terminalConnect = function (req, res, next){
 
     exec('docker start '+ req.body.classNum, function (err){
         if (err) console.log('exec error : docker start');
@@ -25,7 +25,7 @@ exports.TerminalConnect = function (req, res){
             res.status(500).send('terminal connect error');
         }
         else{
-            res.status(200);
+            next();
         }
     });
 
