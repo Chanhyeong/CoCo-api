@@ -57,7 +57,7 @@ exports.getWriter = function(req, res) {
     var filter = req.params.nickname;
 
     // 신청온 목록
-    var sql = "select ch.num, ch.writer, ch.applicant, c.title, ch.classNum " +
+    var sql = "select ch.num, ch.writer, ch.applicant, c.title, c.language, ch.classNum " +
             "from Chat as ch, Class as c " +
             "where ch.classNum = c.num and writer = ? and (c.status = 1 or c.status = 2)";
     mysql.query(sql, filter, function (err, result) {
@@ -79,7 +79,7 @@ exports.getApplicant = function(req, res){
     var filter = req.params.nickname;
 
     // 신청한 목록
-    var sql = "select ch.num, ch.writer, ch.applicant, c.title, ch.classNum " +
+    var sql = "select ch.num, ch.writer, ch.applicant, c.title, c.language, ch.classNum " +
             "from Chat as ch, Class as c " +
             "where ch.classNum = c.num and applicant = ? and (c.status = 1 or c.status = 2)";
     mysql.query(sql, filter, function(err, result){
