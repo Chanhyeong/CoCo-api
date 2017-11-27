@@ -36,7 +36,7 @@ exports.getLanguage = function (num, callback){
 };
 
 exports.getInstance = function (num, callback) {
-    var statement = 'select content from Class where num = ?';
+    var statement = 'select content, tutorNick, studentNick from Class where num = ?';
 
     mysql.query(statement, num, function (err, content) {
         if (err) {
@@ -47,7 +47,9 @@ exports.getInstance = function (num, callback) {
             mysql.query(timeStatement, num, function (err, time) {
                 callback(err, {
                     content: content[0].content,
-                    time: time
+                    time: time,
+                    tutorNick: content[0].tutorNick,
+                    studentNick: content[0].studentNick
                 });
             })
         }
