@@ -26,7 +26,7 @@ function getChatOpponentNickname (userNickname, chatRoomNumber) {
                 };
             } else {
                 return {
-                    result[0].writer,
+                    nickname: result[0].writer,
                     status: result[0].status
                 };
             }
