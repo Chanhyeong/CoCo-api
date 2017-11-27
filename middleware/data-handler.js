@@ -9,8 +9,6 @@ module.exports = DataHandler;
 DataHandler.prototype.init = function (io) {
     dataSocket = io.of('/data');
     dataSocket.on('connection', function (socket) {
-        console.log('update connect 생성');
-
         socket.on('join', function (classNumber) {
             socket.join(classNumber.toString());
             console.log(classNumber, '에 join');

@@ -22,9 +22,9 @@ exports.getMessages = function (req, res) {
 
 // 채팅방번호에 맞는 채팅 로그
 exports.getMessage = function (req, res) {
-    var chatNumber = parseInt(req.params.chatNumber);
+    var chatNum = parseInt(req.params.chatNum);
 
-    model.getMessage('matching', req.user.nickname, chatNumber, function (err, result, opponentNickname) {
+    model.getMessage('matching', req.user.nickname, chatNum, function (err, result, opponentNickname) {
         // mongodb에서 검색된 내용이 바로 채워지지 않아서 nextTick 추가
         process.nextTick( function () {
             if (err) {
@@ -47,7 +47,7 @@ exports.getMessage = function (req, res) {
 
 // 채팅방번호에 새로운 메시지 라인 추가
 exports.sendMessage = function (req, res) {
-    var chatNumber = parseInt(req.params.chatNumber);
+    var chatNumber = parseInt(req.params.chatNum);
 
     // Format: 2017-10-27 17:19:33
     var time = new Date().toISOString().
@@ -72,10 +72,7 @@ exports.sendMessage = function (req, res) {
 };
 
 exports.handleMatch = function (req, res) {
-    switch (req.body.mode) {
-
-        case 'on':
-            model.getChatInfo(req.body.chatNum, function (err, result){
+        model.getChatInfo(req.params.chatNum, function (err, result){
                 if(err){
                     console.log('DB Update error, mysql');
                     res.status(500).send('Err: get ChatInfo Error');
@@ -111,27 +108,12 @@ exports.handleMatch = function (req, res) {
                         });
                     }
                 });
-
                 res.status(200).send();
-
             });
-            break;
-
-        case 'off':
-            model.delete(req.body.chatNum, function (err) {
-                if (err) {
-                    console.log('DB delete error, mongo');
-                    res.status(500).send('Err: DB delete Error');
-                } else {
-                    res.status(200).send();
-                }
-            });
-            break;
-    }
 };
 
 exports.delete = function (req, res){
-    model.getMessages(req.params.chatNumber, function (err) {
+    model.delete(req.params.chatNum, function (err) {
         if (err) {
             res.status(500).send('Err: DB delete error');
         } else {
