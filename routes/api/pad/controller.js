@@ -15,16 +15,9 @@ exports.terminalConnect = function (req, res, next){
             console.log('DB select error', err);
             res.status(500).send('Err: DB select error');
         } else {
-            language = result[0];
-            new Connect(req.app.get('io'), classNum, language, function(err){
-                if(err) {
-                    console.log('connect error');
-                    res.status(500).send('terminal connect error');
-                }
-                else{
-                    next();
-                }
-            });
+            language = result[0].language;
+            new Connect(req.app.get('io'), classNum, language);
+	     next();
         }
     });
 };
