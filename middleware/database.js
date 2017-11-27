@@ -12,6 +12,17 @@ mysqlDb.getConnection(function(err) {
     }
 });
 
+var knex = require('knex')({
+    client: 'mysql',
+    connection: {
+        host: 'external.cocotutor.ml',
+        user: 'coco',
+        password: 'whdtjf123@',
+        database: 'coco'
+    },
+    pool: { min: 0, max: 10 }
+});
+
 var MongoDb = {};
 MongoDb.chatDb = function (callback) {
     MongoClient.connect(config.mongoUrl.chat, function (err, db) {
@@ -23,6 +34,7 @@ MongoDb.chatDb = function (callback) {
 module.exports = function (name) {
     switch (name) {
         case 'mysql': return mysqlDb; break;
-        case 'mongodb': return MongoDb;
+        case 'mongodb': return MongoDb; break;
+        case 'knex': return knex;
     }
 };
