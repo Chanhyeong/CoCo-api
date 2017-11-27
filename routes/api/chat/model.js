@@ -107,7 +107,7 @@ exports.create = function (mode, data, time, callback) {
 
 exports.delete = function (chatNum, callback) {
     mongodb(function (db) {
-        db.collection('matching').delete({_id: chatNum}, function (err) {
+        db.collection('matching').remove({_id: chatNum}, function (err) {
             if (err) {
                 callback(err);
             } else {
