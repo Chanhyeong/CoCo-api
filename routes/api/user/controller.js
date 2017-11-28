@@ -35,8 +35,8 @@ exports.getClass = function (req, res) {
         if (err) {
             res.status(500).json({error: err})
         } else {
-            sql = "select * from Class where (studentNick = ? or tutorNick = ?) and (status = ? or status = ?)";
-            filter = [userNick, userNick, status.STUDENT, status.TUTOR];
+            sql = "select * from Class where (studentNick = ? or tutorNick = ?)";
+            filter = [userNick, userNick];
             mysql.query(sql, filter, function (err, result2){
                 if (err) {
                     res.status(500).json({error: err})
