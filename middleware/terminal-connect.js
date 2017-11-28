@@ -78,5 +78,3 @@ function TerminalConnect(io, classNum, language){
         });
     })
 }
-
-// TODO: 프로젝트 접속인원 파악 가능하면 소켓 destroy 구현

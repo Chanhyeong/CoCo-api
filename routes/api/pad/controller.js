@@ -1,9 +1,10 @@
 var exec = require('child_process').exec;
 var model = require('./../board/model');
-var Connect = require('../../../middleware/terminal-connect');
+var TerminalConnect = require('../../../middleware/terminal-connect');
 
-exports.terminalConnect = function (req, res, next){
+var terminalPool = {};
 
+exports.createTerminalConnect = function (req, res, next){
     var language, classNum = req.params.classNum;
 
     model.getInstance(classNum, function (err, result) {
@@ -24,14 +25,15 @@ exports.terminalConnect = function (req, res, next){
                         res.status(500).send('Err: DB select error');
                     } else {
                         language = result[0].language;
-                        new Connect(req.app.get('io'), classNum, language);
+
+                        if (!terminalPool[classNum]) {
+                            terminalPool[classNum] = new TerminalConnect(req.app.get('io'), classNum, language);
+                        }
                         next();
                     }
                 });
             }
         }
     });
-
-
 };
 
