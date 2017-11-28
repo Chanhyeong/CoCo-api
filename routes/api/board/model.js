@@ -45,12 +45,14 @@ exports.getInstance = function (num, callback) {
             var timeStatement = 'select day, startTime, endTime from Classtime where classNum = ?';
 
             mysql.query(timeStatement, num, function (err, time) {
-                callback(err, {
-                    content: content[0].content,
-                    time: time,
-                    tutorNick: content[0].tutorNick,
-                    studentNick: content[0].studentNick
-                });
+                if(content) {
+                    callback(err, {
+                        content: content[0].content,
+                        time: time,
+                        tutorNick: content[0].tutorNick,
+                        studentNick: content[0].studentNick
+                    });
+                } else callback(err, null)
             })
         }
     });

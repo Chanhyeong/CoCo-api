@@ -16,7 +16,7 @@ exports.search = function (req, res) {
 
     // 검색s
     group = "select num from Class, User ";
-    switch (req.query.group){
+    switch (req.query.group) {
         // 전체 검색
         case '0' : group += "where status = 1 or status = 2";
             break;
