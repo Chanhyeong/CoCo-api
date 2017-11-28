@@ -18,7 +18,7 @@ function TerminalConnect(io, classNum, language){
                 socket.on('command', function(data) {
                     if (stream.writable) {
                         enteredCommand = data;
-			data += '\n';
+                        data += '\n';
                         stream.write(data);
                     } else {
                         socket.emit('data', '\r\n--- Disconnected. Please refresh this page. ---\r\n')
@@ -55,7 +55,6 @@ function TerminalConnect(io, classNum, language){
 
                 stream.on('data', function(d) {
                     var printFromContainer = d.toString('binary');
-		    console.log(printFromContainer);
 
                     if(printFromContainer.slice(-2) === '$ '){}
                     else if (enteredCommand || printFromContainer === '\n' || printFromContainer === ' \n') {
