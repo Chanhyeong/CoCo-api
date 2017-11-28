@@ -34,7 +34,7 @@ exports.search = function (req, res) {
             break;
         case '1' : language += "where language = 'C'";
             break;
-        case '2' : language += "where language = 'C++";
+        case '2' : language += "where language = 'C++'";
             break;
         case '3' : language += "where language = 'JAVA'";
             break;
