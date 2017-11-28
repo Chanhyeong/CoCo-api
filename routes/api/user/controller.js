@@ -64,13 +64,9 @@ exports.getWriter = function(req, res) {
         if (err) {
             res.status(500).json({error: err})
         } else {
-            if (!result.length) {
-                res.status(401).send("신청한 받은 목록이 없습니다.");
-            } else {
-                res.status(200).send({
-                    list : result
-                });
-            }
+            res.status(200).send({
+                list : result
+            });
         }
     });
 };
@@ -86,17 +82,14 @@ exports.getApplicant = function(req, res){
         if (err) {
             res.status(500).json({ error: err })
         } else {
-            if(!result.length) {
-                res.status(401).send("신청한 목록이 없습니다.");
-            } else {
-                res.status(200).send({
-                    list : result
+            res.status(200).send({
+                list : result
                 });
-            }
         }
     });
 };
 
+// 튜터 등록
 exports.regist = function(req, res){
     var info = {
         'id' : req.body.id,
@@ -130,7 +123,7 @@ exports.getTutor = function(req, res){
             res.status(500).send({error: err})
         } else {
             if(!result.length) {
-                res.status(401).send("튜터 정보가 없습니다.");
+                res.status(404).send("튜터 정보가 없습니다.");
             } else {
                 res.status(200).send({
                     tutor : result[0]
@@ -140,6 +133,7 @@ exports.getTutor = function(req, res){
     });
 };
 
+// 튜터 정보 얻어오기
 exports.TutorInfo = function(req, res){
     var filter = req.params.id;
 
@@ -149,7 +143,7 @@ exports.TutorInfo = function(req, res){
             res.status(500).send({error: err})
         } else {
             if(!result.length) {
-                res.status(401).send("튜터 정보가 없습니다.");
+                res.status(404).send("튜터 정보가 없습니다.");
             } else {
                 res.status(200).send({
                     tutor : result[0]
