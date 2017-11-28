@@ -27,13 +27,13 @@ function TerminalConnect(io, classNum, language){
                     statement = 'docker exec '+ classNum +' bash -c "cd /home/coco && ';
                     switch(language){
                         case 'C' :
-                            statement =+ 'gcc -o main -I ~/ *.c"';
+                            statement += 'gcc -o main -I/home/coco/* ./*.c -lm';
                             break;
                         case 'JAVA' :
-                            statement =+ 'javac -d . *.java"';
+                            statement += 'javac -d . *.java';
                             break;
                         case 'C++' :
-
+                            statement += 'g++ -o main -I/home/coco/* ./*.cpp -lm';
                             break;
                         case 'Python' :
                     }
