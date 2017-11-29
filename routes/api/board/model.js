@@ -1,4 +1,5 @@
 var mysql = require('../../../middleware/database')('mysql');
+var knex = require('../../../middleware/database')('knex');
 
 var status = {
     'STUDENT': 1,
@@ -17,17 +18,10 @@ exports.getClasses = function (callback) {
 };
 
 exports.getStatus = function (classNum) {
-    var statement = "select status from Class where num = ?";
-
-    mysql.query(statement, classNum, function (err, result) {
-        if (err) {
-            return err;
-        } else {
-            return result[0].status;
-        }
-
-    })
-}
+    return knex('Class').where({
+        num: classNum
+    }).select('status');
+};
 
 exports.getLanguage = function (num, callback){
     var statement = 'select language from Class where num = ?';
