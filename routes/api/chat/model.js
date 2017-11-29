@@ -46,12 +46,14 @@ exports.Match = function (ClassNum, applicant, callback){
 exports.getMessage = function (mode, userNickname, chatNumber, callback) {
     var classData = getChatOpponentNickname(userNickname, chatNumber);
 
-    var opponentNickname;
+    var opponentNickname, isWriter;
 
     if (classData.writer === userNickname) {
         opponentNickname = classData.applicant;
+        isWriter = true;
     } else {
         opponentNickname = classData.writer;
+        isWriter = false;
     }
 
     var classStatusCode = boardModel.getStatus(classData.status);
@@ -61,7 +63,7 @@ exports.getMessage = function (mode, userNickname, chatNumber, callback) {
             if (err) {
                 callback(err);
             } else {
-                callback(null, result, opponentNickname, classStatusCode);
+                callback(null, result, opponentNickname, classStatusCode, isWriter);
             }
         });
 
