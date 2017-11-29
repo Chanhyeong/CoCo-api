@@ -18,9 +18,12 @@ exports.getClasses = function (callback) {
 };
 
 exports.getStatus = function (classNum) {
-    return knex('Class').where({
+    knex('Class').where({
         num: classNum
-    }).select('status');
+    }).select('status')
+        .then(function (rows) {
+            return rows[0];
+        });
 };
 
 exports.getLanguage = function (num, callback){

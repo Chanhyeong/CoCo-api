@@ -14,9 +14,12 @@ exports.getMessages = function (nickName, callback) {
 };
 
 function getChatOpponentNickname (chatRoomNumber) {
-    return knex('Chat').where({
+    knex('Chat').where({
         num: chatRoomNumber
-    }).select('writer', 'applicant', 'classNum');
+    }).select('writer', 'applicant', 'classNum')
+        .then(function (rows) {
+            return rows[0];
+        });
 }
 
 exports.changeStatus = function (classNum, value, callback) {
