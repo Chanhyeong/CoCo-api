@@ -117,13 +117,13 @@ exports.regist = function(req, res){
 exports.getTutor = function(req, res){
     var filter = req.params.nickname;
 
-    var sql = "select degree, intro, github, career, t.language from Tutor as t, User as u where t.id = u.id and nickname = ?";
+    var sql = "select degree, intro, github, career, t.language from Tutor as t, User as u where t.id = u.id and nickname = ? and u.tutor = 1";
     mysql.query(sql, filter, function (err, result) {
         if (err) {
             res.status(500).send({error: err})
         } else {
             if(!result.length) {
-                res.status(404).send("튜터 정보가 없습니다.");
+                res.status(401).send("튜터로 등록되어 있지 않습니다.");
             } else {
                 res.status(200).send({
                     tutor : result[0]
@@ -137,13 +137,13 @@ exports.getTutor = function(req, res){
 exports.TutorInfo = function(req, res){
     var filter = req.params.id;
 
-    var sql = "select degree, intro, github, career, language from Tutor as t, User as u where t.id = u.id and u.id = ? and u.tutor = 1";
+    var sql = "select degree, intro, github, career, language from Tutor where id = ?";
     mysql.query(sql, filter, function (err, result) {
         if (err) {
             res.status(500).send({error: err})
         } else {
             if(!result.length) {
-                res.status(401).send("튜터가 아닙니다.");
+                res.status(404).send("튜터 정보가 없습니다.");
             } else {
                 res.status(200).send({
                     tutor : result[0]
