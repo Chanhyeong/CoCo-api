@@ -24,7 +24,7 @@ exports.getMessages = function (req, res) {
 exports.getMessage = function (req, res) {
     var chatNum = parseInt(req.params.chatNum);
 
-    model.getMessage('matching', req.user.nickname, chatNum, function (err, result, opponentNickname, classStatusCode) {
+    model.getMessage('matching', req.user.nickname, chatNum, function (err, result, opponentNickname, classStatusCode, isWriter) {
         // mongodb에서 검색된 내용이 바로 채워지지 않아서 nextTick 추가
         process.nextTick( function () {
             if (err) {
@@ -38,7 +38,8 @@ exports.getMessage = function (req, res) {
                         nickname: opponentNickname,
                         status: classStatusCode,
                         mode: 'matching',
-                        log: result.log
+                        log: result.log,
+                        isWriter: isWriter
                     });
                 }
             }
