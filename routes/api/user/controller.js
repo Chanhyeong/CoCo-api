@@ -99,7 +99,6 @@ exports.regist = function(req, res){
         'career' : req.body.career,
         'language' : req.body.language
     };
-
     var sql = "insert into Tutor values (?, ?, ?, ?, ?, ?)";
     var filter = [info.id, info.degree, info.intro, info.github, info.career, info.language];
 
@@ -107,9 +106,7 @@ exports.regist = function(req, res){
         if (err) {
             res.status(500).send({error: err})
         } else {
-            res.status(200).send({
-                list : result
-            });
+            res.status(200).send()
         }
     });
 };
