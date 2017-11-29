@@ -137,13 +137,13 @@ exports.getTutor = function(req, res){
 exports.TutorInfo = function(req, res){
     var filter = req.params.id;
 
-    var sql = "select degree, intro, github, career, language from Tutor where id = ?";
+    var sql = "select degree, intro, github, career, language from Tutor as t, User as u where t.id = u.id and u.id = ? and u.tutor = 1";
     mysql.query(sql, filter, function (err, result) {
         if (err) {
             res.status(500).send({error: err})
         } else {
             if(!result.length) {
-                res.status(404).send("튜터 정보가 없습니다.");
+                res.status(401).send("튜터가 아닙니다.");
             } else {
                 res.status(200).send({
                     tutor : result[0]
