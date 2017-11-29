@@ -14,12 +14,9 @@ exports.getMessages = function (nickName, callback) {
 };
 
 function getChatOpponentNickname (chatRoomNumber) {
-    knex('Chat').where({
+    return knex('Chat').where({
         num: chatRoomNumber
-    }).select('writer', 'applicant', 'classNum')
-        .then(function (rows) {
-            return rows[0];
-        });
+    }).select('writer', 'applicant', 'classNum');
 }
 
 exports.changeStatus = function (classNum, value, callback) {
@@ -47,7 +44,7 @@ exports.Match = function (ClassNum, applicant, callback){
 // result 값이 router로 전달되지 않아서 callback으로 설계
 // mode: 'matching' (매칭 중일 때의 채팅) or 'class' (에디터 접속 후 채팅)
 exports.getMessage = function (mode, userNickname, chatNumber, callback) {
-    var classData = getChatOpponentNickname(userNickname, chatNumber);
+    var classData = getChatOpponentNickname(chatNumber);
 
     var opponentNickname, isWriter;
 
@@ -59,7 +56,7 @@ exports.getMessage = function (mode, userNickname, chatNumber, callback) {
         isWriter = false;
     }
 
-    var classStatusCode = boardModel.getStatus(classData.status);
+    var classStatusCode = boardModel.getStatus(classData.num);
 
     mongodb(function (db) {
         db.collection(mode).findOne( { _id : chatNumber }, function (err, result) {
