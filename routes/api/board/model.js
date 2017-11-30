@@ -17,10 +17,11 @@ exports.getClasses = function (callback) {
     mysql.query(statement, filter, callback);
 };
 
-exports.getStatus = function (classNum) {
+exports.getStatus = function (classNum, callback) {
     return knex('Class').where({
         num: classNum
-    }).select('status');
+    }).select('status')
+        .then(callback);
 };
 
 exports.getLanguage = function (num, callback){

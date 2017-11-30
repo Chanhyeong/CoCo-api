@@ -13,10 +13,11 @@ exports.getMessages = function (nickName, callback) {
     mysql.query(statement, filter, callback);
 };
 
-function getChatOpponentNickname (chatRoomNumber) {
+function getChatInformation (chatNumber, callback) {
     return knex('Chat').where({
-        num: chatRoomNumber
-    }).select('writer', 'applicant', 'classNum');
+        num: chatNumber
+    }).select('writer', 'applicant', 'classNum')
+        .then(callback);
 }
 
 exports.changeStatus = function (classNum, value, callback) {
@@ -44,30 +45,33 @@ exports.Match = function (ClassNum, applicant, callback){
 // result 값이 router로 전달되지 않아서 callback으로 설계
 // mode: 'matching' (매칭 중일 때의 채팅) or 'class' (에디터 접속 후 채팅)
 exports.getMessage = function (mode, userNickname, chatNumber, callback) {
-    var classData = getChatOpponentNickname(chatNumber);
-
     var opponentNickname, isWriter;
 
-    if (classData.writer === userNickname) {
-        opponentNickname = classData.applicant;
-        isWriter = true;
-    } else {
-        opponentNickname = classData.writer;
-        isWriter = false;
-    }
+    getChatInformation(function (result) {
+        var classData = result[0];
 
-    var classStatusCode = boardModel.getStatus(classData.num);
+        if (classData.writer === userNickname) {
+            opponentNickname = classData.applicant;
+            isWriter = true;
+        } else {
+            opponentNickname = classData.writer;
+            isWriter = false;
+        }
 
-    mongodb(function (db) {
-        db.collection(mode).findOne( { _id : chatNumber }, function (err, result) {
-            if (err) {
-                callback(err);
-            } else {
-                callback(null, result, opponentNickname, classStatusCode, isWriter);
-            }
+        boardModel.getStatus(classData.classNum, function (boardResult) {
+            var classStatusCode = boardResult[0].status;
+            mongodb(function (db) {
+                db.collection(mode).findOne( { _id : chatNumber }, function (err, result) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        callback(null, result, opponentNickname, classStatusCode, isWriter, classData.classNum);
+                    }
+                });
+
+                db.close();
+            });
         });
-
-        db.close();
     });
 };
 
