@@ -26,20 +26,20 @@ function TerminalConnect(io, classNum, language){
                     switch(language){
                         case 'c' :
                             enteredCommand = 'gcc -o main -I/home/coco/* ./*.c -lm\n';
-			    stream.write('gcc -o main -I/home/coco/* ./*.c -lm\n');
-			    enteredCommand = './main\n';
+                            stream.write('gcc -o main -I/home/coco/* ./*.c -lm\n');
+                            enteredCommand = './main\n';
                             stream.write('./main\n');
                             break;
                         case 'java' :
-			enteredCommand = 'javac -d . *.java\n';
+                            enteredCommand = 'javac -d . *.java\n';
                             stream.write('javac -d . *.java\n');
-			    enteredCommand = 'java -cp . Board\n';
-			    stream.write('java -cp . Board\n');
+                            enteredCommand = 'java -cp . Board\n';
+                            stream.write('java -cp . Board\n');
                             break;
                         case 'c++' :
-		            enteredCommand = 'g++ -o main -I/home/coco/* ./*.cpp -lm\n';
+                            enteredCommand = 'g++ -o main -I/home/coco/* ./*.cpp -lm\n';
                             stream.write('g++ -o main -I/home/coco/* ./*.cpp -lm\n');
-			    enteredCommand = './main\n';
+                            enteredCommand = './main\n';
                             stream.write('./main\n');
                             break;
                         case 'python' :

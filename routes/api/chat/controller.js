@@ -1,7 +1,8 @@
 var model = require('./model');
-var boardModel = require('../board/model')
+var boardModel = require('../board/model');
 var fs = require('fs');
 var exec = require('child_process').exec;
+var shareDBClient = require('sharedb/lib/client');
 
 // 해당 유저에 대한 전체 리스트 가져오기
 exports.getMessages = function (req, res) {
@@ -130,14 +131,23 @@ exports.handleMatch = function (req, res) {
 };
 
 function copyDefaultFilesToContainer (language, classNumber) {
-    var lowerCaseLanguage;
-
+    var filePath;
     switch (language) {
-        case 'C++': lowerCaseLanguage = 'cpp'; break;
-        default: lowerCaseLanguage = language.toLowerCase();
+        case 'c': filePath = '/src/main.c'; break;
+        case 'c++': language = 'cpp';
+            filePath = '/src/main.cpp'; break;
+        case 'java': filePath = '/com/example/Main.java'; break;
+        case 'python': filePath = '/src/main.py';
     }
 
-    exec('cp /root/coco-api/default_files/' + lowerCaseLanguage + '/* /root/store/' + classNumber);
+    var shareConnection = shareDBClient.Connection(new WebSocket("wss://" + 'external.cocotutor.ml'));
+
+    exec('cat ./default/' + language + filePath, function (err, stdout) {
+        var defaultValue = [{p: [stdout], t: 'text', o: op}];
+        shareConnection.get(classNumber, filePath).submitOp(defaultValue, {source: this});
+    });
+
+    exec('cp /root/coco-api/default_files/' + language + '/* /root/store/' + classNumber);
     exec('chmod 777 /root/store/' + classNumber + ' -R');
 }
 
