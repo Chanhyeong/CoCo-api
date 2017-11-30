@@ -1,13 +1,11 @@
 var SSHClient = require('ssh2').Client;
-var exec = require('child_process').exec;
 
 module.exports = TerminalConnect;
 
 function TerminalConnect(io, classNum, language){
     this.nameIO = io.of('/' + classNum);
-    var statement, compile, run, enteredCommand = '';
+    var enteredCommand = '';
 
-    io.
     this.nameIO.on('connection', function(socket) {
         var conn = new SSHClient();
         conn.on('ready', function() {
