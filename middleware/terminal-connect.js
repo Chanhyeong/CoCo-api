@@ -24,19 +24,25 @@ function TerminalConnect(io, classNum, language){
                     }
                 }).on('run', function(){
                     switch(language){
-                        case 'C' :
-                            stream.write('gcc -o main -I/home/coco/* ./*.c -lm\n');
+                        case 'c' :
+                            enteredCommand = 'gcc -o main -I/home/coco/* ./*.c -lm';
+			    stream.write('gcc -o main -I/home/coco/* ./*.c -lm\n');
+			    enteredCommand = './main';
                             stream.write('./main\n');
                             break;
-                        case 'JAVA' :
+                        case 'java' :
+			enteredCommand = 'javac -d . *.java';
                             stream.write('javac -d . *.java\n');
-                            stream.write('java -cp . Board\n');
+			    enteredCommand = 'java -cp . Board';
+			    stream.write('java -cp . Board\n');
                             break;
-                        case 'C++' :
+                        case 'c++' :
+		            enteredCommand = 'g++ -o main -I/home/coco/* ./*.cpp -lm';
                             stream.write('g++ -o main -I/home/coco/* ./*.cpp -lm\n');
+			    enteredCommand = './main';
                             stream.write('./main\n');
                             break;
-                        case 'Python' :
+                        case 'python' :
                     }
                 });
 
