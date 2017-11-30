@@ -9,8 +9,13 @@ exports.getDirectory = function (req, res) {
             res.status(500).send('Err: exec tree error');
         }
         else{
+            stdout = stdout.replace(/name/ig,"title");
+            stdout = stdout.replace(/contents/ig,"children");
+
+            var result = JSON.parse(stdout);
+
             res.status(200).json({
-                dir : JSON.parse(stdout)
+                dir : result[0].children
             });
         }
     });
