@@ -1,11 +1,13 @@
 var SSHClient = require('ssh2').Client;
+var exec = require('child_process').exec;
 
 module.exports = TerminalConnect;
 
 function TerminalConnect(io, classNum, language){
     this.nameIO = io.of('/' + classNum);
-    var statement, enteredCommand = '';
+    var statement, compile, run, enteredCommand = '';
 
+    io.
     this.nameIO.on('connection', function(socket) {
         var conn = new SSHClient();
         conn.on('ready', function() {
@@ -23,31 +25,19 @@ function TerminalConnect(io, classNum, language){
                     } else {
                         socket.emit('data', '\r\n--- Disconnected. Please refresh this page. ---\r\n')
                     }
-                }).on('compile', function(){
-                    statement = 'docker exec '+ classNum +' bash -c "cd /home/coco && ';
-                    switch(language){
-                        case 'C' :
-                            statement += 'gcc -o main -I/home/coco/* ./*.c -lm';
-                            break;
-                        case 'JAVA' :
-                            statement += 'javac -d . *.java';
-                            break;
-                        case 'C++' :
-                            statement += 'g++ -o main -I/home/coco/* ./*.cpp -lm';
-                            break;
-                        case 'Python' :
-                    }
                 }).on('run', function(){
-                    statement = 'docker exec '+ classNum +' bash -c "cd /home/coco && ';
                     switch(language){
                         case 'C' :
-                            statement =+ './main"';
+                            stream.write('gcc -o main -I/home/coco/* ./*.c -lm\n');
+                            stream.write('./main\n');
                             break;
                         case 'JAVA' :
-                            statement =+ 'java -cp . Board';
+                            stream.write('javac -d . *.java\n');
+                            stream.write('java -cp . Board\n');
                             break;
                         case 'C++' :
-
+                            stream.write('g++ -o main -I/home/coco/* ./*.cpp -lm\n');
+                            stream.write('./main\n');
                             break;
                         case 'Python' :
                     }
