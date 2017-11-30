@@ -1,4 +1,5 @@
 var model = require('./model');
+var boardModel = require('../board/model')
 var fs = require('fs');
 var exec = require('child_process').exec;
 
@@ -24,7 +25,7 @@ exports.getMessages = function (req, res) {
 exports.getMessage = function (req, res) {
     var chatNum = parseInt(req.params.chatNum);
 
-    model.getMessage('matching', req.user.nickname, chatNum, function (err, result, opponentNickname, classStatusCode, isWriter) {
+    model.getMessage('matching', req.user.nickname, chatNum, function (err, result, opponentNickname, classStatusCode, isWriter, classNum) {
         // mongodb에서 검색된 내용이 바로 채워지지 않아서 nextTick 추가
         process.nextTick( function () {
             if (err) {
@@ -39,7 +40,8 @@ exports.getMessage = function (req, res) {
                         status: classStatusCode,
                         mode: 'matching',
                         log: result.log,
-                        isWriter: isWriter
+                        isWriter: isWriter,
+                        classNum: classNum
                     });
                 }
             }
@@ -74,45 +76,70 @@ exports.sendMessage = function (req, res) {
 };
 
 exports.handleMatch = function (req, res) {
-        model.getChatInfo(req.params.chatNum, function (err, result){
-                if(err){
-                    console.log('DB Update error, mysql');
-                    res.status(500).send('Err: get ChatInfo Error');
-                }
+    model.getChatInfo(req.params.chatNum, function (err, result){
+        if(err){
+            console.log('DB Update error, mysql');
+            res.status(500).send('Err: get ChatInfo Error');
+        }
 
-                model.Match(result[0].classNum, result[0].applicant, function (err){
-                    if(err){
-                        console.log('DB Update error, mysql');
-                        res.status(500).send('Err: Match Error');
-                    }
-                });
+        model.Match(result[0].classNum, result[0].applicant, function (err){
+            if(err){
+                console.log('DB Update error, mysql');
+                res.status(500).send('Err: Match Error');
+            }
+        });
 
-                process.umask(0);
-                fs.mkdir('/root/store/' + result[0].classNum, 0777, function (err){
-                    if (err){
-                        console.log('file system error, mkdir');
-                        res.status(500).send('Err: server error');
-                    }
-                });
+        process.umask(0);
+        fs.mkdir('/root/store/' + result[0].classNum, 0777, function (err){
+            if (err){
+                console.log('file system error, mkdir');
+                res.status(500).send('Err: server error');
+            }
+        });
 
-                exec('docker run -d -p '+ result[0].classNum +':22 -h Terminal --cpu-quota=25000 --name '+
-                    result[0].classNum +' -v /root/store/'+ result[0].classNum +':/home/coco coco:0.4',function (err, stdout){
+        exec('docker run -d -p '+ result[0].classNum +':22 -h Terminal --cpu-quota=25000 --name '+
+            result[0].classNum +' -v /root/store/'+ result[0].classNum +':/home/coco coco:0.4',function (err, stdout){
+            if (err) {
+                console.log('exec error : docker run error');
+                res.status(500).send('Err: docker run error');
+            }
+            else{
+                exec('docker stop '+ result[0].classNum, function (err){
                     if (err) {
-                        console.log('exec error : docker run error');
-                        res.status(500).send('Err: docker run error');
-                    }
-                    else{
-                        exec('docker stop '+ result[0].classNum, function (err){
-                            if (err) {
-                                console.log('exec error : docker stop error');
-                                res.status(500).send('Err: docker stop error');
-                            }
-                        });
+                        console.log('exec error : docker stop error');
+                        res.status(500).send('Err: docker stop error');
                     }
                 });
-                res.status(200).send();
-            });
+            }
+        });
+        
+        boardModel.getLanguage(result[0].classNum, function (err, languageResult){
+            if (err) {
+                console.log('DB error: select error');
+                res.status(500).send('Err: DB error');
+            } else {
+                if (copyDefaultFilesToContainer(languageResult[0].language, result[0].classNum)) {
+                    res.status(200).send();
+                } else {
+                    console.log('Copy file error');
+                    res.status(500).send('Err: copy file error');
+                }
+            }
+        });
+    });
 };
+
+function copyDefaultFilesToContainer (language, classNumber) {
+    var lowerCaseLanguage;
+
+    switch (language) {
+        case 'C++': lowerCaseLanguage = 'cpp'; break;
+        default: lowerCaseLanguage = language.toLowerCase();
+    }
+
+    exec('cp /root/coco-api/default_files/' + lowerCaseLanguage + '/* /root/store/' + classNumber);
+    exec('chmod 777 /root/store/' + classNumber + ' -R');
+}
 
 exports.delete = function (req, res){
     model.delete(req.params.chatNum, function (err) {

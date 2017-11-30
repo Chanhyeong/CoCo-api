@@ -11,12 +11,11 @@ function TerminalConnect(io, classNum, language){
     this.nameIO.on('connection', function(socket) {
         var conn = new SSHClient();
         conn.on('ready', function() {
-            socket.emit('data', '\r\n*** SSH CONNECTION ESTABLISHED ***\r\n');
             enteredCommand = null;
 
             conn.shell(function(err, stream) {
                 if (err)
-                    return socket.emit('data', '\r\n*** SSH SHELL ERROR: ' + err.message + ' ***\r\n');
+                    return socket.emit('data', '\r\n--- Error. refresh this page please. ---: ' + err.message + ' ***\r\n');
                 socket.on('command', function(data) {
                     if (stream.writable) {
                         enteredCommand = data;
