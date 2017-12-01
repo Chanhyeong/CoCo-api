@@ -87,7 +87,7 @@ exports.delete = function (req, res) {
             console.log ('DB delete err: ', err);
             res.status(500).send('Err: DB delete Error');
         } else {
-            exec('docker rm ' + req.params.num, function (err) {
+            exec('docker stop ' + req.params.num + '&&docker rm ' + req.params.num, function (err) {
                 if (err) {
                     console.log ('Docker remove err: ', err);
                     res.status(500).send();
