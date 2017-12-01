@@ -3,6 +3,7 @@ var boardModel = require('../board/model');
 var fs = require('fs');
 var exec = require('child_process').exec;
 var shareDBClient = require('sharedb/lib/client');
+var WebSocket = require('ws');
 
 // 해당 유저에 대한 전체 리스트 가져오기
 exports.getMessages = function (req, res) {
@@ -140,10 +141,10 @@ function copyDefaultFilesToContainer (language, classNumber) {
         case 'python': filePath = '/src/main.py';
     }
 
-    var shareConnection = shareDBClient.Connection(new WebSocket("wss://" + 'external.cocotutor.ml'));
+    var shareConnection = new shareDBClient.Connection(new WebSocket("wss://" + 'external.cocotutor.ml'));
 
     exec('cat ./default/' + language + filePath, function (err, stdout) {
-        var defaultValue = [{p: [stdout], t: 'text', o: op}];
+        var defaultValue = [{p: [], t: 'text', o: stdout}];
         shareConnection.get(classNumber, filePath).submitOp(defaultValue, {source: this});
     });
 
