@@ -120,12 +120,12 @@ exports.handleMatch = function (req, res) {
                 console.log('DB error: select error');
                 res.status(500).send('Err: DB error');
             } else {
-                if (copyDefaultFilesToContainer(languageResult[0].language, result[0].classNum)) {
+                // if (copyDefaultFilesToContainer(languageResult[0].language, result[0].classNum)) {
                     res.status(200).send();
-                } else {
-                    console.log('Copy file error');
-                    res.status(500).send('Err: copy file error');
-                }
+                // } else {
+                //     console.log('Copy file error');
+                //     res.status(500).send('Err: copy file error');
+                // }
             }
         });
     });
