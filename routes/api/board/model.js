@@ -138,9 +138,9 @@ exports.modifyClass = function (classNumber, classData, timeData) {
     });
 };
 
+// TODO: ShareDB 데이터 삭제하기
 exports.delete = function (classNumber, callback) {
     var deleteStatement = 'delete from Class where num = ?';
 
     mysql.query(deleteStatement, classNumber, callback);
-
 };

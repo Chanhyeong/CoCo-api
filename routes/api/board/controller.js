@@ -1,5 +1,6 @@
 var model = require('./model');
 var chatModel = require('../chat/model');
+var exec = require('child_process').exec;
 
 exports.getClasses = function (req, res) {
     model.getClasses( function (err, result) {
@@ -86,7 +87,14 @@ exports.delete = function (req, res) {
             console.log ('DB delete err: ', err);
             res.status(500).send('Err: DB delete Error');
         } else {
-            res.status(200).send();
+            exec('docker rm ' + req.params.num, function (err) {
+                if (err) {
+                    console.log ('Docker remove err: ', err);
+                    res.status(500).send();
+                } else {
+                    res.status(200).send();
+                }
+            });
         }
     });
 };
