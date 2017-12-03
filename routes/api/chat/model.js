@@ -1,5 +1,7 @@
 var mysql = require('../../../middleware/database')('mysql');
 var mongodb = require('../../../middleware/database')('mongodb').chatDb;
+var boardModel = require('../board/model');
+var knex = require('../../../middleware/database')('knex');
 
 exports.getMessages = function (nickName, callback) {
     var statement = "select num, applicant as nickname from Chat where writer = ? " +
@@ -11,24 +13,30 @@ exports.getMessages = function (nickName, callback) {
     mysql.query(statement, filter, callback);
 };
 
+function getChatInformation (chatNumber, callback) {
+    return knex('Chat').where({
+        num: chatNumber
+    }).select('writer', 'applicant', 'classNum')
+        .then(callback);
+}
 
-exports.changeStatus = function (ClassNum, value, callback) {
+exports.changeStatus = function (classNum, value, callback) {
     var statement = 'update Class set status = ? where num = ?';
-    var filter = [value, ClassNum];
+    var filter = [value, classNum];
 
     mysql.query(statement, filter, callback);
 };
 
-exports.getChatInfo =  function (ChatNum, callback){
+exports.getChatInfo =  function (chatNum, callback){
     var statement = "select applicant, classNum from Chat where num = ?";
-    var filter = ChatNum;
-    mysql.query(statement, filter, callback);
+
+    mysql.query(statement, chatNum, callback);
 };
 
 exports.Match = function (ClassNum, applicant, callback){
     var statement = "update Class " +
-                    "set tutorNick = if(tutorNick is null, ?, tutorNick), studentNick = if(studentNick is null, ?, studentNick), status = 3 " +
-                    "where num = ?";
+        "set tutorNick = if(tutorNick is null, ?, tutorNick), studentNick = if(studentNick is null, ?, studentNick), status = 3 " +
+        "where num = ?";
     var filter = [applicant, applicant, ClassNum];
     mysql.query(statement, filter, callback);
 };
@@ -36,17 +44,34 @@ exports.Match = function (ClassNum, applicant, callback){
 // 특정 Document의 message 반환
 // result 값이 router로 전달되지 않아서 callback으로 설계
 // mode: 'matching' (매칭 중일 때의 채팅) or 'class' (에디터 접속 후 채팅)
-exports.getMessage = function (mode, chatNumber, callback) {
-    mongodb(function (db) {
-        db.collection(mode).findOne( { _id : chatNumber }, function (err, result) {
-            if (err) {
-                callback(err);
-            } else {
-                callback(null, result);
-            }
-        });
+exports.getMessage = function (mode, userNickname, chatNumber, callback) {
+    var opponentNickname, isWriter;
 
-        db.close();
+    getChatInformation(function (result) {
+        var classData = result[0];
+
+        if (classData.writer === userNickname) {
+            opponentNickname = classData.applicant;
+            isWriter = true;
+        } else {
+            opponentNickname = classData.writer;
+            isWriter = false;
+        }
+
+        boardModel.getStatus(classData.classNum, function (boardResult) {
+            var classStatusCode = boardResult[0].status;
+            mongodb(function (db) {
+                db.collection(mode).findOne( { _id : chatNumber }, function (err, result) {
+                    if (err) {
+                        callback(err);
+                    } else {
+                        callback(null, result, opponentNickname, classStatusCode, isWriter, classData.classNum);
+                    }
+                });
+
+                db.close();
+            });
+        });
     });
 };
 
@@ -74,13 +99,7 @@ exports.create = function (mode, data, time, callback) {
         } else {
             var form = {
                 _id: result.insertId,
-                log: [
-                    {
-                        nickname: 'admin',
-                        message: '여기서 강의 내용에 대한 질문/답변을 진행하세요.',
-                        date: time
-                    }
-                ]
+                log: []
             };
 
             mongodb(function (db) {
@@ -94,17 +113,15 @@ exports.create = function (mode, data, time, callback) {
     });
 };
 
-exports.delete = function (ChatNum, callback) {
+exports.delete = function (chatNum, callback) {
     mongodb(function (db) {
-        db.collection('matching').delete({_id: ChatNum}, function (err) {
+        db.collection('matching').remove({_id: chatNum}, function (err) {
             if (err) {
                 callback(err);
             } else {
-                var statement= "delet from Chat where num = ?";
-                mysql.query(statement, ChatNum, callback);
+                var statement= "delete from Chat where num = ?";
+                mysql.query(statement, chatNum, callback);
             }
         });
     });
-
-
 };

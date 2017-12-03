@@ -28,20 +28,26 @@ exports.getClass = function (req, res) {
     };
 
     // 내가 수강중인 목록
-    var sql = "select * from Class where studentNick = ? or tutorNick = ? and status = ?";
+    var sql = "select * from Class where (studentNick = ? or tutorNick = ?) and status = ?";
     var filter = [userNick, userNick, status.MATCHED];
 
-    mysql.query(sql, filter, function (err, result) {
+    mysql.query(sql, filter, function (err, result1) {
         if (err) {
             res.status(500).json({error: err})
         } else {
-            if (!result.length) {
-                res.status(401).send("수강중인 목록이 없습니다");
-            } else {
-                res.status(200).send({
-                    list : result
-                });
-            }
+            sql = "select * from Class where (studentNick = ? or tutorNick = ?)";
+            filter = [userNick, userNick];
+            mysql.query(sql, filter, function (err, result2){
+                if (err) {
+                    res.status(500).json({error: err})
+                } else {
+                    res.status(200).send({
+                        matchList : result1,
+                        myList : result2
+                    });
+                }
+            });
+
         }
     });
 
@@ -51,20 +57,16 @@ exports.getWriter = function(req, res) {
     var filter = req.params.nickname;
 
     // 신청온 목록
-    var sql = "select ch.num, ch.writer, ch.applicant, c.title, ch.classNum " +
+    var sql = "select ch.num, ch.writer, ch.applicant, c.title, c.language, ch.classNum " +
             "from Chat as ch, Class as c " +
             "where ch.classNum = c.num and writer = ? and (c.status = 1 or c.status = 2)";
     mysql.query(sql, filter, function (err, result) {
         if (err) {
             res.status(500).json({error: err})
         } else {
-            if (!result.length) {
-                res.status(401).send("신청한 받은 목록이 없습니다.");
-            } else {
-                res.status(200).send({
-                    list : result
-                });
-            }
+            res.status(200).send({
+                list : result
+            });
         }
     });
 };
@@ -73,24 +75,21 @@ exports.getApplicant = function(req, res){
     var filter = req.params.nickname;
 
     // 신청한 목록
-    var sql = "select ch.num, ch.writer, ch.applicant, c.title, ch.classNum " +
+    var sql = "select ch.num, ch.writer, ch.applicant, c.title, c.language, ch.classNum " +
             "from Chat as ch, Class as c " +
             "where ch.classNum = c.num and applicant = ? and (c.status = 1 or c.status = 2)";
     mysql.query(sql, filter, function(err, result){
         if (err) {
             res.status(500).json({ error: err })
         } else {
-            if(!result.length) {
-                res.status(401).send("신청한 목록이 없습니다.");
-            } else {
-                res.status(200).send({
-                    list : result
+            res.status(200).send({
+                list : result
                 });
-            }
         }
     });
 };
 
+// 튜터 등록
 exports.regist = function(req, res){
     var info = {
         'id' : req.body.id,
@@ -100,7 +99,6 @@ exports.regist = function(req, res){
         'career' : req.body.career,
         'language' : req.body.language
     };
-
     var sql = "insert into Tutor values (?, ?, ?, ?, ?, ?)";
     var filter = [info.id, info.degree, info.intro, info.github, info.career, info.language];
 
@@ -108,9 +106,7 @@ exports.regist = function(req, res){
         if (err) {
             res.status(500).send({error: err})
         } else {
-            res.status(200).send({
-                list : result
-            });
+            res.status(200).send()
         }
     });
 };
@@ -118,13 +114,13 @@ exports.regist = function(req, res){
 exports.getTutor = function(req, res){
     var filter = req.params.nickname;
 
-    var sql = "select degree, intro, github, career, t.language from Tutor as t, User as u where t.id = u.id and nickname = ?";
+    var sql = "select degree, intro, github, career, t.language from Tutor as t, User as u where t.id = u.id and nickname = ? and u.tutor = 1";
     mysql.query(sql, filter, function (err, result) {
         if (err) {
             res.status(500).send({error: err})
         } else {
             if(!result.length) {
-                res.status(401).send("튜터 정보가 없습니다.");
+                res.status(401).send("튜터로 등록되어 있지 않습니다.");
             } else {
                 res.status(200).send({
                     tutor : result[0]
@@ -134,6 +130,7 @@ exports.getTutor = function(req, res){
     });
 };
 
+// 튜터 정보 얻어오기
 exports.TutorInfo = function(req, res){
     var filter = req.params.id;
 
@@ -143,7 +140,7 @@ exports.TutorInfo = function(req, res){
             res.status(500).send({error: err})
         } else {
             if(!result.length) {
-                res.status(401).send("튜터 정보가 없습니다.");
+                res.status(404).send("튜터 정보가 없습니다.");
             } else {
                 res.status(200).send({
                     tutor : result[0]

@@ -1,9 +1,12 @@
 var express = require('express');
 var router = express.Router();
+var controller = require('./controller');
+var directoryController = require('./directory/controller');
+var jwtHandler = require('../../../middleware/jwt-handler');
 
-router.get('/');
 
-router.use('/compile', require('./compile/router'));
+router.get('/:classNum', jwtHandler.decodeToken, controller.createTerminalConnect, directoryController.getDirectory);
+
 router.use('/directory', require('./directory/router'));
 
 module.exports = router;

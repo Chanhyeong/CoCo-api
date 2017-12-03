@@ -1,4 +1,5 @@
 var mysql = require('../../../middleware/database')('mysql');
+var knex = require('../../../middleware/database')('knex');
 
 var status = {
     'STUDENT': 1,
@@ -16,20 +17,37 @@ exports.getClasses = function (callback) {
     mysql.query(statement, filter, callback);
 };
 
+exports.getStatus = function (classNum, callback) {
+    return knex('Class').where({
+        num: classNum
+    }).select('status')
+        .then(callback);
+};
+
+exports.getLanguage = function (num, callback){
+    var statement = 'select language from Class where num = ?';
+
+    mysql.query(statement, num, callback);
+};
+
 exports.getInstance = function (num, callback) {
-    var statement = 'select content from Class where num = ?';
+    var statement = 'select content, tutorNick, studentNick from Class where num = ?';
 
     mysql.query(statement, num, function (err, content) {
         if (err) {
             callback(err);
         } else {
-            var timeStatement = 'select day, startTime, endTime from Classtime where classNum = ?'
+            var timeStatement = 'select day, startTime, endTime from Classtime where classNum = ?';
 
             mysql.query(timeStatement, num, function (err, time) {
-                callback(err, {
-                    content: content[0].content,
-                    time: time
-                });
+                if(content) {
+                    callback(err, {
+                        content: content[0].content,
+                        time: time,
+                        tutorNick: content[0].tutorNick,
+                        studentNick: content[0].studentNick
+                    });
+                } else callback(err, null)
             })
         }
     });
@@ -120,17 +138,9 @@ exports.modifyClass = function (classNumber, classData, timeData) {
     });
 };
 
-exports.delete = function (nickname, num, callback) {
-    var matchStatement = 'select  * from Class where num = ? AND status IN (?, ?) ' +
-        'AND tutorNick = ? or studentNick = ?';
-    var filter = [num, status.STUDENT, status.TUTOR, nickname, nickname];
-    
-    // result 값이 있다면 정보가 일치함
-    if(duplicateCheck(matchStatement, filter) === true) {
-        var deleteStatement = 'delete from Class where num = ?';
+// TODO: ShareDB 데이터 삭제하기
+exports.delete = function (classNumber, callback) {
+    var deleteStatement = 'delete from Class where num = ?';
 
-        mysql.query(deleteStatement, num, callback);
-    } else {
-        callback(401);
-    }
+    mysql.query(deleteStatement, classNumber, callback);
 };

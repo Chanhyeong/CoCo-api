@@ -1,6 +1,9 @@
 var model = require('./model');
+var boardModel = require('../board/model');
 var fs = require('fs');
 var exec = require('child_process').exec;
+var shareDBClient = require('sharedb/lib/client');
+var WebSocket = require('ws');
 
 // 해당 유저에 대한 전체 리스트 가져오기
 exports.getMessages = function (req, res) {
@@ -22,9 +25,9 @@ exports.getMessages = function (req, res) {
 
 // 채팅방번호에 맞는 채팅 로그
 exports.getMessage = function (req, res) {
-    var chatNumber = parseInt(req.params.chatNumber);
+    var chatNum = parseInt(req.params.chatNum);
 
-    model.getMessage('matching', chatNumber, function (err, result) {
+    model.getMessage('matching', req.user.nickname, chatNum, function (err, result, opponentNickname, classStatusCode, isWriter, classNum) {
         // mongodb에서 검색된 내용이 바로 채워지지 않아서 nextTick 추가
         process.nextTick( function () {
             if (err) {
@@ -35,8 +38,12 @@ exports.getMessage = function (req, res) {
                     res.status(409).send('wrong chat number');
                 } else {
                     res.status(200).send({
+                        nickname: opponentNickname,
+                        status: classStatusCode,
                         mode: 'matching',
-                        log: result.log
+                        log: result.log,
+                        isWriter: isWriter,
+                        classNum: classNum
                     });
                 }
             }
@@ -46,7 +53,7 @@ exports.getMessage = function (req, res) {
 
 // 채팅방번호에 새로운 메시지 라인 추가
 exports.sendMessage = function (req, res) {
-    var chatNumber = parseInt(req.params.chatNumber);
+    var chatNumber = parseInt(req.params.chatNum);
 
     // Format: 2017-10-27 17:19:33
     var time = new Date().toISOString().
@@ -65,68 +72,92 @@ exports.sendMessage = function (req, res) {
             res.status(500).send('Err: DB insert Error');
         }
 
-        req.app.get('dataHandler').sendChatMsg(chatNumber, message);
-        res.status(200).send();
+        req.app.get('dataHandler').sendMessage(chatNumber, message);
+        res.status(200).json(message);
     });
 };
 
-// TODO 1: 매칭이 되고 + 끝난 클래스에 대한 정보를 남겨두려면 현재 디비 구조로는 안되는데.
-// TODO 2: 매칭이 되면 새로운 row를 추가하여 터미널 번호를 새로 부여하는 방식이 나을 것 같음
 exports.handleMatch = function (req, res) {
-    switch (req.body.mode) {
+    model.getChatInfo(req.params.chatNum, function (err, result){
+        if(err){
+            console.log('DB Update error, mysql');
+            res.status(500).send('Err: get ChatInfo Error');
+        }
 
-        case 'on':
-            model.getChatInfo(req.body.chatNum, function (err, result){
-                if(err){
-                    console.log('DB Update error, mysql');
-                    res.status(500).send('Err: get ChatInfo Error');
-                }
+        model.Match(result[0].classNum, result[0].applicant, function (err){
+            if(err){
+                console.log('DB Update error, mysql');
+                res.status(500).send('Err: Match Error');
+            }
+        });
 
-                model.Match(result[0].classNum, result[0].applicant, function (err){
-                    if(err){
-                        console.log('DB Update error, mysql');
-                        res.status(500).send('Err: Match Error');
-                    }
-                });
+        process.umask(0);
+        fs.mkdir('/root/store/' + result[0].classNum, 0777, function (err){
+            if (err){
+                console.log('file system error, mkdir');
+                res.status(500).send('Err: server error');
+            }
+        });
 
-                process.umask(0);
-                fs.mkdir('/root/store/' + result[0].classNum, 0777, function (err){
-                    if (err){
-                        console.log('file system error, mkdir');
-                        res.status(500).send('Err: server error');
-                    }
-                });
-
-                exec('docker run -d -p '+ result[0].classNum +':22 -h Terminal --cpu-quota=25000 --name '+
-                    result[0].classNum +' -v /root/store/'+ result[0].classNum +':/home/coco coco:0.3',function (err, stdout){
+        exec('docker run -d -p '+ result[0].classNum +':22 -h Terminal --cpu-quota=25000 --name '+
+            result[0].classNum +' -v /root/store/'+ result[0].classNum +':/home/coco coco:0.4',function (err, stdout){
+            if (err) {
+                console.log('exec error : docker run error');
+                res.status(500).send('Err: docker run error');
+            }
+            else{
+                exec('docker stop '+ result[0].classNum, function (err){
                     if (err) {
-                        console.log('exec error : docker run error');
-                        res.status(500).send('Err: docker run error');
-                    }
-                    else{
-                        exec('docker stop '+ result[0].classNum, function (err){
-                            if (err) {
-                                console.log('exec error : docker stop error');
-                                res.status(500).send('Err: docker stop error');
-                            }
-                        });
+                        console.log('exec error : docker stop error');
+                        res.status(500).send('Err: docker stop error');
                     }
                 });
-
-                res.status(200).send();
-
-            });
-            break;
-
-        case 'off':
-            model.delete(req.body.chatNum, function (err) {
-                if (err) {
-                    console.log('DB delete error, mongo');
-                    res.status(500).send('Err: DB delete Error');
-                } else {
+            }
+        });
+        
+        boardModel.getLanguage(result[0].classNum, function (err, languageResult){
+            if (err) {
+                console.log('DB error: select error');
+                res.status(500).send('Err: DB error');
+            } else {
+                // if (copyDefaultFilesToContainer(languageResult[0].language, result[0].classNum)) {
                     res.status(200).send();
-                }
-            });
-            break;
+                // } else {
+                //     console.log('Copy file error');
+                //     res.status(500).send('Err: copy file error');
+                // }
+            }
+        });
+    });
+};
+
+function copyDefaultFilesToContainer (language, classNumber) {
+    var filePath;
+    switch (language) {
+        case 'c': filePath = '/src/main.c'; break;
+        case 'c++': language = 'cpp';
+            filePath = '/src/main.cpp'; break;
+        case 'java': filePath = '/com/example/Main.java'; break;
+        case 'python': filePath = '/src/main.py';
     }
+
+    var shareConnection = new shareDBClient.Connection(new WebSocket("wss://" + 'external.cocotutor.ml'));
+
+    exec('cat ./default/' + language + filePath, function (err, stdout) {
+        var defaultValue = [{p: [], t: 'text', o: stdout}];
+        shareConnection.get(classNumber, filePath).submitOp(defaultValue, {source: this});
+    });
+
+    exec('cp /root/coco-api/default_files/' + language + '/* /root/store/' + classNumber);
+    exec('chmod 777 /root/store/' + classNumber + ' -R');
+}
+
+exports.delete = function (req, res){
+    model.delete(req.params.chatNum, function (err) {
+        if (err) {
+            res.status(500).send('Err: DB delete error');
+        } else {
+            res.status(200).send();
+        }
+    });
 };

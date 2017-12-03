@@ -3,13 +3,11 @@ var jwt = require('jsonwebtoken');
 var SECRET = require('../config').jwtSecret;
 
 exports.signToken = function (user) {
-    console.log('jwt-handler.js: signToken');
     return jwt.sign({ user: user }, SECRET);
 };
 
 // 토큰을 해독한 후, 사용자 ID를 request에 추가합니다.
 exports.decodeToken = function (req, res, next) {
-    console.log('jwt-handler.js: decodeToken');
     if (req.query && req.query.hasOwnProperty('access_token')) {
         req.headers.authorization = 'Bearer' + req.query.access_token;
     }
