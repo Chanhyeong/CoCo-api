@@ -145,13 +145,14 @@ function copyDefaultFilesToContainer (language, classNumber) {
         case 'python': filePath = '/src/main.py';
     }
 
-    var shareConnection = new shareDBClient.Connection(new WebSocket("wss://" + 'external.cocotutor.ml'));
+    var shareConnection = new shareDBClient.Connection(new WebSocket("ws://" + 'localhost'));
     var doc = shareConnection.get(classNumber, filePath);
-    doc.create({ content: "" });
 
-    exec('cat ./default/' + language + filePath, function (err, stdout) {
+    doc.create({ content: '' });
+
+    exec('cat /root/coco-api/default_files/' + language + filePath, function (err, stdout) {
         if (err) {
-            console.log('command error', stdout);
+            console.log('command error: ', stdout);
             return false;
         }
 
