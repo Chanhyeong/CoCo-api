@@ -1,4 +1,5 @@
 var exec = require('child_process').exec;
+var mongodb = require('../../../middleware/database')('mongodb').editorDb;
 
 
 exports.getDirectory = function (req, res) {
@@ -34,32 +35,49 @@ exports.create = function (req, res) {
     } else {
         statement =+ 'touch ' + fileName +'"';
     }
+
+    exec(statement);
 };
 
 exports.rename = function (req, res) {
-    var classNum = req.body.file.classNum;
-    var fileName = req.body.fileName;
+    var classNum = req.body.classNum;
+    var prevName = req.body.prevName;
+    var nextName = req.body.nextName;
     var path = req.body.file.path;
 
-    var statement = 'docker exec ' + classNum + ' bash -c "cd ' + path +' && ';
-
-    statement =+ 'mv ' + fileName +'"';
+    var statement = 'docker exec ' + classNum + ' bash -c "cd ' + path +' && mv ' + prevName + ' ' + nextName + '';
 
     exec(statement);
+
+    res.status(200).send();
 };
 
 
 exports.delete = function (req, res) {
     var classNum = req.body.file.classNum;
     var type = req.body.file.type;
+    var fileName = req.body.file.name;
+    var path = req.body.file.path;
 
     var statement = 'docker exec ' + classNum + ' bash -c "cd ' + path +' && ';
 
-    if(req.body.Dir){
+    if(req.body.file.type){
         statement =+ 'rm -r' + fileName +'"';
     } else {
         statement =+ 'rm ' + fileName +'"';
+
+        mongodb(function (db) {
+            db.collection(classNum).remove({_id: '/'+fileName+'/'}, function (err) {
+                if (err) {
+                    callback(err);
+                } else {
+                    res.status(200).send();
+                }
+            });
+        });
     }
+
+    exec(statement);
 };
 
 exports.move = function (req, res) {
@@ -68,7 +86,9 @@ exports.move = function (req, res) {
     var prevpath = req.body.prevpath;
     var nextpath = req.body.nextpath;
 
-    var statement = 'docker exec ' + classNum + ' bash -c "cd ' + prevpath +' && ';
+    var statement = 'docker exec ' + classNum + ' bash -c "cd ' + prevpath +' && mv ' + fileName + ' ' + nextpath +'"';
 
-    statement =+ 'mv ' + fileName + ' ' + nextpath +'"';
+    exec(statement);
+
+    res.status(200).send();
 };
