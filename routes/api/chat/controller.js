@@ -2,11 +2,8 @@ var model = require('./model');
 var boardModel = require('../board/model');
 var fs = require('fs');
 var exec = require('child_process').exec;
-var shareDBClient = require('sharedb/lib/client');
-var WebSocket = require('ws');
-var otText = require('ot-text');
-
-shareDBClient.types.map['json0'].registerSubtype(otText.type);
+var editorDb = require('../../../middleware/database')('mongodb').editorDb;
+var ObjectId = require('mongodb').ObjectID;
 
 // 해당 유저에 대한 전체 리스트 가져오기
 exports.getMessages = function (req, res) {
@@ -117,7 +114,7 @@ exports.handleMatch = function (req, res) {
                 });
             }
         });
-        
+
         boardModel.getLanguage(result[0].classNum, function (err, languageResult){
             if (err) {
                 console.log('DB error: select error');
@@ -145,19 +142,25 @@ function copyDefaultFilesToContainer (language, classNumber) {
         case 'python': filePath = '/src/main.py';
     }
 
-    var shareConnection = new shareDBClient.Connection(new WebSocket("ws://" + 'localhost'));
-    var doc = shareConnection.get(classNumber, filePath);
-
-    doc.create({ content: '' });
-
-    exec('cat /root/coco-api/default_files/' + language + filePath, function (err, stdout) {
+    exec('cat /root/coco-api/default_files/' + language + '/' + filePath, function (err, fileContent) {
         if (err) {
             console.log('command error \'cat\': ', err);
             return false;
         }
 
-        var defaultValue = [{t: 'text', o: [stdout]}];
-        doc.submitOp(defaultValue, {source: this});
+        var createdObjectId = new ObjectId();
+        var creationTime = Date.now();
+
+        editorDb(function (db) {
+            db.collection(classNumber.toString()).insertOne({ // key/values that are referenced by shraedb
+                _id: filePath,
+                content: fileContent,
+                _type: "http://sharejs.org/types/JSONv0",
+                _v: fileContent.length,
+                _m: { ctime: creationTime, mtime: creationTime},
+                _o: createdObjectId
+            })
+        });
     });
 
     exec('cp /root/coco-api/default_files/' + language + '/* /root/store/' + classNumber +
