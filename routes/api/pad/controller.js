@@ -48,12 +48,16 @@ exports.save = function (req, res){
                 res.status(500).send("mongo DB err");
             } else {
                 for(var i=0; i< result.length; i++){
-                    exec('docker exec ' + classNum + ' bash -c "echo ' + result[i].content + ' > /home/coco' + result[i]._id + '"');
-                }
+                    exec('docker exec ' + classNum + ' bash -c "echo \'' + result[i].content + '\' > /home/coco' + result[i]._id + '"',
+		    	function(err,stdout){
+				if(err) console.log(err);
+				else console.log(stdout);
+		    });
+		}
+		res.status(200).send();	
             }
         });
         db.close();
     });
 
-    res.status(200).send();
 };
