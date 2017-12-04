@@ -1,4 +1,5 @@
 var exec = require('child_process').exec;
+var fs = require('fs');
 var model = require('./../board/model');
 var mongodb = require('../../../middleware/database')('mongodb').editorDb;
 var TerminalConnect = require('../../../middleware/terminal-connect');
@@ -47,15 +48,16 @@ exports.save = function (req, res){
                 console.log(err);
                 res.status(500).send("mongo DB err");
             } else {
-                for(var i=0; i< result.length; i++){
-                    exec('docker exec ' + classNum + ' bash -c "echo \'' + result[i].content + '\' > /home/coco' + result[i]._id + '"',
-		    	function(err,stdout){
-				if(err) console.log(err);
-				else console.log(stdout);
-		    });
-		}
-		res.status(200).send();	
-            }
+                for(var i=0; i< result.length; i++) {
+                    fs.writeFile('/root/store/' + classNum + result[i]._id, result[i].content, function (err) {
+                        //exec('docker exec ' + classNum + ' bash -c "echo \'' + result[i].content + '\' > /home/coco' + result[i]._id + '"',
+                        //function(err,stdout){
+                        if (err) console.log(err);
+                        else console.log(stdout);
+                    });
+                }
+		    }
+		    res.status(200).send();
         });
         db.close();
     });
