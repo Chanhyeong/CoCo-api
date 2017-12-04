@@ -2,8 +2,8 @@ var model = require('./model');
 var boardModel = require('../board/model');
 var fs = require('fs');
 var exec = require('child_process').exec;
-var shareDBClient = require('sharedb/lib/client');
-var WebSocket = require('ws');
+var editorDb = require('../../../middleware/database')('mongodb').editorDb;
+var ObjectId = require('mongodb').ObjectID;
 
 // 해당 유저에 대한 전체 리스트 가져오기
 exports.getMessages = function (req, res) {
@@ -84,7 +84,7 @@ exports.handleMatch = function (req, res) {
             res.status(500).send('Err: get ChatInfo Error');
         }
 
-        model.Match(result[0].classNum, result[0].applicant, function (err){
+        model.Match(result[0].classNum, result[0].applicant, function (err) {
             if(err){
                 console.log('DB Update error, mysql');
                 res.status(500).send('Err: Match Error');
@@ -92,7 +92,7 @@ exports.handleMatch = function (req, res) {
         });
 
         process.umask(0);
-        fs.mkdir('/root/store/' + result[0].classNum, 0777, function (err){
+        fs.mkdir('/root/store/' + result[0].classNum, 0777, function (err) {
             if (err){
                 console.log('file system error, mkdir');
                 res.status(500).send('Err: server error');
@@ -114,25 +114,28 @@ exports.handleMatch = function (req, res) {
                 });
             }
         });
-        
+
         boardModel.getLanguage(result[0].classNum, function (err, languageResult){
             if (err) {
                 console.log('DB error: select error');
                 res.status(500).send('Err: DB error');
             } else {
-                // if (copyDefaultFilesToContainer(languageResult[0].language, result[0].classNum)) {
-                    res.status(200).send();
-                // } else {
-                //     console.log('Copy file error');
-                //     res.status(500).send('Err: copy file error');
-                // }
+                copyDefaultFilesToContainer(languageResult[0].language, result[0].classNum, function (status) {
+                    if (status) {
+                        res.status(200).send();
+                    } else {
+                        console.log('Copy file error');
+                        res.status(500).send('Err: copy file error');
+                    }
+                });
             }
         });
     });
 };
 
-function copyDefaultFilesToContainer (language, classNumber) {
+function copyDefaultFilesToContainer (language, classNumber, callback) {
     var filePath;
+
     switch (language) {
         case 'c': filePath = '/src/main.c'; break;
         case 'c++': language = 'cpp';
@@ -141,15 +144,36 @@ function copyDefaultFilesToContainer (language, classNumber) {
         case 'python': filePath = '/src/main.py';
     }
 
-    var shareConnection = new shareDBClient.Connection(new WebSocket("wss://" + 'external.cocotutor.ml'));
+    exec('cat /root/coco-api/default_files/' + language + '/' + filePath, function (err, fileContent) {
+        if (err) {
+            console.log('command error \'cat\': ', err);
+            callback(false);
+        }
 
-    exec('cat ./default/' + language + filePath, function (err, stdout) {
-        var defaultValue = [{p: [], t: 'text', o: stdout}];
-        shareConnection.get(classNumber, filePath).submitOp(defaultValue, {source: this});
+        var createdObjectId = new ObjectId();
+        var creationTime = Date.now();
+
+        editorDb(function (db) {
+            db.collection(classNumber.toString()).insertOne({ // key/values that are referenced by shraedb
+                _id: filePath,
+                content: fileContent,
+                _type: "http://sharejs.org/types/JSONv0",
+                _v: fileContent.length,
+                _m: { ctime: creationTime, mtime: creationTime},
+                _o: createdObjectId
+            })
+        });
     });
 
-    exec('cp /root/coco-api/default_files/' + language + '/* /root/store/' + classNumber);
-    exec('chmod 777 /root/store/' + classNumber + ' -R');
+    exec('cp /root/coco-api/default_files/' + language + '/* /root/store/' + classNumber +
+        ' -r &&chmod 777 /root/store/' + classNumber + ' -R', function (err) {
+        if (err) {
+            console.log('command error: \'cp and chmod\'', err);
+            callback(false);
+        } else {
+            callback(true);
+        }
+    });
 }
 
 exports.delete = function (req, res){
