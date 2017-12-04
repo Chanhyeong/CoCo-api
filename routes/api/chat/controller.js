@@ -149,7 +149,7 @@ function copyDefaultFilesToContainer (language, classNumber) {
     });
 
     exec('cp /root/coco-api/default_files/' + language + '/* /root/store/' + classNumber);
-    exec('chmod 777 /root/store/' + classNumber + ' -R');
+    exec('chmod 755 /root/store/' + classNumber + ' -R');
 }
 
 exports.delete = function (req, res){

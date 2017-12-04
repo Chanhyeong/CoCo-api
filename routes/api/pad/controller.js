@@ -1,5 +1,6 @@
 var exec = require('child_process').exec;
 var model = require('./../board/model');
+var mongodb = require('../../../middleware/database')('mongodb').editorDb;
 var TerminalConnect = require('../../../middleware/terminal-connect');
 
 var terminalPool = {};
@@ -37,3 +38,22 @@ exports.createTerminalConnect = function (req, res, next){
     });
 };
 
+exports.save = function (req, res){
+    var classNum = req.params.classNum;
+    var data = {};
+
+    mongodb(function (db) {
+        db.collection(classNum).find( {}, function (err, result) {
+            if (err) {
+                console.log(err);
+            } else {
+                data = result;
+            }
+        });
+        db.close();
+    });
+
+    for(var i=0; i< data.length; i++){
+        exec('docker exec ' + classNum + ' bash -c "echo ' + result.content + ' > /home/coco' + result._id + '"');
+    }
+};

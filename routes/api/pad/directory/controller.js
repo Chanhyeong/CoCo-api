@@ -21,41 +21,54 @@ exports.getDirectory = function (req, res) {
     });
 };
 
-exports.update = function (req, res) {
-    var classNum = req.body.classNum;
-    var mode = req.body.mode;
-    var path = req.body.path;
-    var newpath = req.body.newpath;
+exports.create = function (req, res) {
+    var classNum = req.body.file.classNum;
+    var type = req.body.file.type;
+    var path = req.body.file.path;
     var fileName = req.body.fileName;
 
     var statement = 'docker exec ' + classNum + ' bash -c "cd ' + path +' && ';
 
-    switch (mode) {
-        case 'create':
-            if(req.body.Dir){
-                statement =+ 'mkdir ' + fileName +'"';
-            } else {
-                statement =+ 'touch ' + fileName +'"';
-            }
-            break;
-
-        case 'rename':
-            statement =+ 'mv ' + fileName +'"';
-            break;
-
-        case 'delete':
-            if(req.body.Dir){
-                statement =+ 'rm -r' + fileName +'"';
-            } else {
-                statement =+ 'rm ' + fileName +'"';
-            }
-            break;
-
-        case 'move':
-            statement =+ 'mv ' + fileName + ' ' + newpath+'"';
-            break;
-        default: console.log('wrong mode'); return false;
+    if(type === "directory"){
+        statement =+ 'mkdir ' + fileName +'"';
+    } else {
+        statement =+ 'touch ' + fileName +'"';
     }
+};
+
+exports.rename = function (req, res) {
+    var classNum = req.body.file.classNum;
+    var fileName = req.body.fileName;
+    var path = req.body.file.path;
+
+    var statement = 'docker exec ' + classNum + ' bash -c "cd ' + path +' && ';
+
+    statement =+ 'mv ' + fileName +'"';
 
     exec(statement);
+};
+
+
+exports.delete = function (req, res) {
+    var classNum = req.body.file.classNum;
+    var type = req.body.file.type;
+
+    var statement = 'docker exec ' + classNum + ' bash -c "cd ' + path +' && ';
+
+    if(req.body.Dir){
+        statement =+ 'rm -r' + fileName +'"';
+    } else {
+        statement =+ 'rm ' + fileName +'"';
+    }
+};
+
+exports.move = function (req, res) {
+    var classNum = req.body.file.classNum;
+    var fileName = req.body.fileName;
+    var prevpath = req.body.prevpath;
+    var nextpath = req.body.nextpath;
+
+    var statement = 'docker exec ' + classNum + ' bash -c "cd ' + prevpath +' && ';
+
+    statement =+ 'mv ' + fileName + ' ' + nextpath +'"';
 };

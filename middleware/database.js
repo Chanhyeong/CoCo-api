@@ -30,6 +30,12 @@ MongoDb.chatDb = function (callback) {
         callback(db);
     });
 };
+MongoDb.editorDb = function (callback) {
+    MongoClient.connect(config.mongoUrl.editor, function (err, db) {
+        assert.equal(err, null);
+        callback(db);
+    });
+};
 
 module.exports = function (name) {
     switch (name) {
