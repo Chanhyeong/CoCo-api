@@ -50,10 +50,10 @@ exports.save = function (req, res){
             } else {
                 for(var i=0; i< result.length; i++) {
                     fs.writeFile('/root/store/' + classNum + result[i]._id, result[i].content, function (err) {
-                        //exec('docker exec ' + classNum + ' bash -c "echo \'' + result[i].content + '\' > /home/coco' + result[i]._id + '"',
-                        //function(err,stdout){
-                        if (err) console.log(err);
-                        else console.log(stdout);
+                        if (err) {
+                            console.log(err);
+                            res.status(500).send("file write error");
+                        }
                     });
                 }
 		    }
