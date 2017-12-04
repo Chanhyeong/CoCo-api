@@ -152,7 +152,7 @@ function copyDefaultFilesToContainer (language, classNumber) {
 
     exec('cat /root/coco-api/default_files/' + language + filePath, function (err, stdout) {
         if (err) {
-            console.log('command error: ', stdout);
+            console.log('command error \'cat\': ', err);
             return false;
         }
 
@@ -161,9 +161,9 @@ function copyDefaultFilesToContainer (language, classNumber) {
     });
 
     exec('cp /root/coco-api/default_files/' + language + '/* /root/store/' + classNumber +
-        '&&chmod 777 /root/store/' + classNumber + ' -R', function (err, stdout) {
+        ' -r &&chmod 777 /root/store/' + classNumber + ' -R', function (err) {
         if (err) {
-            console.log('command error: ', stdout);
+            console.log('command error: \'cp and chmod\'', err);
             return false;
         } else {
             return true;
