@@ -40,25 +40,20 @@ exports.createTerminalConnect = function (req, res, next){
 
 exports.save = function (req, res){
     var classNum = req.params.classNum;
-    var data = {};
 
     mongodb(function (db) {
-        db.collection("8046").find({}).toArray(function (err, result) {
+        db.collection(classNum).find({}).toArray(function (err, result) {
             if (err) {
                 console.log(err);
                 res.status(500).send("mongo DB err");
             } else {
-                data = result;
-		console.log(data);
+                for(var i=0; i< result.length; i++){
+                    exec('docker exec ' + classNum + ' bash -c "echo ' + result[i].content + ' > /home/coco' + result[i]._id + '"');
+                }
             }
         });
         db.close();
     });
-
-	console.log(data.length);
-    for(var i=0; i< data.length; i++){
-        exec('docker exec ' + classNum + ' bash -c "echo ' + data[i].content + ' > /home/coco' + data[i]._id + '"');
-    }
 
     res.status(200).send();
 };
