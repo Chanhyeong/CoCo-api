@@ -84,7 +84,7 @@ exports.handleMatch = function (req, res) {
             res.status(500).send('Err: get ChatInfo Error');
         }
 
-        model.Match(result[0].classNum, result[0].applicant, function (err){
+        model.Match(result[0].classNum, result[0].applicant, function (err) {
             if(err){
                 console.log('DB Update error, mysql');
                 res.status(500).send('Err: Match Error');
@@ -92,7 +92,7 @@ exports.handleMatch = function (req, res) {
         });
 
         process.umask(0);
-        fs.mkdir('/root/store/' + result[0].classNum, 0777, function (err){
+        fs.mkdir('/root/store/' + result[0].classNum, 0777, function (err) {
             if (err){
                 console.log('file system error, mkdir');
                 res.status(500).send('Err: server error');
@@ -120,18 +120,20 @@ exports.handleMatch = function (req, res) {
                 console.log('DB error: select error');
                 res.status(500).send('Err: DB error');
             } else {
-                if (copyDefaultFilesToContainer(languageResult[0].language, result[0].classNum)) {
-                    res.status(200).send();
-                } else {
-                    console.log('Copy file error');
-                    res.status(500).send('Err: copy file error');
-                }
+                copyDefaultFilesToContainer(languageResult[0].language, result[0].classNum, function (status) {
+                    if (status) {
+                        res.status(200).send();
+                    } else {
+                        console.log('Copy file error');
+                        res.status(500).send('Err: copy file error');
+                    }
+                });
             }
         });
     });
 };
 
-function copyDefaultFilesToContainer (language, classNumber) {
+function copyDefaultFilesToContainer (language, classNumber, callback) {
     var filePath;
 
     switch (language) {
@@ -145,7 +147,7 @@ function copyDefaultFilesToContainer (language, classNumber) {
     exec('cat /root/coco-api/default_files/' + language + '/' + filePath, function (err, fileContent) {
         if (err) {
             console.log('command error \'cat\': ', err);
-            return false;
+            callback(false);
         }
 
         var createdObjectId = new ObjectId();
@@ -167,9 +169,9 @@ function copyDefaultFilesToContainer (language, classNumber) {
         ' -r &&chmod 777 /root/store/' + classNumber + ' -R', function (err) {
         if (err) {
             console.log('command error: \'cp and chmod\'', err);
-            return false;
+            callback(false);
         } else {
-            return true;
+            callback(true);
         }
     });
 }
