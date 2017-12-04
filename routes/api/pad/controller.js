@@ -46,6 +46,7 @@ exports.save = function (req, res){
         db.collection(classNum).find( {}, function (err, result) {
             if (err) {
                 console.log(err);
+                res.status(500).send("mongo DB err");
             } else {
                 data = result;
             }
@@ -54,6 +55,8 @@ exports.save = function (req, res){
     });
 
     for(var i=0; i< data.length; i++){
-        exec('docker exec ' + classNum + ' bash -c "echo ' + result.content + ' > /home/coco' + result._id + '"');
+        exec('docker exec ' + classNum + ' bash -c "echo ' + data[i].content + ' > /home/coco' + data[i]._id + '"');
     }
+
+    res.status(200).send();
 };
