@@ -33,7 +33,7 @@ exports.getChatInfo =  function (chatNum, callback){
     mysql.query(statement, chatNum, callback);
 };
 
-exports.Match = function (ClassNum, applicant, callback){
+exports.updateStatus = function (ClassNum, applicant, callback){
     var statement = "update Class " +
         "set tutorNick = if(tutorNick is null, ?, tutorNick), studentNick = if(studentNick is null, ?, studentNick), status = 3 " +
         "where num = ?";
