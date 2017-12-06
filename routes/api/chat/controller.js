@@ -94,6 +94,13 @@ exports.handleMatch = function (req, res) {
         boardModel.getLanguage(result[0].classNum, function (err, languageResult) {
             var language = languageResult[0].language;
 
+            var dockerImageVersion;
+            if (language === 'c++') {
+                dockerImageVersion = 'c';
+            } else {
+                dockerImageVersion = language
+            }
+
             process.umask(0);
             fs.mkdir('/root/store/' + result[0].classNum, 0777, function (err) {
                 if (err){
@@ -103,7 +110,7 @@ exports.handleMatch = function (req, res) {
             });
 
             exec('docker run -d -p '+ result[0].classNum +':22 -h Terminal --cpu-quota=25000 --name '+
-                result[0].classNum +' -v /root/store/'+ result[0].classNum +':/home/coco coco:' + language, function (err){
+                result[0].classNum +' -v /root/store/'+ result[0].classNum +':/home/coco coco:' + dockerImageVersion, function (err){
                 if (err) {
                     console.log('exec error : docker run error');
                     res.status(500).send('Err: docker run error');
@@ -139,8 +146,7 @@ function copyDefaultFilesToContainer (language, classNumber, callback) {
 
     switch (language) {
         case 'c': filePath = '/src/main.c'; break;
-        case 'c++': language = 'cpp';
-            filePath = '/src/main.cpp'; break;
+        case 'c++': filePath = '/src/main.cpp'; break;
         case 'java': filePath = '/com/example/Main.java'; break;
         case 'python': filePath = '/src/main.py';
     }

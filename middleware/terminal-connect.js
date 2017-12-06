@@ -1,3 +1,4 @@
+// TODO: 시작 시 모든 포트에 대한 소켓을 열기 or 프로젝트 접속자 파악해서 열고 닫기
 var SSHClient = require('ssh2').Client;
 
 module.exports = TerminalConnect;

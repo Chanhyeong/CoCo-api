@@ -28,10 +28,4 @@ Middleware.init = function (server, app) {
             "Access-Control-Request-Method, Access-Control-Request-Headers, Authorization");
         next();
     });
-
-    // TODO 1: 프로젝트 생성 시 소켓 생성하도록
-    // TODO 2: 시작 시 모든 포트에 대한 소켓을 열기 or 프로젝트 접속자 파악해서 열고 닫기
-    var TerminalConnect = require('./terminal-connect');
-
-    new TerminalConnect(io, 8001);
 };
