@@ -1,4 +1,4 @@
-var mysql = require('../../../middleware/database')('mysql');
+var mysql = require('../../../middleware/database').mysql;
 
 exports.getUser = function (req, res) {
     var filter = req.params.id;

@@ -1,5 +1,5 @@
-var mysql = require('../../../middleware/database')('mysql');
-var knex = require('../../../middleware/database')('knex');
+var mysql = require('../../../middleware/database').mysql;
+var knex = require('../../../middleware/database').knex;
 
 var status = {
     'STUDENT': 1,

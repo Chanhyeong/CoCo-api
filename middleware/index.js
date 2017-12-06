@@ -16,6 +16,7 @@ Middleware.init = function (server, app) {
 
     app.get('stream').init(io);
     app.get('dataHandler').init(io);
+    require('./database').init();
 
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: true }));

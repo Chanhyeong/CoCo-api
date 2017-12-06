@@ -1,5 +1,5 @@
 var exec = require('child_process').exec;
-var mongodb = require('../../../../middleware/database')('mongodb').editorDb;
+var mongodb = require('../../../../middleware/database').mongodb.editorDb;
 
 
 exports.getDirectory = function (req, res) {

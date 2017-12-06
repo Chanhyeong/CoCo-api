@@ -1,44 +1,48 @@
-var mysql = require('../../../middleware/database')('mysql');
-var mongodb = require('../../../middleware/database')('mongodb').chatDb;
+var mysql = require('../../../middleware/database').mysql;
+var mongodb = require('../../../middleware/database').mongodb.chatDb;
 var boardModel = require('../board/model');
-var knex = require('../../../middleware/database')('knex');
+var knex = require('../../../middleware/database').knex;
 
-exports.getMessages = function (nickName, callback) {
-    var statement = "select num, applicant as nickname from Chat where writer = ? " +
-        "UNION ALL " +
-        "select num, writer as nickname from Chat where applicant = ? " +
-        "order by num;";
-    var filter = [nickName, nickName];
+exports.getMessages = function (nickname, callback) {
+    knex.select('num', {nickname: 'applicant'}, {classNum: 'class_number'}).from('chat').where({
+        writer: nickname
+    }).unionAll(function () {
+        this.select('num', {nickname: 'writer'}, {classNum: 'class_number'}).from('chat').where({
+            applicant: nickname
+        })
+    }).catch(function (err) {
+        console.log(err);
+        callback(500);
+    }).then(callback);
 
-    mysql.query(statement, filter, callback);
 };
 
 function getChatInformation (chatNumber, callback) {
-    return knex('Chat').where({
+    knex.select('writer', 'applicant', {classNum: 'class_number'}).from('chat').where({
         num: chatNumber
-    }).select('writer', 'applicant', 'classNum')
-        .then(callback);
+    }).catch(function (err) {
+        console.log(err);
+        callback(500);
+    }).then(callback);
 }
 
-exports.changeStatus = function (classNum, value, callback) {
-    var statement = 'update Class set status = ? where num = ?';
-    var filter = [value, classNum];
-
-    mysql.query(statement, filter, callback);
+exports.getChatInfo =  function (chatNumber, callback) {
+    knex.select('applicant', {classNum: 'class_number'}).from('chat').where({
+        num: chatNumber
+    }).catch(function (err) {
+        console.log(err);
+        callback(500);
+    }).then(callback);
 };
 
-exports.getChatInfo =  function (chatNum, callback){
-    var statement = "select applicant, classNum from Chat where num = ?";
-
-    mysql.query(statement, chatNum, callback);
-};
-
-exports.updateStatus = function (ClassNum, applicant, callback){
-    var statement = "update Class " +
-        "set tutorNick = if(tutorNick is null, ?, tutorNick), studentNick = if(studentNick is null, ?, studentNick), status = 3 " +
-        "where num = ?";
-    var filter = [applicant, applicant, ClassNum];
-    mysql.query(statement, filter, callback);
+exports.updateStatus = function (classNumber, applicant, callback) {
+    knex('class').raw('update Class' +
+        'set tutorNick = if(tutorNick is null, ?, tutorNick), studentNick = if(studentNick is null, ?, studentNick), status = 3 ' +
+        'where num = ?', [[applicant, applicant, classNumber]])
+        .catch(function (err) {
+            console.log(err);
+            callback(500);
+        }).then(callback);
 };
 
 // 특정 Document의 message 반환
@@ -91,36 +95,38 @@ exports.insertMessage = function (mode, chatNumber, message, callback) {
 // 매칭 신청 시 + 매칭 완료 시 각각의 채팅방 생성, 관리자 안내 메시지 추가
 // mode: 'matching', 'class'
 exports.create = function (mode, data, time, callback) {
-    var statement= "insert into Chat SET ?";
-
-    mysql.query(statement, data, function (err, result) {
-        if (err) {
-            callback(err);
-        } else {
+    knex.into('chat').insert(data)
+        .catch(function (err) {
+            console.log(err);
+            callback(500);
+        }).then(function (id) {
             var form = {
-                _id: result.insertId,
+                _id: id,
                 log: []
             };
 
             mongodb(function (db) {
                 db.collection(mode).insert(form, function (err) {
-                    callback(err);
+                    console.log(err);
+                    callback(500);
                 });
 
                 db.close();
             });
-        }
-    });
+        });
 };
 
-exports.delete = function (chatNum, callback) {
+exports.delete = function (chatNumber, callback) {
     mongodb(function (db) {
-        db.collection('matching').remove({_id: chatNum}, function (err) {
+        db.collection('matching').remove({_id: chatNumber}, function (err) {
             if (err) {
-                callback(err);
+                callback(500);
             } else {
-                var statement= "delete from Chat where num = ?";
-                mysql.query(statement, chatNum, callback);
+                knex.del().from('chat').where('num', chatNumber)
+                    .catch(function (err) {
+                        console.log(err);
+                        callback(500);
+                    }).then(callback);
             }
         });
     });

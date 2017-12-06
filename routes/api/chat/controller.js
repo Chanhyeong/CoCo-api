@@ -2,36 +2,31 @@ var model = require('./model');
 var boardModel = require('../board/model');
 var fs = require('fs');
 var exec = require('child_process').exec;
-var editorDb = require('../../../middleware/database')('mongodb').editorDb;
+var editorDb = require('../../../middleware/database').mongodb.editorDb;
 var ObjectId = require('mongodb').ObjectID;
+
 
 // 해당 유저에 대한 전체 리스트 가져오기
 exports.getMessages = function (req, res) {
-    model.getMessages(req.user.nickname, function (err, result) {
-        if (err) {
-            console.log('DB select error', err);
-            res.status(500).send('Err: DB select error');
+    model.getMessages(req.user.nickname, function (result) {
+        if (result === 500) {
+            res.status(500).send();
+        } else if (!result) {
+            res.status(204).json({list: null});
         } else {
-            process.nextTick(function() {
-                if (!result) {
-                    res.status(204).json({list: null});
-                } else {
-                    res.status(200).json({list: result});
-                }
-            });
+            res.status(200).json({list: result});
         }
     });
 };
 
 // 채팅방번호에 맞는 채팅 로그
 exports.getMessage = function (req, res) {
-    var chatNum = parseInt(req.params.chatNum);
+    var chatNumber = parseInt(req.params.chatNumber);
 
-    model.getMessage('matching', req.user.nickname, chatNum, function (err, result, opponentNickname, classStatusCode, isWriter, classNum) {
+    model.getMessage('matching', req.user.nickname, chatNumber, function (err, result, opponentNickname, classStatusCode, isWriter, classNum) {
         // mongodb에서 검색된 내용이 바로 채워지지 않아서 nextTick 추가
         process.nextTick( function () {
             if (err) {
-                console.log('DB insert error, mongo');
                 res.status(500).send('Error: DB Find Error');
             } else {
                 if(!result) {
@@ -53,7 +48,7 @@ exports.getMessage = function (req, res) {
 
 // 채팅방번호에 새로운 메시지 라인 추가
 exports.sendMessage = function (req, res) {
-    var chatNumber = parseInt(req.params.chatNum);
+    var chatNumber = parseInt(req.params.chatNumber);
 
     // Format: 2017-10-27 17:19:33
     var time = new Date().toISOString().
@@ -78,14 +73,14 @@ exports.sendMessage = function (req, res) {
 };
 
 exports.handleMatch = function (req, res) {
-    model.getChatInfo(req.params.chatNum, function (err, result){
+    model.getChatInfo(req.params.chatNumber, function (err, result){
         if(err){
             console.log('DB Update error, mysql');
             res.status(500).send('Err: get ChatInfo Error');
         }
 
         model.updateStatus(result[0].classNum, result[0].applicant, function (err) {
-            if(err){
+            if (err){
                 console.log('DB Update error, mysql');
                 res.status(500).send('Err: Match Error');
             }
@@ -184,7 +179,7 @@ function copyDefaultFilesToContainer (language, classNumber, callback) {
 }
 
 exports.delete = function (req, res){
-    model.delete(req.params.chatNum, function (err) {
+    model.delete(req.params.chatNumber, function (err) {
         if (err) {
             res.status(500).send('Err: DB delete error');
         } else {

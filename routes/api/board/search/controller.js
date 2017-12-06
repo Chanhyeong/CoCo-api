@@ -1,4 +1,4 @@
-var mysql = require('../../../../middleware/database')('mysql');
+var mysql = require('../../../../middleware/database').mysql;
 
 exports.search = function (req, res) {
     var group, language, keyword = "";

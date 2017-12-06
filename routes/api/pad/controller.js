@@ -1,7 +1,7 @@
 var exec = require('child_process').exec;
 var fs = require('fs');
 var model = require('./../board/model');
-var mongodb = require('../../../middleware/database')('mongodb').editorDb;
+var mongodb = require('../../../middleware/database').mongodb.editorDb;
 var TerminalConnect = require('../../../middleware/terminal-connect');
 
 var terminalPool = {};

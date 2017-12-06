@@ -1,5 +1,5 @@
 var bcrypt = require('bcrypt');
-var mysql = require('../../middleware/database')('mysql');
+var mysql = require('../../middleware/database').mysql;
 var jwtHandler = require('../../middleware/jwt-handler');
 
 exports.signIn = function (req, res) {
