@@ -1,5 +1,6 @@
 // TODO: 시작 시 모든 포트에 대한 소켓을 열기 or 프로젝트 접속자 파악해서 열고 닫기
 var SSHClient = require('ssh2').Client;
+var exec = require('child_process').exec;
 
 module.exports = TerminalConnect;
 
@@ -26,10 +27,11 @@ function TerminalConnect(io, classNum, language){
                 }).on('run', function(){
                     switch(language){
                         case 'c' :
-                            enteredCommand = 'gcc -o main -I/home/coco/* ./*.c -lm\n';
-                            stream.write('gcc -o main -I/home/coco/* ./*.c -lm\n');
-                            enteredCommand = './main\n';
-                            stream.write('./main\n');
+                            var result = CheckDept(classNum);
+                            enteredCommand = result + '\n';
+                            stream.write(resutl + '\n');
+                            enteredCommand = '/home/main\n';
+                            stream.write('/home/main\n');
                             break;
                         case 'java' :
                             enteredCommand = 'javac -d . *.java\n';
@@ -71,4 +73,22 @@ function TerminalConnect(io, classNum, language){
             password: 'whdtjf123@'
         });
     })
+}
+
+function CheckDept(classNum){
+
+        exec("find ~/store/" + classNum +
+            " -type d -exec bash -c 'echo $(tr -cd / <<< \"$1\"|wc -c):$1' -- {} \;  | sort -n | tail -n 1 | awk -F: '{print $1}'"
+                , function(err, stdout){
+            if(err) console.log(err);
+            else {
+                var result = "gcc -o /home/main";
+                var cd;
+                for(var i=1; i<=stdout+1; i++){
+                    cd = " home/coco/" + Array(i).join("*/") + "*.c";
+                    result += cd;
+                }
+                return result;
+            }
+    });
 }
