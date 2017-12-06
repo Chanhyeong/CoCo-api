@@ -44,11 +44,11 @@ mongoUrl: {
     chat: 'mongodb://database_url:27017/chat',
     editor: 'mongodb://database_url:27017/editor'
 }
+```
 
 Build Dockerfiles
 ```
-on this repository
-cd ./default_files/docker_file
+:~# cd ./default_files/docker_file
 docker build ./c_cpp/ --tag coco:c
 docker build ./java/ --tag coco:java
 docker build ./python/ --tag coco:python
