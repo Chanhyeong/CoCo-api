@@ -116,7 +116,6 @@ exports.create = function (mode, data, time, callback) {
 exports.deleteByClassNumber = function (classNumber, callback) {
     knex.select('num').from('Chat').where({classNum: classNumber})
         .then(function (result) {
-	console.log(result);
             for (var index in result) {
                 deleteByChatNumber(result[index], function (status) {
                     if (status) {
@@ -124,6 +123,7 @@ exports.deleteByClassNumber = function (classNumber, callback) {
                     }
                 })
             }
+            callback();
         })
 };
 
@@ -131,15 +131,20 @@ exports.deleteOne = function (chatNumber, callback) {
     deleteByChatNumber(chatNumber, callback);
 };
 
-function deleteByChatNumber (chatNum, callback) {
+function deleteByChatNumber (chatNumber, callback) {
     mongodb(function (db) {
-        db.collection('matching').remove({_id: chatNum}, function (err) {
+        db.collection('matching').remove({_id: chatNumber}, function (err) {
             if (err) {
                 console.log(err);
                 callback(500);
             } else {
                 var statement= "delete from Chat where num = ?";
-                mysql.query(statement, chatNum, callback);
+                mysql.query(statement, chatNumber, function (err) {
+                    if (err) {
+                        console.log(err);
+                        callback(500);
+                    }
+                });
             }
         });
     });
