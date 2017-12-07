@@ -27,15 +27,15 @@ function TerminalConnect(io, classNum, language){
                 }).on('run', function(maxDepth){
                     switch(language){
                         case 'c' :
-                            var result = CheckDept(classNum, maxDepth);
+                            var result = CheckDept(classNum, maxDepth, language);
                             exec(result, function(err, stdout){
-			    	if(err) console.log(err);
-				else {
-					stream.write(stdout);
-					enteredCommand = '/home/main\n';
-					stream.write('/home/main\n');
-				}
-			    });
+			    	            if(err) console.log(err);
+                                else {
+					                stream.write(stdout);
+					                enteredCommand = '/home/main\n';
+					                stream.write('/home/main\n');
+				                }
+                            });
                             break;
                         case 'java' :
                             enteredCommand = 'javac -d . *.java\n';
@@ -44,10 +44,15 @@ function TerminalConnect(io, classNum, language){
                             stream.write('java -cp . Board\n');
                             break;
                         case 'c++' :
-                            enteredCommand = 'g++ -o main -I/home/coco/* ./*.cpp -lm\n';
-                            stream.write('g++ -o main -I/home/coco/* ./*.cpp -lm\n');
-                            enteredCommand = './main\n';
-                            stream.write('./main\n');
+                            var result = CheckDept(classNum, maxDepth, language);
+                            exec(result, function(err, stdout){
+                                if(err) console.log(err);
+                                else {
+                                    stream.write(stdout);
+                                    enteredCommand = '/home/main\n';
+                                    stream.write('/home/main\n');
+                                }
+                            });
                             break;
                         case 'python' :
                     }
@@ -79,14 +84,24 @@ function TerminalConnect(io, classNum, language){
     })
 }
 
-function CheckDept(classNum, maxDepth){
+function CheckDept(classNum, maxDepth, language){
 
         var result = 'gcc -o /home/main';
         var cd;
-        for(var i=1; i<=maxDepth; i++){
-            cd = ' home/coco/src/' + Array(i).join("*/") + '*.c';
-            result += cd;
+
+        if(language === 'c') {
+            for (var i = 1; i <= maxDepth; i++) {
+                cd = ' home/coco/src/' + Array(i).join("*/") + '*.c';
+                result += cd;
+            }
+        }else{
+            for (var i = 1; i <= maxDepth; i++) {
+                cd = ' home/coco/src/' + Array(i).join("*/") + '*.cpp';
+                result += cd;
+            }
         }
-	result = 'docker exec '+classNum+' sh -c "' + result + '"';
+
+	    result = 'docker exec '+classNum+' sh -c "' + result + '"';
+
         return result;
 }
