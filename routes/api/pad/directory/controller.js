@@ -74,7 +74,7 @@ exports.delete = function (req, res) {
     var statement = 'docker exec ' + classNum + ' bash -c "cd /home/coco' + path +' && ';
 	
 	console.log(fileName, path);
-    if(type === 'derectory'){
+    if(type === 'directory'){
         statement += 'rm -r ' + fileName +'"';
     } else {
         statement += 'rm ' + fileName +'"';
