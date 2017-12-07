@@ -24,14 +24,18 @@ function TerminalConnect(io, classNum, language){
                     } else {
                         socket.emit('data', '\r\n--- Disconnected. Please refresh this page. ---\r\n')
                     }
-                }).on('run', function(){
+                }).on('run', function(maxDepth){
                     switch(language){
                         case 'c' :
-                            var result = CheckDept(classNum);
-                            enteredCommand = result + '\n';
-                            stream.write(resutl + '\n');
-                            enteredCommand = '/home/main\n';
-                            stream.write('/home/main\n');
+                            var result = CheckDept(classNum, maxDepth);
+                            exec(result, function(err, stdout){
+			    	if(err) console.log(err);
+				else {
+					stream.write(stdout);
+					enteredCommand = '/home/main\n';
+					stream.write('/home/main\n');
+				}
+			    });
                             break;
                         case 'java' :
                             enteredCommand = 'javac -d . *.java\n';
@@ -75,20 +79,14 @@ function TerminalConnect(io, classNum, language){
     })
 }
 
-function CheckDept(classNum){
+function CheckDept(classNum, maxDepth){
 
-        exec("find ~/store/" + classNum +
-            " -type d -exec bash -c 'echo $(tr -cd / <<< \"$1\"|wc -c):$1' -- {} \;  | sort -n | tail -n 1 | awk -F: '{print $1}'"
-                , function(err, stdout){
-            if(err) console.log(err);
-            else {
-                var result = "gcc -o /home/main";
-                var cd;
-                for(var i=1; i<=stdout+1; i++){
-                    cd = " home/coco/" + Array(i).join("*/") + "*.c";
-                    result += cd;
-                }
-                return result;
-            }
-    });
+        var result = 'gcc -o /home/main';
+        var cd;
+        for(var i=1; i<=maxDepth; i++){
+            cd = ' home/coco/src/' + Array(i).join("*/") + '*.c';
+            result += cd;
+        }
+	result = 'docker exec '+classNum+' sh -c "' + result + '"';
+        return result;
 }
