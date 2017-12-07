@@ -73,7 +73,7 @@ exports.delete = function (req, res) {
 
     var statement = 'docker exec ' + classNum + ' bash -c "cd /home/coco' + path +' && ';
 
-    if(req.body.type){
+    if(type){
         statement =+ 'rm -r' + fileName +'"';
     } else {
         statement =+ 'rm ' + fileName +'"';
@@ -82,6 +82,7 @@ exports.delete = function (req, res) {
             db.collection(classNum).remove({_id: '/'+fileName+'/'}, function (err) {
                 if (err) {
                     console.log(err);
+		    }
             });
         });
     }

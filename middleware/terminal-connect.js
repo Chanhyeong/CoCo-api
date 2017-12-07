@@ -27,7 +27,7 @@ function TerminalConnect(io, classNum, language){
                 }).on('run', function(maxDepth){
                     switch(language){
                         case 'c' :
-                            var result = CheckDept(classNum, maxDepth, language);
+			    var result = CheckDept(classNum, maxDepth, language);
                             exec(result, function(err, stdout){
 			    	            if(err) console.log(err);
                                 else {
