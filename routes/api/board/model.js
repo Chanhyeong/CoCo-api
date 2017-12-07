@@ -18,9 +18,7 @@ exports.getClasses = function (callback) {
 };
 
 exports.getStatus = function (classNum, callback) {
-    knex('Class').where({
-        num: classNum
-    }).select('status')
+    knex('Class').where('num', classNum).select('status')
         .then(callback);
 };
 

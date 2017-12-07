@@ -92,7 +92,7 @@ exports.delete = function (req, res) {
                 if (status === 500) {
                     res.status(500).send();
                 } else {
-                    model.getStatus(req.param.num, function (result) {
+                    model.getStatus(req.params.num, function (result) {
                         if (result.length !== 0) {
                             exec('docker stop ' + req.params.num + '&&docker rm ' + req.params.num
                                 + '&&rm -rf /root/store/' + req.params.num, function (err) {
