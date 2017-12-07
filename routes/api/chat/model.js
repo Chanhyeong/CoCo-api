@@ -113,15 +113,33 @@ exports.create = function (mode, data, time, callback) {
     });
 };
 
-exports.delete = function (chatNum, callback) {
+exports.deleteByClassNumber = function (classNumber, callback) {
+    knex.select('num').from('Chat').where('classNum', classNumber)
+        .then(function (result) {
+            for (var index in result) {
+                deleteByChatNumber(result[index], function (status) {
+                    if (status) {
+                        callback(500);
+                    }
+                })
+            }
+        })
+};
+
+exports.deleteOne = function (chatNumber, callback) {
+    deleteByChatNumber(chatNumber, callback);
+};
+
+function deleteByChatNumber (chatNum, callback) {
     mongodb(function (db) {
         db.collection('matching').remove({_id: chatNum}, function (err) {
             if (err) {
-                callback(err);
+                console.log(err);
+                callback(500);
             } else {
                 var statement= "delete from Chat where num = ?";
                 mysql.query(statement, chatNum, callback);
             }
         });
     });
-};
+}

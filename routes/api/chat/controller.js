@@ -184,8 +184,8 @@ function copyDefaultFilesToContainer (language, classNumber, callback) {
 }
 
 exports.delete = function (req, res){
-    model.delete(req.params.chatNum, function (err) {
-        if (err) {
+    model.deleteOne(req.params.chatNum, function (err) {
+        if (err === 500) {
             res.status(500).send('Err: DB delete error');
         } else {
             res.status(200).send();
