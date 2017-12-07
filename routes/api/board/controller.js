@@ -92,12 +92,14 @@ exports.delete = function (req, res) {
                 if (err) {
                     res.status(500).send();
                 } else {
+		console.log('chat delete');
                     exec('docker stop ' + req.params.num + '&&docker rm ' + req.params.num
                         + '&&rm -rf /root/store/' + req.params.num, function (err) {
                         if (err) {
                             console.log ('Docker remove err: ', err);
                             res.status(500).send();
                         } else {
+			console.log('docker delete');
                             res.status(200).send();
                         }
                     });

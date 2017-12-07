@@ -31,9 +31,9 @@ exports.create = function (req, res) {
     var statement = 'docker exec ' + classNum + ' bash -c "cd /home/coco' + path +' && ';
 
     if(type === "directory"){
-        statement =+ 'mkdir ' + fileName +'"';
+        statement += ('mkdir ' + fileName +'"');
     } else {
-        statement =+ 'touch ' + fileName +'"';
+        statement += ('touch ' + fileName)+'"';
     }
 
     exec(statement, function(err){
@@ -66,20 +66,21 @@ exports.rename = function (req, res) {
 
 
 exports.delete = function (req, res) {
-    var classNum = req.body.classNum;
-    var type = req.body.type;
-    var fileName = req.body.name;
-    var path = req.body.path;
+    var classNum = req.query.classNum;
+    var type = req.query.type;
+    var fileName = req.query.fileName;
+    var path = req.query.path;
 
     var statement = 'docker exec ' + classNum + ' bash -c "cd /home/coco' + path +' && ';
-
-    if(type){
-        statement =+ 'rm -r' + fileName +'"';
+	
+	console.log(fileName, path);
+    if(type === 'derectory'){
+        statement += 'rm -r ' + fileName +'"';
     } else {
-        statement =+ 'rm ' + fileName +'"';
+        statement += 'rm ' + fileName +'"';
 
         mongodb(function (db) {
-            db.collection(classNum).remove({_id: '/'+fileName+'/'}, function (err) {
+            db.collection(''+classNum).remove({_id: '/'+fileName+'/'}, function (err) {
                 if (err) {
                     console.log(err);
 		    }
