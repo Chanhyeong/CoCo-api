@@ -90,6 +90,9 @@ function defineDatabaseSchemas () {
                                     knex.schema.raw('alter table class add fulltext(title, content, language)').then(function () {
                                         console.log('fulltext constraint');
                                     });
+                                    knex.schema.raw('alter table class auto_increment value = 49152').then(function () {
+                                        console.log('change auto_increment value');
+                                    });
 
                                     knex.schema.hasTable('classtime')
                                         .then(function (exist) {
