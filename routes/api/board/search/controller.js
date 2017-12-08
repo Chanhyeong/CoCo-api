@@ -1,12 +1,11 @@
-var mysql = require('../../../../middleware/database').mysql;
+var knex = require('../../../../middleware/database').knex;
 
 exports.search = function (req, res) {
     var group, language, keyword = "";
 
-    if (req.query.keyword !== ""){
+    if (req.query.keyword !== "") {
         var str = req.query.keyword.split(" ");
-        console.log(str);
-        for (var i=0; i<str.length; i++){
+        for (var i=0; i<str.length; i++) {
             keyword += str[i] + "*";
         }
         keyword = "select num from Class where match (title, content, language) against ('"+keyword+"' in boolean mode)"
@@ -29,7 +28,7 @@ exports.search = function (req, res) {
     }
 
     language = "select num from Class ";
-    switch (req.query.language){
+    switch (req.query.language) {
         case '0' : //all
             break;
         case '1' : language += "where language = 'C'";
@@ -42,17 +41,14 @@ exports.search = function (req, res) {
             break;
     }
 
-    var sql = "select num, title, content, language, IFNULL(tutorNick, studentNick) AS nickname, status, date "+
-              "from Class where num in ("+group+") and num in ("+language+") and num in ("+ keyword + ");";
-
-    mysql.query(sql, function (err, result) {
-        if (err) {
-            res.status(500).json({error: err})
-        } else {
-            res.status(200).send({
-                list: result
-            });
-        }
+    knex.schema.raw('select num, title, content, language, IFNULL(tutorNick, studentNick) AS nickname, status, date ' +
+        'from Class where num in (' + group + ') and num in (' + language + ') and num in (' + keyword + ');')
+        .catch(function (err) {
+            console.log(err);
+            res.status(500).send();
+        }).then(function (result) {
+        res.status(200).json({
+            list: result
+        });
     });
-
 };
