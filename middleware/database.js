@@ -57,7 +57,7 @@ function defineDatabaseSchemas () {
                     table.string('password', MYSQL_TYPE_LENGTH.LONG_STRING).notNullable();
                     table.string('email', MYSQL_TYPE_LENGTH.EMAIL).notNullable().unique();
                     table.string('nickname', MYSQL_TYPE_LENGTH.COMMON_STRING).notNullable().unique();
-                    table.boolean('is_tutor').notNullable();
+                    table.boolean('is_tutor').notNullable().defaultTo(false);
                 }).then(function () {
                     console.log('Table \'user\' is generated');
 
