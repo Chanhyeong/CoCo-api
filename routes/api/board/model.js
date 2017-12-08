@@ -18,23 +18,23 @@ exports.getClasses = function (callback) {
         }).then(callback);
 };
 
-exports.getLanguage = function (classNumber, callback) {
-    knex.select('status').from('class').where('num', classNumber)
+exports.getLanguage = function (classNum, callback) {
+    knex.select('status').from('class').where('num', classNum)
         .catch(function (err) {
             console.log(err);
             callback(500);
         }).then(callback);
 };
 
-exports.getClass = function (classNumber, callback) {
+exports.getClass = function (classNum, callback) {
     knex.select('content', {tutorNick: 'tutor_nickname'}, {studentNick: 'student_nickname'})
-        .from('class').where('num', classNumber)
+        .from('class').where('num', classNum)
         .catch(function (err) {
             console.log(err);
             callback(500);
         }).then(function (classResult) {
         knex.select('day', {startTime: 'start_time'}, {endTime: 'end_time'})
-            .from('classtime').where('class_number', classNumber)
+            .from('classtime').where('class_number', classNum)
             .catch(function (err) {
                 console.log(err);
                 callback(500);
@@ -120,11 +120,11 @@ exports.create = function (nickname, data, callback) {
 };
 
 // 시간 데이터 추가, 에러면 err, 아니면 null
-function timeInsert (classNumber, data) {
+function timeInsert (classNum, data) {
     for (var prop in data) {
         data[prop] = JSON.parse(JSON.stringify(data[prop]).split('"startTime":').join('"start_time":'));
         data[prop] = JSON.parse(JSON.stringify(data[prop]).split('"endTime":').join('"end_time":'));
-        data[prop]['class_number'] = classNumber;
+        data[prop]['class_number'] = classNum;
         knex.into('classtime').insert(data[prop])
             .catch(function (err) {
                 console.log(err);
@@ -133,25 +133,25 @@ function timeInsert (classNumber, data) {
     }
 }
 
-exports.modifyClass = function (classNumber, classData, timeData) {
+exports.modifyClass = function (classNum, classData, timeData) {
     classData = JSON.parse(JSON.stringify(classData).split('"tutorNick":').join('"tutor_nickname":'));
     classData = JSON.parse(JSON.stringify(classData).split('"studentNick":').join('"student_nickname":'));
 
-    knex('class').update(classData).where('num', classNumber)
+    knex('class').update(classData).where('num', classNum)
         .catch(function (err) {
             console.log(err);
             callback(500);
         }).then(function () {
-        knex.del().from('classtime').where('class_number', classNumber)
+        knex.del().from('classtime').where('class_number', classNum)
             .catch(function (err) {
                 console.log(err);
                 callback(500);
-            }).then(callback(timeInsert(classNumber, timeData)));
+            }).then(callback(timeInsert(classNum, timeData)));
     })
 };
 
-exports.delete = function (classNumber, callback) {
-    knex.del().from('class').where('num', classNumber)
+exports.delete = function (classNum, callback) {
+    knex.del().from('class').where('num', classNum)
         .catch(function (err) {
             console.log(err);
             callback(500);

@@ -120,7 +120,7 @@ exports.handleMatch = function (req, res) {
     });
 };
 
-function copyDefaultFilesToContainer (language, classNumber, callback) {
+function copyDefaultFilesToContainer (language, classNum, callback) {
     var filePath;
 
     switch (language) {
@@ -140,7 +140,7 @@ function copyDefaultFilesToContainer (language, classNumber, callback) {
         var creationTime = Date.now();
 
         editorDb(function (db) {
-            db.collection(classNumber.toString()).insertOne({ // key/values that are referenced by shraedb
+            db.collection(classNum.toString()).insertOne({ // key/values that are referenced by shraedb
                 _id: filePath,
                 content: fileContent,
                 _type: "http://sharejs.org/types/JSONv0",
@@ -151,8 +151,8 @@ function copyDefaultFilesToContainer (language, classNumber, callback) {
         });
     });
 
-    exec('cp /root/coco-api/default_files/' + language + '/* /root/store/' + classNumber +
-        ' -r &&chmod 755 /root/store/' + classNumber + ' -R', function (err) {
+    exec('cp /root/coco-api/default_files/' + language + '/* /root/store/' + classNum +
+        ' -r &&chmod 755 /root/store/' + classNum + ' -R', function (err) {
         if (err) {
             console.log('command error: \'cp and chmod\'', err);
             callback(false);

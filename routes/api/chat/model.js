@@ -29,16 +29,16 @@ exports.getChatInformation =  function (chatNumber, callback) {
     getChatInformation(chatNumber,callback);
 };
 
-exports.updateStatus = function (classNumber, applicant, callback) {
+exports.updateStatus = function (classNum, applicant, callback) {
     knex.schema.raw('update class ' +
         'set tutor_nickname = if(tutor_nickname is null, ?, tutor_nickname), ' +
         'student_nickname = if(student_nickname is null, ?, student_nickname), status = 3 ' +
-        'where num = ?', [applicant, applicant, classNumber])
+        'where num = ?', [applicant, applicant, classNum])
         .catch(function (err) {
             console.log(knex.schema.raw('update class' +
                 'set tutor_nickname = if(tutor_nickname is null, ?, tutor_nickname), ' +
                 'student_nickname = if(student_nickname is null, ?, student_nickname), status = 3 ' +
-                'where num = ?', [applicant, applicant, classNumber]).toString());
+                'where num = ?', [applicant, applicant, classNum]).toString());
             console.log(err);
             callback(500);
         }).then(callback);
