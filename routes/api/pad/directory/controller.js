@@ -41,7 +41,7 @@ exports.create = function (req, res) {
             console.log (err);
             res.status(500).send();
         } else{
-            res.status(200).send();
+            res.status(200).send({msg : "생성이 완료되었습니다"});
         }
     });
 };
@@ -50,18 +50,55 @@ exports.rename = function (req, res) {
     var classNum = req.body.classNum;
     var prevName = req.body.prevName;
     var nextName = req.body.nextName;
+    var type = req.body.type;
     var path = req.body.path;
 
-    var statement = 'docker exec ' + classNum + ' bash -c "cd /home/coco' + path +' && mv ' + prevName + ' ' + nextName + '';
+    var statement = 'docker exec ' + classNum + ' bash -c "cd /home/coco' + path +' && mv ' + prevName + ' ' + nextName + '"';
 
-    exec(statement, function(err){
-        if(err) {
-            console.log (err);
-            res.status(500).send();
-        } else{
-            res.status(200).send();
-        }
-    });
+    if(type === "directory"){
+        exec(statement, function(err){
+            if(err) {
+                console.log (err);
+                res.status(500).send();
+            } else{
+                res.status(200).send({msg : "이름변경이 완료되었습니다"});
+            }
+        });
+    } else {
+        mongodb(function (db) {
+            db.collection(''+classNum).findOne({ _id: path+prevName }, function (err, result){
+                if(err) {
+                    console.log (err);
+                    res.status(500).send();
+                } else{
+                    result[0]._id = path+nextName;
+                    db.collection(''+classNum).insert(result[0], function (err) {
+                        if(err) {
+                            console.log (err);
+                            res.status(500).send();
+                        } else {
+                            db.collection(''+classNum).remove({ _id:path+prevName }, function (err){
+                                if(err) {
+                                    console.log (err);
+                                    res.status(500).send();
+                                } else{
+                                    exec(statement, function(err){
+                                        if(err) {
+                                            console.log (err);
+                                            res.status(500).send();
+                                        } else{
+                                            res.status(200).send({msg : "이름변경이 완료되었습니다"});
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+            db.close();
+        });
+    }
 };
 
 
@@ -73,7 +110,6 @@ exports.delete = function (req, res) {
 
     var statement = 'docker exec ' + classNum + ' bash -c "cd /home/coco' + path +' && ';
 	
-	console.log(fileName, path);
     if(type === 'directory'){
         statement += 'rm -r ' + fileName +'"';
     } else {
@@ -83,19 +119,23 @@ exports.delete = function (req, res) {
             db.collection(''+classNum).remove({_id: '/'+fileName+'/'}, function (err) {
                 if (err) {
                     console.log(err);
-		    }
+                }
+                else {
+                    exec(statement, function(err){
+                        if(err) {
+                            console.log (err);
+                            res.status(500).send();
+                        } else{
+                            res.status(200).send({msg : "삭제가 완료되었습니다"});
+                        }
+                    });
+                }
             });
+            db.close();
         });
     }
 
-    exec(statement, function(err){
-        if(err) {
-            console.log (err);
-            res.status(500).send();
-        } else{
-            res.status(200).send();
-        }
-    });
+
 };
 
 exports.move = function (req, res) {
