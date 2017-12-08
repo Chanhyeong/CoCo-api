@@ -50,7 +50,7 @@ exports.request = function (req, res) {
     replace(/T/, ' ').      // replace T with a space
     replace(/\..+/, '');     // delete the dot and everything after
 
-    chatModel.create('matching_', data, time, function (err) {
+    chatModel.create('matching', data, time, function (err) {
         if (err) {
             res.status(500).send('Err: DB insert Error');
         } else {
