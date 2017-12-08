@@ -1,13 +1,12 @@
 var express = require('express');
 var router = express.Router();
-var controller = require('./controller')
+var controller = require('./controller');
+var jwtHandler = require('../../../middleware/jwt-handler')
 
-router.get('/getUser/:id', controller.getUser);
-router.get('/getClass/:nickname', controller.getClass);
-router.get('/getWriter/:nickname', controller.getWriter);
-router.get('/getApplicant/:nickname', controller.getApplicant);
-router.get('/TutorInfo/:id', controller.TutorInfo);
-router.get('/getTutor/:nickname', controller.getTutor);
-router.post('/tutor', controller.regist);
+router.get('/', jwtHandler.decodeToken, controller.getUserInformation);
+//router.get('/getUser/', jwtHandler.decodeToken, controller.getUser);
+router.get('/tutor/id/:id', controller.getTutorInformationById);
+router.get('/tutor/nickname/:nickname', controller.getTutorInformationByNickname);
+router.post('/tutor', jwtHandler.decodeToken, controller.registerTutor);
 
 module.exports = router;

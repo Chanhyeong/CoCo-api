@@ -58,6 +58,30 @@ exports.getClass = function (classNumber, callback) {
     });
 };
 
+exports.getClassesByNickname = function (nickname, callback) {
+    var filter = [nickname, nickname, status.MATCHED];
+
+    knex.schema.raw('select *, tutor_nickname as tutorNick, student_nickname as studentNick' +
+        ' from class where (student_nickname = ? or tutor_nickname = ?) and status = ?', filter)
+        .catch(function (err) {
+            console.log(err);
+            callback(500);
+        }).then(function (matchedList) {
+        filter = [nickname, nickname];
+        knex.schema.raw('select *, tutor_nickname as tutorNick, student_nickname as studentNick' +
+            ' from class where (student_nickname = ? or tutor_nickname = ?)', filter)
+            .catch(function (err) {
+                console.log(err);
+                callback(500);
+            }).then(function (allList) {
+            callback({
+                matchList: matchedList,
+                myList: allList
+            })
+        })
+    });
+};
+
 exports.create = function (nickname, data, callback) {
     var statement;
 
@@ -85,7 +109,7 @@ exports.create = function (nickname, data, callback) {
 
     var filter = [data.title, '', status.STUDENT, status.TUTOR];
 
-    knex.schema.raw(statement, [filter])
+    knex.schema.raw(statement, filter)
         .catch(function (err) {
             console.log(err);
             callback(500);
@@ -135,9 +159,10 @@ exports.modifyClass = function (classNumber, classData, timeData) {
     })
 };
 
-// TODO: ShareDB 데이터 삭제하기
 exports.delete = function (classNumber, callback) {
-    var deleteStatement = 'delete from Class where num = ?';
-
-    mysql.query(deleteStatement, classNumber, callback);
+    knex.del().from('class').where('num', classNumber)
+        .catch(function (err) {
+            console.log(err);
+            callback(500);
+        }).then(callback);
 };

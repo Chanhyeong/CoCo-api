@@ -52,7 +52,6 @@ exports.request = function (req, res) {
 
     chatModel.create('matching', data, time, function (err) {
         if (err) {
-            console.log('DB insert err: ', err);
             res.status(500).send('Err: DB insert Error');
         } else {
             res.status(200).send();

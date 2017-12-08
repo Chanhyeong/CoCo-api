@@ -68,7 +68,7 @@ function defineDatabaseSchemas () {
                                     table.charset('utf8');
                                     table.string('id', MYSQL_TYPE_LENGTH.COMMON_STRING).notNullable();
                                     table.string('degree', MYSQL_TYPE_LENGTH.MIDDLE_STRING).notNullable();
-                                    table.string('introduction', MYSQL_TYPE_LENGTH.MIDDLE_STRING).notNullable();
+                                    table.string('intro', MYSQL_TYPE_LENGTH.MIDDLE_STRING).notNullable();
                                     table.string('github', MYSQL_TYPE_LENGTH.EMAIL).notNullable();
                                     table.string('career', MYSQL_TYPE_LENGTH.LONG_STRING).notNullable();
                                     table.string('language', MYSQL_TYPE_LENGTH.MIDDLE_STRING).notNullable();

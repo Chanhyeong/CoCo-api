@@ -23,7 +23,7 @@ exports.getMessages = function (req, res) {
 exports.getMessage = function (req, res) {
     var chatNumber = parseInt(req.params.chatNumber);
 
-    model.getMessage('matching', req.user.nickname, chatNumber, function (err, result, opponentNickname, classStatusCode, isWriter, classNum) {
+    model.getMessage('matching', req.user.nickname, chatNumber, function (err, result) {
         // mongodb에서 검색된 내용이 바로 채워지지 않아서 nextTick 추가
         process.nextTick( function () {
             if (err) {
@@ -32,14 +32,7 @@ exports.getMessage = function (req, res) {
                 if(!result) {
                     res.status(409).send('wrong chat number');
                 } else {
-                    res.status(200).send({
-                        nickname: opponentNickname,
-                        status: classStatusCode,
-                        mode: 'matching',
-                        log: result.log,
-                        isWriter: isWriter,
-                        classNum: classNum
-                    });
+                    res.status(200).json(result[0]);
                 }
             }
         })
@@ -73,8 +66,8 @@ exports.sendMessage = function (req, res) {
 };
 
 exports.handleMatch = function (req, res) {
-    model.getChatInfo(req.params.chatNumber, function (err, result){
-        if(err){
+    model.getChatInformation(req.params.chatNumber, function (err, result){
+        if (err) {
             console.log('DB Update error, mysql');
             res.status(500).send('Err: get ChatInfo Error');
         }
