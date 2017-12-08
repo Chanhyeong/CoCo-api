@@ -54,8 +54,8 @@ exports.sendMessage = function (req, res) {
         date: time
     };
 
-    model.insertMessage(req.body.mode, chatNumber, message, function (err) {
-        if (err) {
+    model.insertMessage(req.body.mode, chatNumber, message, function (result) {
+        if (result === 500) {
             console.log('DB insert error, mongo');
             res.status(500).send('Err: DB insert Error');
         }
@@ -66,66 +66,57 @@ exports.sendMessage = function (req, res) {
 };
 
 exports.handleMatch = function (req, res) {
-    model.getChatInformation(req.params.chatNumber, function (err, result){
-        if (err) {
-            console.log('DB Update error, mysql');
+    model.getChatInformation(req.params.chatNumber, function (result) {
+        if (result === 500) {
             res.status(500).send('Err: get ChatInfo Error');
-        }
+        } else {
+            var classData = result[0];
 
-        model.updateStatus(result[0].classNum, result[0].applicant, function (err) {
-            if (err){
-                console.log('DB Update error, mysql');
-                res.status(500).send('Err: Match Error');
-            }
-        });
-
-        boardModel.getLanguage(result[0].classNum, function (err, languageResult) {
-            var language = languageResult[0].language;
+            model.updateStatus(classData.classNum, classData.applicant, function (updateResult) {
+                if (updateResult === 500) {
+                    res.status(500).send('Err: Match Error');
+                }
+            });
 
             var dockerImageVersion;
-            if (language === 'c++') {
+            if (classData.language === 'c++') {
                 dockerImageVersion = 'c';
             } else {
-                dockerImageVersion = language
+                dockerImageVersion = classData.language
             }
 
             process.umask(0);
-            fs.mkdir('/root/store/' + result[0].classNum, 0777, function (err) {
+            fs.mkdir('/root/store/' + classData.classNum, 0777, function (err) {
                 if (err){
-                    console.log('file system error, mkdir');
+                    console.log('file system error, mkdir', err);
                     res.status(500).send('Err: server error');
                 }
             });
 
-            exec('docker run -d -p '+ result[0].classNum +':22 -h Terminal --cpu-quota=25000 --name '+
-                result[0].classNum +' -v /root/store/'+ result[0].classNum +':/home/coco coco:' + dockerImageVersion, function (err){
+            exec('docker run -d -p '+ classData.classNum +':22 -h Terminal --cpu-quota=25000 --name '+
+                classData.classNum +' -v /root/store/'+ classData.classNum +':/home/coco coco:' + dockerImageVersion, function (err) {
                 if (err) {
-                    console.log('exec error : docker run error');
+                    console.log('exec error : docker run error', err);
                     res.status(500).send('Err: docker run error');
                 } else {
-                    exec('docker stop '+ result[0].classNum, function (err){
+                    exec('docker stop '+ classData.classNum, function (err){
                         if (err) {
-                            console.log('exec error : docker stop error');
+                            console.log('exec error : docker stop error', err);
                             res.status(500).send('Err: docker stop error');
                         }
                     });
                 }
             });
 
-            if (err) {
-                console.log('DB error: select error');
-                res.status(500).send('Err: DB error');
-            } else {
-                copyDefaultFilesToContainer(language, result[0].classNum, function (status) {
-                    if (status) {
-                        res.status(200).send();
-                    } else {
-                        console.log('Copy file error');
-                        res.status(500).send('Err: copy file error');
-                    }
-                });
-            }
-        });
+            copyDefaultFilesToContainer(classData.language, classData.classNum, function (status) {
+                if (status) {
+                    res.status(200).send();
+                } else {
+                    console.log('Copy file error');
+                    res.status(500).send('Err: copy file error');
+                }
+            });
+        }
     });
 };
 

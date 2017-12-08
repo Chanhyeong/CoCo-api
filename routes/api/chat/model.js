@@ -1,6 +1,4 @@
-var mysql = require('../../../middleware/database').mysql;
 var mongodb = require('../../../middleware/database').mongodb.chatDb;
-var boardModel = require('../board/model');
 var knex = require('../../../middleware/database').knex;
 
 exports.getMessages = function (nickname, callback) {
@@ -18,12 +16,13 @@ exports.getMessages = function (nickname, callback) {
 };
 
 function getChatInformation (chatNumber, callback) {
-    knex.select('writer', 'applicant', {classNum: 'class_number'}).from('chat').where({
-        num: chatNumber
-    }).catch(function (err) {
-        console.log(err);
-        callback(500);
-    }).then(callback);
+    knex.select('writer', 'applicant', {classNum: 'class_number'}, 'class.*')
+        .from('chat').whereRaw('chat.num = ' + chatNumber)
+        .innerJoin('class', 'class.num', 'chat.class_number')
+        .catch(function (err) {
+            console.log(err);
+            callback(500);
+        }).then(callback);
 }
 
 exports.getChatInformation =  function (chatNumber, callback) {
@@ -31,11 +30,15 @@ exports.getChatInformation =  function (chatNumber, callback) {
 };
 
 exports.updateStatus = function (classNumber, applicant, callback) {
-    knex.schema.raw('update class' +
+    knex.schema.raw('update class ' +
         'set tutor_nickname = if(tutor_nickname is null, ?, tutor_nickname), ' +
         'student_nickname = if(student_nickname is null, ?, student_nickname), status = 3 ' +
-        'where num = ?', [[applicant, applicant, classNumber]])
+        'where num = ?', [applicant, applicant, classNumber])
         .catch(function (err) {
+            console.log(knex.schema.raw('update class' +
+                'set tutor_nickname = if(tutor_nickname is null, ?, tutor_nickname), ' +
+                'student_nickname = if(student_nickname is null, ?, student_nickname), status = 3 ' +
+                'where num = ?', [applicant, applicant, classNumber]).toString());
             console.log(err);
             callback(500);
         }).then(callback);
@@ -56,26 +59,23 @@ exports.getMessage = function (mode, userNickname, chatNumber, callback) {
             isWriter = false;
         }
 
-        boardModel.getStatus(classData.classNum, function (boardResult) {
-            var classStatus = boardResult[0].status;
-            mongodb(function (db) {
-                db.collection(mode).findOne( { _id : chatNumber }, function (err, result) {
-                    if (err) {
-                        callback(err);
-                    } else {
-                        callback(null, [{
-                            log: result.log,
-                            nickname: opponentNickname,
-                            status: classStatus,
-                            mode: 'matching',
-                            isWriter: isWriter,
-                            classNum: classData.classNum
-                        }]);
-                    }
-                });
-
-                db.close();
+        mongodb(function (db) {
+            db.collection(mode).findOne( { _id : chatNumber }, function (err, chatResult) {
+                if (err) {
+                    callback(err);
+                } else {
+                    callback(null, [{
+                        log: chatResult.log,
+                        nickname: opponentNickname,
+                        status: classData.status,
+                        mode: 'matching',
+                        isWriter: isWriter,
+                        classNum: classData.classNum
+                    }]);
+                }
             });
+
+            db.close();
         });
     });
 };
@@ -85,8 +85,9 @@ exports.insertMessage = function (mode, chatNumber, message, callback) {
     mongodb(function (db) {
         db.collection(mode).update( { _id: chatNumber }, {
             $push: { log: message }
-        }, function (err){
-            callback(err);
+        }, function (err) {
+            console.log(err);
+            callback(500);
         });
 
         db.close();
@@ -106,17 +107,19 @@ exports.create = function (mode, data, time, callback) {
             callback(500);
         }).then(function (id) {
         var form = {
-            _id: id,
+            _id: id[0],
             log: []
         };
 
         mongodb(function (db) {
             db.collection(mode).insert(form, function (err) {
-                console.log(err);
-                callback(500);
+                if (err) {
+                    console.log(err);
+                    callback(500);
+                } else {
+                    callback();
+                }
             });
-
-            db.close();
         });
     });
 };
@@ -138,25 +141,23 @@ exports.delete = function (chatNumber, callback) {
 };
 
 exports.getRequestInformation = function (nickname, callback) {
-    knex.select('chat.*, chat.class_number as classNum', 'class.title', 'class.language')
-        .from('chat').innerJoin('class', function () {
+    knex.select('chat.*', 'chat.class_number as classNum', 'class.title', 'class.language')
+        .from('chat').where('writer', nickname).innerJoin('class', function () {
         this.on('class.num', 'chat.class_number')
-            .on('writer', '=', nickname)
             .andOn(function () {
                 this.on('class.status', '=', 1)
-                    .on('class.status', '=', 2)
+                    .orOn('class.status', '=', 2)
             })
     }).catch(function (err) {
         console.log(err);
         callback(500);
     }).then(function (writerResult) {
-        knex.select('chat.*, chat.class_number as classNum', 'class.title', 'class.language')
-            .from('chat').innerJoin('class', function () {
+        knex.select('chat.*', 'chat.class_number as classNum', 'class.title', 'class.language')
+            .from('chat').where('applicant', nickname).innerJoin('class', function () {
             this.on('class.num', 'chat.class_number')
-                .on('applicant', '=', nickname)
                 .andOn(function () {
                     this.on('class.status', '=', 1)
-                        .on('class.status', '=', 2)
+                        .orOn('class.status', '=', 2)
                 })
         }).catch(function (err) {
             console.log(err);

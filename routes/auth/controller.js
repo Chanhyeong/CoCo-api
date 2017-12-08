@@ -42,13 +42,17 @@ exports.signUp = function (req, res) {
         if (result === 500) {
             res.status(500).send();
         } else if (result.length) {
-            res.status(409).send('id');
+            res.status(409).json({
+                err: 'id가 이미 존재합니다.'
+            });
         } else {
             userModel.checkNickname(req.body.nickname, function (checkResult) {
                 if (checkResult === 500) {
                     res.status(500).send();
                 } else if (checkResult.length) {
-                    res.status(409).send('nickname');
+                    res.status(409).json({
+                        err: 'nickname이 이미 존재합니다.'
+                    });
                 } else {
                     userModel.createUser(user, function (createResult) {
                         if (createResult === 500) {

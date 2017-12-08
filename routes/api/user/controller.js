@@ -1,4 +1,3 @@
-var mysql = require('../../../middleware/database').mysql;
 var model = require('./model');
 var boardModel = require('../board/model');
 var chatModel = require('../chat/model');

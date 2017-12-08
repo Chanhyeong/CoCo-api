@@ -1,4 +1,3 @@
-var mysql = require('../../../middleware/database').mysql;
 var knex = require('../../../middleware/database').knex;
 
 var status = {
@@ -13,14 +12,6 @@ exports.getClasses = function (callback) {
 
     knex.schema.raw('select num, title, language, IFNULL(tutor_nickname, student_nickname) AS nickname, status, date ' +
         'from class where status IN (?, ?)', filter)
-        .catch(function (err) {
-            console.log(err);
-            callback(500);
-        }).then(callback);
-};
-
-exports.getStatus = function (classNumber, callback) {
-    knex.select('status').from('class').where('num', classNumber)
         .catch(function (err) {
             console.log(err);
             callback(500);
@@ -43,7 +34,7 @@ exports.getClass = function (classNumber, callback) {
             callback(500);
         }).then(function (classResult) {
         knex.select('day', {startTime: 'start_time'}, {endTime: 'end_time'})
-            .from('classtime').where('num', classNumber)
+            .from('classtime').where('class_number', classNumber)
             .catch(function (err) {
                 console.log(err);
                 callback(500);
@@ -75,8 +66,8 @@ exports.getClassesByNickname = function (nickname, callback) {
                 callback(500);
             }).then(function (allList) {
             callback({
-                matchList: matchedList,
-                myList: allList
+                matchList: matchedList[0],
+                myList: allList[0]
             })
         })
     });
@@ -114,7 +105,7 @@ exports.create = function (nickname, data, callback) {
             console.log(err);
             callback(500);
         }).then(function(result) {
-        if (result.length !== 0) {
+        if (result[0].length !== 0) {
             callback(409);
         } else {
             knex.into('class').insert(data)
