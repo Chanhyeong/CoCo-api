@@ -1,7 +1,6 @@
 var exec = require('child_process').exec;
 var mongodb = require('../../../../middleware/database')('mongodb').editorDb;
 
-
 exports.getDirectory = function (req, res) {
 
     exec('tree -J ~/store/' + req.params.classNum , function (err, stdout){
@@ -117,29 +116,24 @@ exports.delete = function (req, res) {
         statement += 'rm -r ' + fileName +'"';
 
         mongodb(function (db) {
-           db.collection(''+classNum).find({_id : {'$regex' : '^'+path+'/'+fileName, '$options' : 'i'}}, function (err, result){
+           db.collection(''+classNum)
+	   .remove({_id : {'$regex' : '^'+path+'/'+fileName, '$options' : 'i'}},function(err,result){
                if(err) {
-                   console.log (err);
+                   console.log ('find err : ' , err);
                    res.status(500).send();
                } else{
-                   var list = [];
-                   for(var i=0; i<result.length; i++){
-                       list.push(result[i]._id);
-                   }
-                   db.collection(''+classNum).remove({_id : {$in : [list]}}, function (err) {
-
-                   });
-               }
+	       		exec(statement, function(err){
+            			if(err) {
+                			console.log (err);
+                			res.status(500).send();
+            			} else{
+                			res.status(200).send({msg : "폴더 삭제가 완료되었습니다"});
+            			}
+        		});
+		}
            });
-        });
-        exec(statement, function(err){
-            if(err) {
-                console.log (err);
-                res.status(500).send();
-            } else{
-                res.status(200).send({msg : "폴더 삭제가 완료되었습니다"});
-            }
-        });
+	   db.close();
+	});
     } else {
         statement += 'rm ' + fileName +'"';
 
