@@ -27,13 +27,16 @@ exports.create = function (req, res) {
     var type = req.body.type;
     var path = req.body.path;
     var fileName = req.body.fileName;
+    var msg;
 
     var statement = 'docker exec ' + classNum + ' bash -c "cd /home/coco' + path +' && ';
 
     if(type === "directory"){
         statement += ('mkdir ' + fileName +'"');
+	msg = "폴더 생성이 완료되었습니다.";
     } else {
         statement += ('touch ' + fileName)+'"';
+	msg = "파일 생성이 완료되었습니다.";
     }
 
     exec(statement, function(err){
@@ -41,7 +44,7 @@ exports.create = function (req, res) {
             console.log (err);
             res.status(500).send();
         } else{
-            res.status(200).send({msg : "생성이 완료되었습니다"});
+            res.status(200).send({msg : msg});
         }
     });
 };
@@ -61,23 +64,23 @@ exports.rename = function (req, res) {
                 console.log (err);
                 res.status(500).send();
             } else{
-                res.status(200).send({msg : "이름변경이 완료되었습니다"});
+                res.status(200).send({msg : "폴더이름 변경이 완료되었습니다"});
             }
         });
     } else {
         mongodb(function (db) {
-            db.collection(''+classNum).findOne({ _id: path+prevName }, function (err, result){
+            db.collection(''+classNum).findOne({ _id: path+'/'+prevName }, function (err, result){
                 if(err) {
                     console.log (err);
                     res.status(500).send();
                 } else{
-                    result[0]._id = path+nextName;
+                    result[0]._id = path+'/'+nextName;
                     db.collection(''+classNum).insert(result[0], function (err) {
                         if(err) {
                             console.log (err);
                             res.status(500).send();
                         } else {
-                            db.collection(''+classNum).remove({ _id:path+prevName }, function (err){
+                            db.collection(''+classNum).remove({ _id:path+'/'+prevName }, function (err){
                                 if(err) {
                                     console.log (err);
                                     res.status(500).send();
@@ -87,7 +90,7 @@ exports.rename = function (req, res) {
                                             console.log (err);
                                             res.status(500).send();
                                         } else{
-                                            res.status(200).send({msg : "이름변경이 완료되었습니다"});
+                                            res.status(200).send({msg : "파일이름 변경이 완료되었습니다"});
                                         }
                                     });
                                 }
@@ -109,7 +112,7 @@ exports.delete = function (req, res) {
     var path = req.query.path;
 
     var statement = 'docker exec ' + classNum + ' bash -c "cd /home/coco' + path +' && ';
-	
+
     if(type === 'directory'){
         statement += 'rm -r ' + fileName +'"';
         exec(statement, function(err){
@@ -117,14 +120,14 @@ exports.delete = function (req, res) {
                 console.log (err);
                 res.status(500).send();
             } else{
-                res.status(200).send({msg : "삭제가 완료되었습니다"});
+                res.status(200).send({msg : "폴더 삭제가 완료되었습니다"});
             }
         });
     } else {
         statement += 'rm ' + fileName +'"';
 
         mongodb(function (db) {
-            db.collection(''+classNum).remove({_id: path+fileName }, function (err) {
+            db.collection(''+classNum).remove({_id: path+'/'+fileName }, function (err) {
                 if (err) {
                     console.log(err);
                 }
@@ -134,7 +137,7 @@ exports.delete = function (req, res) {
                             console.log (err);
                             res.status(500).send();
                         } else{
-                            res.status(200).send({msg : "삭제가 완료되었습니다"});
+                            res.status(200).send({msg : "폴더 삭제가 완료되었습니다"});
                         }
                     });
                 }
