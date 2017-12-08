@@ -19,7 +19,7 @@ exports.signIn = function (req, res) {
                         var token = jwtHandler.signToken(userResult[0]);
                         res.status(200).json({
                             access_token: token,
-                            user: user
+                            user: userResult[0]
                         });
                     }
                 });
