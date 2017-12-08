@@ -115,6 +115,23 @@ exports.delete = function (req, res) {
 
     if(type === 'directory'){
         statement += 'rm -r ' + fileName +'"';
+
+        mongodb(function (db) {
+           db.collection(''+classNum).find({_id : {'$regex' : '^'+path+'/'+fileName, '$options' : 'i'}}, function (err, result){
+               if(err) {
+                   console.log (err);
+                   res.status(500).send();
+               } else{
+                   var list = [];
+                   for(var i=0; i<result.length; i++){
+                       list.push(result[i]._id);
+                   }
+                   db.collection(''+classNum).remove({_id : {$in : [list]}}, function (err) {
+
+                   });
+               }
+           });
+        });
         exec(statement, function(err){
             if(err) {
                 console.log (err);
