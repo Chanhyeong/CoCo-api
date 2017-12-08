@@ -1,14 +1,6 @@
 
 module.exports = {
     serverPort: 3000,
-    mysqlConfig: {
-        connectionLimit : 10,
-        host:'external.cocotutor.ml',
-        port: 3306,
-        user: 'coco',
-        password: 'whdtjf123@',
-        database:'coco'
-    },
     knexMysqlConfig: {
         client: 'mysql',
         connection: {

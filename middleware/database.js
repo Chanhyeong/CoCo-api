@@ -1,4 +1,3 @@
-var mysql = require('mysql');
 var MongoClient = require('mongodb').MongoClient;
 var assert = require('assert');
 var config = require('../config');
@@ -14,15 +13,6 @@ var MYSQL_TYPE_LENGTH = {
     CLASS_CHAT_NUMBER: 10,
     ONE_KOREAN_CHAR: 2
 };
-
-var mysqlDb = mysql.createPool(config.mysqlConfig);
-mysqlDb.getConnection(function(err) {
-    if (err) {
-        console.error('mysql connection error');
-        console.error(err);
-        throw err;
-    }
-});
 
 var MongoDb = {};
 MongoDb.chatDb = function (callback) {
@@ -41,7 +31,6 @@ MongoDb.editorDb = function (callback) {
 
 module.exports = {
     init: defineDatabaseSchemas,
-    mysql: mysqlDb,
     mongodb: MongoDb,
     knex: knex
 };
