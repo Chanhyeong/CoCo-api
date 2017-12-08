@@ -75,18 +75,33 @@ exports.modify = function (req, res) {
     }
 };
 
+// TODO: store를 coco-api 하위 폴더로 만들기
 exports.delete = function (req, res) {
     model.delete(req.params.num, function (err) {
         if (err) {
             console.log ('DB delete err: ', err);
             res.status(500).send('Err: DB delete Error');
         } else {
-            exec('docker stop ' + req.params.num + '&&docker rm ' + req.params.num, function (err) {
-                if (err) {
-                    console.log ('Docker remove err: ', err);
+            chatModel.deleteByClassNumber(req.params.num, function (status) {
+                if (status === 500) {
                     res.status(500).send();
                 } else {
-                    res.status(200).send();
+                    model.getStatus(req.params.num, function (result) {
+                        if (result.length !== 0) {
+                            exec('docker stop ' + req.params.num + '&&docker rm ' + req.params.num
+                                + '&&rm -rf /root/store/' + req.params.num, function (err) {
+                                if (err) {
+                                    console.log ('Docker remove err: ', err);
+                                    res.status(500).send();
+                                } else {
+                                    res.status(200).send();
+                                }
+                            });
+                        } else {
+                            res.status(200).send();
+                        }
+                    })
+
                 }
             });
         }

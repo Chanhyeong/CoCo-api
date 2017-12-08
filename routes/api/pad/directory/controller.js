@@ -23,72 +23,163 @@ exports.getDirectory = function (req, res) {
 };
 
 exports.create = function (req, res) {
-    var classNum = req.body.file.classNum;
-    var type = req.body.file.type;
-    var path = req.body.file.path;
+    var classNum = req.body.classNum;
+    var type = req.body.type;
+    var path = req.body.path;
     var fileName = req.body.fileName;
+    var msg;
 
-    var statement = 'docker exec ' + classNum + ' bash -c "cd ' + path +' && ';
+    var statement = 'docker exec ' + classNum + ' bash -c "cd /home/coco' + path +' && ';
 
     if(type === "directory"){
-        statement =+ 'mkdir ' + fileName +'"';
+        statement += ('mkdir ' + fileName +'"');
+	msg = "폴더 생성이 완료되었습니다.";
     } else {
-        statement =+ 'touch ' + fileName +'"';
+        statement += ('touch ' + fileName)+'"';
+	msg = "파일 생성이 완료되었습니다.";
     }
 
-    exec(statement);
+    exec(statement, function(err){
+        if(err) {
+            console.log (err);
+            res.status(500).send();
+        } else{
+            res.status(200).send({msg : msg});
+        }
+    });
 };
 
 exports.rename = function (req, res) {
     var classNum = req.body.classNum;
     var prevName = req.body.prevName;
     var nextName = req.body.nextName;
-    var path = req.body.file.path;
+    var type = req.body.type;
+    var path = req.body.path;
 
-    var statement = 'docker exec ' + classNum + ' bash -c "cd ' + path +' && mv ' + prevName + ' ' + nextName + '';
+    var statement = 'docker exec ' + classNum + ' bash -c "cd /home/coco' + path +' && mv ' + prevName + ' ' + nextName + '"';
 
-    exec(statement);
-
-    res.status(200).send();
+    if(type === "directory"){
+        exec(statement, function(err){
+            if(err) {
+                console.log (err);
+                res.status(500).send();
+            } else{
+                res.status(200).send({msg : "폴더이름 변경이 완료되었습니다"});
+            }
+        });
+    } else {
+        mongodb(function (db) {
+            db.collection(''+classNum).findOne({ _id: path+'/'+prevName }, function (err, result){
+                if(err) {
+                    console.log (err);
+                    res.status(500).send();
+                } else{
+                    result[0]._id = path+'/'+nextName;
+                    db.collection(''+classNum).insert(result[0], function (err) {
+                        if(err) {
+                            console.log (err);
+                            res.status(500).send();
+                        } else {
+                            db.collection(''+classNum).remove({ _id:path+'/'+prevName }, function (err){
+                                if(err) {
+                                    console.log (err);
+                                    res.status(500).send();
+                                } else{
+                                    exec(statement, function(err){
+                                        if(err) {
+                                            console.log (err);
+                                            res.status(500).send();
+                                        } else{
+                                            res.status(200).send({msg : "파일이름 변경이 완료되었습니다"});
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+            db.close();
+        });
+    }
 };
 
 
 exports.delete = function (req, res) {
-    var classNum = req.body.file.classNum;
-    var type = req.body.file.type;
-    var fileName = req.body.file.name;
-    var path = req.body.file.path;
+    var classNum = req.query.classNum;
+    var type = req.query.type;
+    var fileName = req.query.fileName;
+    var path = req.query.path;
 
-    var statement = 'docker exec ' + classNum + ' bash -c "cd ' + path +' && ';
+    var statement = 'docker exec ' + classNum + ' bash -c "cd /home/coco' + path +' && ';
 
-    if(req.body.file.type){
-        statement =+ 'rm -r' + fileName +'"';
-    } else {
-        statement =+ 'rm ' + fileName +'"';
+    if(type === 'directory'){
+        statement += 'rm -r ' + fileName +'"';
 
         mongodb(function (db) {
-            db.collection(classNum).remove({_id: '/'+fileName+'/'}, function (err) {
+           db.collection(''+classNum).find({_id : {'$regex' : '^'+path+'/'+fileName, '$options' : 'i'}}, function (err, result){
+               if(err) {
+                   console.log (err);
+                   res.status(500).send();
+               } else{
+                   var list = [];
+                   for(var i=0; i<result.length; i++){
+                       list.push(result[i]._id);
+                   }
+                   db.collection(''+classNum).remove({_id : {$in : [list]}}, function (err) {
+
+                   });
+               }
+           });
+        });
+        exec(statement, function(err){
+            if(err) {
+                console.log (err);
+                res.status(500).send();
+            } else{
+                res.status(200).send({msg : "폴더 삭제가 완료되었습니다"});
+            }
+        });
+    } else {
+        statement += 'rm ' + fileName +'"';
+
+        mongodb(function (db) {
+            db.collection(''+classNum).remove({_id: path+'/'+fileName }, function (err) {
                 if (err) {
-                    callback(err);
-                } else {
-                    res.status(200).send();
+                    console.log(err);
+                }
+                else {
+                    exec(statement, function(err){
+                        if(err) {
+                            console.log (err);
+                            res.status(500).send();
+                        } else{
+                            res.status(200).send({msg : "폴더 삭제가 완료되었습니다"});
+                        }
+                    });
                 }
             });
+            db.close();
         });
     }
 
-    exec(statement);
+
 };
 
 exports.move = function (req, res) {
-    var classNum = req.body.file.classNum;
+    var classNum = req.body.classNum;
     var fileName = req.body.fileName;
     var prevpath = req.body.prevpath;
     var nextpath = req.body.nextpath;
 
-    var statement = 'docker exec ' + classNum + ' bash -c "cd ' + prevpath +' && mv ' + fileName + ' ' + nextpath +'"';
+    var statement = 'docker exec ' + classNum + ' bash -c "cd /home/coco' + prevpath +' && mv ' + fileName + ' /home/coco' + nextpath +'"';
 
-    exec(statement);
-
-    res.status(200).send();
+    exec(statement, function(err){
+        if(err) {
+            console.log (err);
+            res.status(500).send();
+        } else{
+            res.status(200).send();
+        }
+    });
 };

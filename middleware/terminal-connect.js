@@ -1,5 +1,6 @@
 // TODO: 시작 시 모든 포트에 대한 소켓을 열기 or 프로젝트 접속자 파악해서 열고 닫기
 var SSHClient = require('ssh2').Client;
+var exec = require('child_process').exec;
 
 module.exports = TerminalConnect;
 
@@ -23,13 +24,18 @@ function TerminalConnect(io, classNum, language){
                     } else {
                         socket.emit('data', '\r\n--- Disconnected. Please refresh this page. ---\r\n')
                     }
-                }).on('run', function(){
+                }).on('run', function(maxDepth){
                     switch(language){
                         case 'c' :
-                            enteredCommand = 'gcc -o main -I/home/coco/* ./*.c -lm\n';
-                            stream.write('gcc -o main -I/home/coco/* ./*.c -lm\n');
-                            enteredCommand = './main\n';
-                            stream.write('./main\n');
+			    var result = CheckDept(classNum, maxDepth, language);
+                            exec(result, function(err, stdout){
+			    	            if(err) console.log(err);
+                                else {
+					                stream.write(stdout);
+					                enteredCommand = '/home/main\n';
+					                stream.write('/home/main\n');
+				                }
+                            });
                             break;
                         case 'java' :
                             enteredCommand = 'javac -d . *.java\n';
@@ -38,10 +44,15 @@ function TerminalConnect(io, classNum, language){
                             stream.write('java -cp . Board\n');
                             break;
                         case 'c++' :
-                            enteredCommand = 'g++ -o main -I/home/coco/* ./*.cpp -lm\n';
-                            stream.write('g++ -o main -I/home/coco/* ./*.cpp -lm\n');
-                            enteredCommand = './main\n';
-                            stream.write('./main\n');
+                            var result = CheckDept(classNum, maxDepth, language);
+                            exec(result, function(err, stdout){
+                                if(err) console.log(err);
+                                else {
+                                    stream.write(stdout);
+                                    enteredCommand = '/home/main\n';
+                                    stream.write('/home/main\n');
+                                }
+                            });
                             break;
                         case 'python' :
                     }
@@ -71,4 +82,26 @@ function TerminalConnect(io, classNum, language){
             password: 'whdtjf123@'
         });
     })
+}
+
+function CheckDept(classNum, maxDepth, language){
+
+        var result = 'gcc -o /home/main';
+        var cd;
+
+        if(language === 'c') {
+            for (var i = 1; i <= maxDepth; i++) {
+                cd = ' home/coco/src/' + Array(i).join("*/") + '*.c';
+                result += cd;
+            }
+        }else{
+            for (var i = 1; i <= maxDepth; i++) {
+                cd = ' home/coco/src/' + Array(i).join("*/") + '*.cpp';
+                result += cd;
+            }
+        }
+
+	    result = 'docker exec '+classNum+' sh -c "' + result + '"';
+
+        return result;
 }
