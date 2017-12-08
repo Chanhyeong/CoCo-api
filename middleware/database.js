@@ -35,7 +35,6 @@ module.exports = {
     knex: knex
 };
 
-// TODO: autogenerate 수정
 function defineDatabaseSchemas () {
     knex.schema.hasTable('user')
         .then(function (exist) {
