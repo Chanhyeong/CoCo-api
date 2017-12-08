@@ -99,7 +99,7 @@ function defineDatabaseSchemas () {
                                 }).then(function () {
                                     console.log('Table \'class\' is generated');
                                     knex.schema.raw('alter table class add fulltext(title, content, language)').then(function () {
-                                        console.log('exist? fulltext');
+                                        console.log('fulltext constraint');
                                     });
 
                                     knex.schema.hasTable('classtime')

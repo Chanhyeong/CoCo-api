@@ -36,7 +36,7 @@ exports.getChatInfo =  function (chatNumber, callback) {
 };
 
 exports.updateStatus = function (classNumber, applicant, callback) {
-    knex('class').raw('update Class' +
+    knex.schema.raw('update class' +
         'set tutorNick = if(tutorNick is null, ?, tutorNick), studentNick = if(studentNick is null, ?, studentNick), status = 3 ' +
         'where num = ?', [[applicant, applicant, classNumber]])
         .catch(function (err) {

@@ -3,9 +3,8 @@ var chatModel = require('../chat/model');
 var exec = require('child_process').exec;
 
 exports.getClasses = function (req, res) {
-    model.getClasses( function (err, result) {
-        if (err) {
-            console.log('DB select err: ', err);
+    model.getClasses( function (result) {
+        if (result === 500) {
             res.status(500).send('Err: DB select Error');
         } else {
             res.status(200).json({
@@ -16,9 +15,8 @@ exports.getClasses = function (req, res) {
 };
 
 exports.getClass = function (req, res) {
-    model.getInstance(req.params.num, function (err, result) {
-        if (err) {
-            console.log('DB select err: ', err);
+    model.getClass(req.params.num, function (result) {
+        if (result === 500) {
             res.status(500).send('Err: DB select Error');
         } else {
             res.status(200).json({
@@ -37,9 +35,6 @@ exports.create = function (req, res) {
                 case 400: res.status(400).send('Check the \'status\' number'); break;
                 case 409: res.status(409).send('동일 제목한 제목으로 이미 게시글을 생성하였습니다.');
             }
-        } else if (err) {
-            console.log('DB err: ', err);
-            res.status(500).send('Err: DB select Error');
         } else {
             res.status(200).send();
         }
