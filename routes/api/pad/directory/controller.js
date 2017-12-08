@@ -112,11 +112,19 @@ exports.delete = function (req, res) {
 	
     if(type === 'directory'){
         statement += 'rm -r ' + fileName +'"';
+        exec(statement, function(err){
+            if(err) {
+                console.log (err);
+                res.status(500).send();
+            } else{
+                res.status(200).send({msg : "삭제가 완료되었습니다"});
+            }
+        });
     } else {
         statement += 'rm ' + fileName +'"';
 
         mongodb(function (db) {
-            db.collection(''+classNum).remove({_id: '/'+fileName+'/'}, function (err) {
+            db.collection(''+classNum).remove({_id: path+fileName }, function (err) {
                 if (err) {
                     console.log(err);
                 }
