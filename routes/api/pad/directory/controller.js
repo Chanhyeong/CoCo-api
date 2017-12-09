@@ -58,14 +58,42 @@ exports.rename = function (req, res) {
     var statement = 'docker exec ' + classNum + ' bash -c "cd /home/coco' + path +' && mv ' + prevName + ' ' + nextName + '"';
 
     if(type === "directory"){
-        exec(statement, function(err){
-            if(err) {
-                console.log (err);
-                res.status(500).send();
-            } else{
-                res.status(200).send({msg : "폴더이름 변경이 완료되었습니다"});
-            }
-        });
+        mongodb(function (db) {
+        db.collection(''+classNum)
+            .find({_id : {'$regex' : '^'+path+'/'+prevName, '$options' : 'i'}}.toArray(function(err, result){
+                if(err) {
+                    console.log (err);
+                    res.status(500).send();
+                } else{
+                    for(var i=0; i<result.length; i++) {
+                        result[i]._id = path + '/' + nextName;
+                    }
+                    db.collection(''+classNum).insert(result, function (err) {
+                        if(err) {
+                            console.log (err);
+                            res.status(500).send();
+                        } else {
+                            db.collection(''+classNum).remove({_id : {'$regex' : '^'+path+'/'+prevName, '$options' : 'i'}}, function (err){
+                                if(err) {
+                                    console.log (err);
+                                    res.status(500).send();
+                                } else{
+                                    exec(statement, function(err){
+                                        if(err) {
+                                            console.log (err);
+                                            res.status(500).send();
+                                        } else{
+                                            res.status(200).send({msg : "폴더이름 변경이 완료되었습니다"});
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+            db.close();
+        })
     } else {
         mongodb(function (db) {
             db.collection(''+classNum).findOne({ _id: path+'/'+prevName }, function (err, result){
@@ -117,23 +145,23 @@ exports.delete = function (req, res) {
 
         mongodb(function (db) {
            db.collection(''+classNum)
-	   .remove({_id : {'$regex' : '^'+path+'/'+fileName, '$options' : 'i'}},function(err,result){
+	        .remove({_id : {'$regex' : '^'+path+'/'+fileName, '$options' : 'i'}},function(err){
                if(err) {
-                   console.log ('find err : ' , err);
+                   console.log ('remove err : ' , err);
                    res.status(500).send();
                } else{
-	       		exec(statement, function(err){
+	       		    exec(statement, function(err){
             			if(err) {
                 			console.log (err);
                 			res.status(500).send();
             			} else{
                 			res.status(200).send({msg : "폴더 삭제가 완료되었습니다"});
             			}
-        		});
-		}
+        		    });
+		        }
            });
-	   db.close();
-	});
+           db.close();
+	    });
     } else {
         statement += 'rm ' + fileName +'"';
 
@@ -145,7 +173,7 @@ exports.delete = function (req, res) {
                 else {
                     exec(statement, function(err){
                         if(err) {
-                            console.log (err);
+                            console.log ('remove err ', err);
                             res.status(500).send();
                         } else{
                             res.status(200).send({msg : "폴더 삭제가 완료되었습니다"});
