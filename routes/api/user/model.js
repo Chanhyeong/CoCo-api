@@ -42,8 +42,8 @@ exports.registerTutor = function (data, callback) {
 };
 
 exports.getTutorInformationByNickname = function (nickname, callback) {
-    knex.schema.raw('select degree, intro, github, career, t.language ' +
-        'from Tutor as t, User as u where t.id = u.id and nickname = ? and u.tutor = 1')
+    knex.schema.raw('select degree, intro, github, career, language ' +
+        'from tutor, user where tutor.id = user.id and nickname = ? and user.is_tutor = true', nickname)
         .catch(function (err) {
             console.log(err);
             callback(500);
