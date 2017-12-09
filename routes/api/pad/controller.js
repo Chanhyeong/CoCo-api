@@ -12,12 +12,12 @@ exports.createTerminalConnect = function (req, res, next){
     boardModel.getClass(classNum, function (classResult) {
         if (classResult === 500){
             res.status(500).send('Err: DB select error');
-        } else if (!classResult.length) {
+        } else if (!classResult) {
             res.status(409).json({
                 err: '없는 클래스 입니다.'
             })
         } else {
-            if (req.user.nickname !== classResult[0].tutorNick && req.user.nickname !== classResult[0].studentNick) {
+            if (req.user.nickname !== classResult.tutorNick && req.user.nickname !== classResult.studentNick) {
                 res.status(401).json({
                     err: '이 클래스에 접근할 권한이 없습니다.'
                 })
