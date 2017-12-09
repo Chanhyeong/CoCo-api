@@ -2,19 +2,6 @@ var model = require('./model');
 var boardModel = require('../board/model');
 var chatModel = require('../chat/model');
 
-// Unused
-exports.getUser = function (req, res) {
-    model.getUser(req.user.id, function (result) {
-        if (result === 500) {
-            res.status(500).send();
-        } else {
-            res.status(200).send({
-                user : result[0]
-            });
-        }
-    });
-};
-
 // getClass, getWriter, getApplicant 통합
 exports.getUserInformation = function (req, res) {
     boardModel.getClassesByNickname(req.user.nickname, function (classesResult) {
@@ -54,7 +41,7 @@ exports.registerTutor = function (req, res) {
 exports.getTutorInformationByNickname = function (req, res) {
     model.getTutorInformationByNickname(req.params.nickname, function (result) {
         if (result === 500) {
-            res.status(500).send({error: err})
+            res.status(500).send();
         } else if (!result.length) {
             res.status(404).send("튜터 정보가 없습니다.");
         } else {
@@ -69,7 +56,7 @@ exports.getTutorInformationByNickname = function (req, res) {
 exports.getTutorInformationById = function(req, res) {
     model.getTutorInformationById(req.params.id, function (result) {
         if (result === 500) {
-            res.status(500).send({error: err})
+            res.status(500).send();
         } else if (!result.length) {
             res.status(404).send("튜터 정보가 없습니다.");
         } else {
