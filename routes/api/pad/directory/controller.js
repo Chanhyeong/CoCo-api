@@ -60,7 +60,7 @@ exports.rename = function (req, res) {
     if(type === "directory"){
         mongodb(function (db) {
         db.collection(''+classNum)
-            .find({_id : {'$regex' : '^'+path+'/'+prevName, '$options' : 'i'}}.toArray(function(err, result){
+            .find({_id : {'$regex' : '^'+path+'/'+prevName, '$options' : 'i'}}).toArray(function(err, result){
                 if(err) {
                     console.log (err);
                     res.status(500).send();

@@ -42,8 +42,9 @@ exports.registerTutor = function (data, callback) {
 };
 
 exports.getTutorInformationByNickname = function (nickname, callback) {
-    knex.schema.raw('select degree, intro, github, career, language ' +
-        'from tutor where tutor.id = user.id and nickname = ? and user.is_tutor = true', nickname)
+    knex.select('*').from('tutor','user')
+        .join('user', 'tutor.id', '=', 'user.id')
+        .where({'user.nickname': nickname , 'is_tutor' : true})
         .catch(function (err) {
             console.log(err);
             callback(500);
@@ -51,7 +52,9 @@ exports.getTutorInformationByNickname = function (nickname, callback) {
 };
 
 exports.getTutorInformationById = function (id, callback) {
-    knex.select('*').from('tutor').where('id', id)
+    knex.select('*').from('tutor')
+        .join('user', 'tutor.id', '=', 'user.id')
+        .where({'user.id' : id, 'user.is_tutor' : true})
         .catch(function (err) {
             console.log(err);
             callback(500);
