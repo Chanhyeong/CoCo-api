@@ -8,13 +8,13 @@ exports.search = function (req, res) {
         for (var i=0; i<str.length; i++) {
             keyword += str[i] + "*";
         }
-        keyword = "select num from Class where match (title, content, language) against ('"+keyword+"' in boolean mode)"
+        keyword = "select num from class where match (title, content, language) against ('"+keyword+"' in boolean mode)"
     } else {
-        keyword = "select num from Class"
+        keyword = "select num from class"
     }
 
     // 검색s
-    group = "select num from Class, User ";
+    group = "select num from class, user ";
     switch (req.query.group) {
         // 전체 검색
         case '0' : group += "where status = 1 or status = 2";
@@ -27,22 +27,22 @@ exports.search = function (req, res) {
             break;
     }
 
-    language = "select num from Class ";
+    language = "select num from class ";
     switch (req.query.language) {
         case '0' : //all
             break;
-        case '1' : language += "where language = 'C'";
+        case '1' : language += "where language = 'c'";
             break;
-        case '2' : language += "where language = 'C++'";
+        case '2' : language += "where language = 'c++'";
             break;
-        case '3' : language += "where language = 'JAVA'";
+        case '3' : language += "where language = 'java'";
             break;
         case '4' : language += "where language = 'python'";
             break;
     }
 
-    knex.schema.raw('select num, title, content, language, IFNULL(tutorNick, studentNick) AS nickname, status, date ' +
-        'from Class where num in (' + group + ') and num in (' + language + ') and num in (' + keyword + ');')
+    knex.schema.raw('select num, title, content, language, IFNULL(tutor_nickname, student_nickname) AS nickname, status, date ' +
+        'from class where num in (' + group + ') and num in (' + language + ') and num in (' + keyword + ');')
         .catch(function (err) {
             console.log(err);
             res.status(500).send();
