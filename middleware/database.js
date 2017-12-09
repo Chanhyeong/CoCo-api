@@ -11,7 +11,8 @@ var MYSQL_TYPE_LENGTH = {
     LONG_STRING: 200,
     DAY: 5, // 0 ~ 24
     CLASS_CHAT_NUMBER: 10,
-    ONE_KOREAN_CHAR: 2
+    ONE_KOREAN_CHAR: 2,
+    DYNAMIC_IP_PORT: 49152
 };
 
 var MongoDb = {};
@@ -43,7 +44,7 @@ function defineDatabaseSchemas () {
                     table.charset('utf8');
                     table.string('id', MYSQL_TYPE_LENGTH.COMMON_STRING).primary().notNullable();
                     table.string('password', MYSQL_TYPE_LENGTH.LONG_STRING).notNullable();
-                    table.string('email', MYSQL_TYPE_LENGTH.EMAIL).notNullable().unique();
+                    table.string('email', MYSQL_TYPE_LENGTH.EMAIL).notNullable();
                     table.string('nickname', MYSQL_TYPE_LENGTH.COMMON_STRING).notNullable().unique();
                     table.boolean('is_tutor').notNullable().defaultTo(false);
                 }).then(function () {
@@ -89,7 +90,7 @@ function defineDatabaseSchemas () {
                                     knex.schema.raw('alter table class add fulltext(title, content, language)').then(function () {
                                         console.log('fulltext constraint');
                                     });
-                                    knex.schema.raw('alter table class auto_increment value = 49152').then(function () {
+                                    knex.schema.raw('alter table class auto_increment = ' + MYSQL_TYPE_LENGTH.DYNAMIC_IP_PORT).then(function () {
                                         console.log('change auto_increment value');
                                     });
 
