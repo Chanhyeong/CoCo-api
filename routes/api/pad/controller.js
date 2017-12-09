@@ -1,7 +1,7 @@
 var exec = require('child_process').exec;
 var fs = require('fs');
-var model = require('./../board/model');
-var mongodb = require('../../../middleware/database')('mongodb').editorDb;
+var boardModel = require('./../board/model');
+var mongodb = require('../../../middleware/database').mongodb.editorDb;
 var TerminalConnect = require('../../../middleware/terminal-connect');
 
 var terminalPool = {};
@@ -9,24 +9,31 @@ var terminalPool = {};
 exports.createTerminalConnect = function (req, res, next){
     var language, classNum = req.params.classNum;
 
-    model.getInstance(classNum, function (err, result) {
-        if (err){
-            console.log('DB select error', err);
+    boardModel.getClass(classNum, function (classResult) {
+        if (classResult === 500){
             res.status(500).send('Err: DB select error');
-        }
-        else {
-            if (req.user.nickname !== result.tutorNick && req.user.nickname !== result.studentNick) res.status(401).send('인증되지 않은 사용자입니다.')
-            else{
-                exec('docker start '+ classNum, function (err){
-                    if (err) console.log('exec error : docker start');
+        } else if (!classResult.length) {
+            res.status(409).json({
+                err: '없는 클래스 입니다.'
+            })
+        } else {
+            if (req.user.nickname !== classResult[0].tutorNick && req.user.nickname !== classResult[0].studentNick) {
+                res.status(401).json({
+                    err: '이 클래스에 접근할 권한이 없습니다.'
+                })
+            } else {
+                exec('docker start '+ classNum, function (err) {
+                    if (err) {
+                        console.log('exec error : docker start', err);
+                    }
                 });
 
-                model.getLanguage(classNum, function (err, result) {
-                    if (err) {
+                boardModel.getLanguage(classNum, function (languageResult) {
+                    if (languageResult === 500) {
                         console.log('DB select error', err);
                         res.status(500).send('Err: DB select error');
                     } else {
-                        language = result[0].language;
+                        language = languageResult[0].language;
 
                         if (!terminalPool[classNum]) {
                             terminalPool[classNum] = new TerminalConnect(req.app.get('io'), classNum, language);
@@ -53,11 +60,12 @@ exports.save = function (req, res){
                         if (err) {
                             console.log(err);
                             res.status(500).send("file write error");
+                        } else {
+                            res.status(200).send();
                         }
                     });
                 }
-		    }
-		    res.status(200).send();
+            }
         });
         db.close();
     });

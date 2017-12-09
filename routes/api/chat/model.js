@@ -1,48 +1,49 @@
-var mysql = require('../../../middleware/database')('mysql');
-var mongodb = require('../../../middleware/database')('mongodb').chatDb;
-var boardModel = require('../board/model');
-var knex = require('../../../middleware/database')('knex');
+var mongodb = require('../../../middleware/database').mongodb.chatDb;
+var knex = require('../../../middleware/database').knex;
 
-exports.getMessages = function (nickName, callback) {
-    var statement = "select num, applicant as nickname from Chat where writer = ? " +
-        "UNION ALL " +
-        "select num, writer as nickname from Chat where applicant = ? " +
-        "order by num;";
-    var filter = [nickName, nickName];
+exports.getMessages = function (nickname, callback) {
+    knex.select('num', {nickname: 'applicant'}, {classNum: 'class_number'}).from('chat').where({
+        writer: nickname
+    }).unionAll(function () {
+        this.select('num', {nickname: 'writer'}, {classNum: 'class_number'}).from('chat').where({
+            applicant: nickname
+        })
+    }).catch(function (err) {
+        console.log(err);
+        callback(500);
+    }).then(callback);
 
-    mysql.query(statement, filter, callback);
 };
 
 function getChatInformation (chatNumber, callback) {
-    return knex('Chat').where({
-        num: chatNumber
-    }).select('writer', 'applicant', 'classNum')
-        .then(callback);
+    knex.select('writer', 'applicant', {classNum: 'class_number'}, 'class.*')
+        .from('chat').whereRaw('chat.num = ' + chatNumber)
+        .innerJoin('class', 'class.num', 'chat.class_number')
+        .catch(function (err) {
+            console.log(err);
+            callback(500);
+        }).then(callback);
 }
 
-exports.changeStatus = function (classNum, value, callback) {
-    var statement = 'update Class set status = ? where num = ?';
-    var filter = [value, classNum];
-
-    mysql.query(statement, filter, callback);
+exports.getChatInformation =  function (chatNumber, callback) {
+    getChatInformation(chatNumber,callback);
 };
 
-exports.getChatInfo =  function (chatNum, callback){
-    var statement = "select applicant, classNum from Chat where num = ?";
-
-    mysql.query(statement, chatNum, callback);
+exports.updateStatus = function (classNum, applicant, callback) {
+    knex.schema.raw('update class ' +
+        'set tutor_nickname = if(tutor_nickname is null, ?, tutor_nickname), ' +
+        'student_nickname = if(student_nickname is null, ?, student_nickname), status = 3 ' +
+        'where num = ?', [applicant, applicant, classNum])
+        .catch(function (err) {
+            console.log(knex.schema.raw('update class' +
+                'set tutor_nickname = if(tutor_nickname is null, ?, tutor_nickname), ' +
+                'student_nickname = if(student_nickname is null, ?, student_nickname), status = 3 ' +
+                'where num = ?', [applicant, applicant, classNum]).toString());
+            console.log(err);
+            callback(500);
+        }).then(callback);
 };
 
-exports.updateStatus = function (ClassNum, applicant, callback){
-    var statement = "update Class " +
-        "set tutorNick = if(tutorNick is null, ?, tutorNick), studentNick = if(studentNick is null, ?, studentNick), status = 3 " +
-        "where num = ?";
-    var filter = [applicant, applicant, ClassNum];
-    mysql.query(statement, filter, callback);
-};
-
-// 특정 Document의 message 반환
-// result 값이 router로 전달되지 않아서 callback으로 설계
 // mode: 'matching' (매칭 중일 때의 채팅) or 'class' (에디터 접속 후 채팅)
 exports.getMessage = function (mode, userNickname, chatNumber, callback) {
     var opponentNickname, isWriter;
@@ -58,19 +59,23 @@ exports.getMessage = function (mode, userNickname, chatNumber, callback) {
             isWriter = false;
         }
 
-        boardModel.getStatus(classData.classNum, function (boardResult) {
-            var classStatusCode = boardResult[0].status;
-            mongodb(function (db) {
-                db.collection(mode).findOne( { _id : chatNumber }, function (err, result) {
-                    if (err) {
-                        callback(err);
-                    } else {
-                        callback(null, result, opponentNickname, classStatusCode, isWriter, classData.classNum);
-                    }
-                });
-
-                db.close();
+        mongodb(function (db) {
+            db.collection(mode).findOne( { _id : chatNumber }, function (err, chatResult) {
+                if (err) {
+                    callback(err);
+                } else {
+                    callback(null, [{
+                        log: chatResult.log,
+                        nickname: opponentNickname,
+                        status: classData.status,
+                        mode: 'matching',
+                        isWriter: isWriter,
+                        classNum: classData.classNum
+                    }]);
+                }
             });
+
+            db.close();
         });
     });
 };
@@ -80,8 +85,9 @@ exports.insertMessage = function (mode, chatNumber, message, callback) {
     mongodb(function (db) {
         db.collection(mode).update( { _id: chatNumber }, {
             $push: { log: message }
-        }, function (err){
-            callback(err);
+        }, function (err) {
+            console.log(err);
+            callback(500);
         });
 
         db.close();
@@ -91,25 +97,30 @@ exports.insertMessage = function (mode, chatNumber, message, callback) {
 // 매칭 신청 시 + 매칭 완료 시 각각의 채팅방 생성, 관리자 안내 메시지 추가
 // mode: 'matching', 'class'
 exports.create = function (mode, data, time, callback) {
-    var statement= "insert into Chat SET ?";
+    data = JSON.parse(JSON.stringify(data).split('"classNum":').join('"class_number":'));
+    data = JSON.parse(JSON.stringify(data).split('"startTime":').join('"start_time":'));
+    data = JSON.parse(JSON.stringify(data).split('"endTime":').join('"end_time":'));
 
-    mysql.query(statement, data, function (err, result) {
-        if (err) {
-            callback(err);
-        } else {
-            var form = {
-                _id: result.insertId,
-                log: []
-            };
+    knex.into('chat').insert(data)
+        .catch(function (err) {
+            console.log(err);
+            callback(500);
+        }).then(function (id) {
+        var form = {
+            _id: id[0],
+            log: []
+        };
 
-            mongodb(function (db) {
-                db.collection(mode).insert(form, function (err) {
-                    callback(err);
-                });
-
-                db.close();
+        mongodb(function (db) {
+            db.collection(mode).insert(form, function (err) {
+                if (err) {
+                    console.log(err);
+                    callback(500);
+                } else {
+                    callback();
+                }
             });
-        }
+        });
     });
 };
 
@@ -139,13 +150,43 @@ function deleteByChatNumber (chatNumber, callback) {
                 callback(500);
             } else {
                 var statement= "delete from Chat where num = ?";
-                mysql.query(statement, chatNumber, function (err) {
-                    if (err) {
+                knex.del().from('chat').where('num', chatNumber)
+                    .catch(function (err) {
                         console.log(err);
                         callback(500);
-                    }
-                });
+                    }).then(callback);
             }
         });
     });
 }
+
+exports.getRequestInformation = function (nickname, callback) {
+    knex.select('chat.*', 'chat.class_number as classNum', 'class.title', 'class.language')
+        .from('chat').where('writer', nickname).innerJoin('class', function () {
+        this.on('class.num', 'chat.class_number')
+            .andOn(function () {
+                this.on('class.status', '=', 1)
+                    .orOn('class.status', '=', 2)
+            })
+    }).catch(function (err) {
+        console.log(err);
+        callback(500);
+    }).then(function (writerResult) {
+        knex.select('chat.*', 'chat.class_number as classNum', 'class.title', 'class.language')
+            .from('chat').where('applicant', nickname).innerJoin('class', function () {
+            this.on('class.num', 'chat.class_number')
+                .andOn(function () {
+                    this.on('class.status', '=', 1)
+                        .orOn('class.status', '=', 2)
+                })
+        }).catch(function (err) {
+            console.log(err);
+            callback(500);
+        }).then(function (applicantResult) {
+            callback({
+                writer: writerResult,
+                applicant: applicantResult
+            })
+        })
+    });
+};

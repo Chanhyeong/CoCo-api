@@ -20,10 +20,35 @@ curl -s https://get.docker.com/ | sudo sh
 sudo usermod -aG docker $USER
 ```
 
+Access to MySQL and create database 'coco'
+```
+:~# mysql
+mysql> create database coco;
+mysql> GRANT ALL PRIVILEGES ON coco.* TO 'your_username'@'localhost' IDENTIFIED BY 'your_password';
+mysql> GRANT ALL PRIVILEGES ON coco.* TO 'your_username'@'%' IDENTIFIED BY 'your_password';
+```
+
+Set your path where database located on config/index.js
+```
+mysqlConfig: {
+    client: 'mysql',
+    connection: {
+        host: 'database_url',
+        user: 'your_username',
+        password: 'your_password',
+        database: 'coco'
+    },
+    pool: { min: 0, max: 10 }
+},
+mongoUrl: {
+    chat: 'mongodb://database_url:27017/chat',
+    editor: 'mongodb://database_url:27017/editor'
+}
+```
+
 Build Dockerfiles
 ```
-on this repository
-cd ./default_files/docker_file
+:~# cd ./default_files/docker_file
 docker build ./c_cpp/ --tag coco:c
 docker build ./java/ --tag coco:java
 docker build ./python/ --tag coco:python

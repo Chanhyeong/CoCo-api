@@ -1,5 +1,4 @@
-var mysql = require('../../../middleware/database')('mysql');
-var knex = require('../../../middleware/database')('knex');
+var knex = require('../../../middleware/database').knex;
 
 var status = {
     'STUDENT': 1,
@@ -9,45 +8,68 @@ var status = {
 };
 
 exports.getClasses = function (callback) {
-    // IFNULL, http://ra2kstar.tistory.com/75
-    var statement = 'select num, title, language, IFNULL(tutorNick, studentNick) AS nickname, status, date ' +
-        'from Class where status IN (?, ?)';
     var filter = [status.STUDENT, status.TUTOR];
 
-    mysql.query(statement, filter, callback);
+    knex.schema.raw('select num, title, language, IFNULL(tutor_nickname, student_nickname) AS nickname, status, date ' +
+        'from class where status IN (?, ?)', filter)
+        .catch(function (err) {
+            console.log(err);
+            callback(500);
+        }).then(callback);
 };
 
-exports.getStatus = function (classNum, callback) {
-    knex('Class').where('num', classNum).select('status')
-        .then(callback);
+exports.getLanguage = function (classNum, callback) {
+    knex.select('status').from('class').where('num', classNum)
+        .catch(function (err) {
+            console.log(err);
+            callback(500);
+        }).then(callback);
 };
 
-exports.getLanguage = function (num, callback){
-    var statement = 'select language from Class where num = ?';
-
-    mysql.query(statement, num, callback);
-};
-
-exports.getInstance = function (num, callback) {
-    var statement = 'select content, tutorNick, studentNick from Class where num = ?';
-
-    mysql.query(statement, num, function (err, content) {
-        if (err) {
-            callback(err);
-        } else {
-            var timeStatement = 'select day, startTime, endTime from Classtime where classNum = ?';
-
-            mysql.query(timeStatement, num, function (err, time) {
-                if(content) {
-                    callback(err, {
-                        content: content[0].content,
-                        time: time,
-                        tutorNick: content[0].tutorNick,
-                        studentNick: content[0].studentNick
-                    });
-                } else callback(err, null)
+exports.getClass = function (classNum, callback) {
+    knex.select('content', {tutorNick: 'tutor_nickname'}, {studentNick: 'student_nickname'})
+        .from('class').where('num', classNum)
+        .catch(function (err) {
+            console.log(err);
+            callback(500);
+        }).then(function (classResult) {
+        knex.select('day', {startTime: 'start_time'}, {endTime: 'end_time'})
+            .from('classtime').where('class_number', classNum)
+            .catch(function (err) {
+                console.log(err);
+                callback(500);
+            }).then(function (timeResult) {
+            callback({
+                content: classResult[0].content,
+                time: timeResult,
+                tutorNick: classResult[0].tutorNick,
+                studentNick: classResult[0].studentNick
             })
-        }
+        })
+    });
+};
+
+exports.getClassesByNickname = function (nickname, callback) {
+    var filter = [nickname, nickname, status.MATCHED];
+
+    knex.schema.raw('select *, tutor_nickname as tutorNick, student_nickname as studentNick' +
+        ' from class where (student_nickname = ? or tutor_nickname = ?) and status = ?', filter)
+        .catch(function (err) {
+            console.log(err);
+            callback(500);
+        }).then(function (matchedList) {
+        filter = [nickname, nickname];
+        knex.schema.raw('select *, tutor_nickname as tutorNick, student_nickname as studentNick' +
+            ' from class where (student_nickname = ? or tutor_nickname = ?)', filter)
+            .catch(function (err) {
+                console.log(err);
+                callback(500);
+            }).then(function (allList) {
+            callback({
+                matchList: matchedList[0],
+                myList: allList[0]
+            })
+        })
     });
 };
 
@@ -57,15 +79,18 @@ exports.create = function (nickname, data, callback) {
     if (data.status === status.STUDENT) {
         data['studentNick'] = nickname;
         data['tutorNick'] = null;
-        statement = 'select * from Class where title = ? AND studentNick = ? AND status IN (?, ?)';
+        statement = 'select * from class where title = ? AND student_nickname = ? AND status IN (?, ?)';
     } else if (data.status === status.TUTOR) {
         data['tutorNick'] = nickname;
         data['studentNick'] = null;
-        statement = 'select * from Class where title = ? AND tutorNick = ? AND status IN (?, ?)';
+        statement = 'select * from class where title = ? AND tutor_nickname = ? AND status IN (?, ?)';
     } else {
         callback(400);
         return;
     }
+
+    data = JSON.parse(JSON.stringify(data).split('"tutorNick":').join('"tutor_nickname":'));
+    data = JSON.parse(JSON.stringify(data).split('"studentNick":').join('"student_nickname":'));
 
     // Format: 2017-10-27
     data.date = new Date().toISOString().split('T')[0];
@@ -75,70 +100,60 @@ exports.create = function (nickname, data, callback) {
 
     var filter = [data.title, '', status.STUDENT, status.TUTOR];
 
-    if (duplicateCheck(statement, filter, callback) !== true) {
-        var insertStatement = 'insert into Class SET ?';
-
-        // Class에 정보 저장
-        mysql.query(insertStatement, data, function (err, result) {
-            if (err) {
-                callback(err);
-            } else {
-                callback(timeInsert(result.insertId, timeData));
-            }
-        });
-    } else { // 이미 값이 존재할 때
-        callback(409);
-    }
-
+    knex.schema.raw(statement, filter)
+        .catch(function (err) {
+            console.log(err);
+            callback(500);
+        }).then(function(result) {
+        if (result[0].length !== 0) {
+            callback(409);
+        } else {
+            knex.into('class').insert(data)
+                .catch(function (err) {
+                    console.log(err);
+                    callback(500);
+                }).then(function (id) {
+                callback(timeInsert(id, timeData));
+            });
+        }
+    });
 };
 
 // 시간 데이터 추가, 에러면 err, 아니면 null
-function timeInsert (classNumber, data) {
+function timeInsert (classNum, data) {
     for (var prop in data) {
-        data[prop]['classNum'] = classNumber;
-        var insertStatement = 'insert into Classtime SET ?;';
-        mysql.query(insertStatement, data[prop], function(err) {
-            return err;
-        });
+        data[prop] = JSON.parse(JSON.stringify(data[prop]).split('"startTime":').join('"start_time":'));
+        data[prop] = JSON.parse(JSON.stringify(data[prop]).split('"endTime":').join('"end_time":'));
+        data[prop]['class_number'] = classNum;
+        knex.into('classtime').insert(data[prop])
+            .catch(function (err) {
+                console.log(err);
+                return 500;
+            }).then()
     }
 }
 
-// 중복 체크. return: 중복이면 true 없으면 false
-function duplicateCheck (statement, filter, callback) {
-    mysql.query(statement, filter, function (err, result) {
-        if (err) {
-            console.log('DB select err: ', err);
-            callback(err);
-            return true;
-        } else {
-            if (result.length !== 0) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-    });
-}
+exports.modifyClass = function (classNum, classData, timeData) {
+    classData = JSON.parse(JSON.stringify(classData).split('"tutorNick":').join('"tutor_nickname":'));
+    classData = JSON.parse(JSON.stringify(classData).split('"studentNick":').join('"student_nickname":'));
 
-exports.modifyClass = function (classNumber, classData, timeData) {
-    var statement = 'update Class set ? where num = ?';
-    var filter = [classData, classNumber];
-
-    mysql.query(statement, filter, function (err) {
-        if (err) return err;
-        else {
-            statement = 'delete from Classtime where classNum = ?';
-            mysql.query(statement, classNumber, function (err) {
-                if (err) return err;
-                else timeInsert(classNumber, timeData);
-            })
-        }
-    });
+    knex('class').update(classData).where('num', classNum)
+        .catch(function (err) {
+            console.log(err);
+            callback(500);
+        }).then(function () {
+        knex.del().from('classtime').where('class_number', classNum)
+            .catch(function (err) {
+                console.log(err);
+                callback(500);
+            }).then(callback(timeInsert(classNum, timeData)));
+    })
 };
 
-// TODO: ShareDB 데이터 삭제하기
-exports.delete = function (classNumber, callback) {
-    var deleteStatement = 'delete from Class where num = ?';
-
-    mysql.query(deleteStatement, classNumber, callback);
+exports.delete = function (classNum, callback) {
+    knex.del().from('class').where('num', classNum)
+        .catch(function (err) {
+            console.log(err);
+            callback(500);
+        }).then(callback);
 };
