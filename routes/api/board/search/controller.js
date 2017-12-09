@@ -23,7 +23,7 @@ exports.search = function (req, res) {
         case '1' : group += "where status = 1";
             break;
         // 튜터 검색
-        case '2' : group += "where status = 2 and tutor = 1";
+        case '2' : group += "where status = 2 and is_tutor = 1";
             break;
     }
 
