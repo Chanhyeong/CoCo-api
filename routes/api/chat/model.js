@@ -86,8 +86,12 @@ exports.insertMessage = function (mode, chatNumber, message, callback) {
         db.collection(mode).update( { _id: chatNumber }, {
             $push: { log: message }
         }, function (err) {
-            console.log(err);
-            callback(500);
+            if (err) {
+                console.log(err);
+                callback(500);
+            } else {
+                callback();
+            }
         });
 
         db.close();
