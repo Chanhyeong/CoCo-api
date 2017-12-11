@@ -25,6 +25,7 @@ function TerminalConnect(io, classNum, language){
                         socket.emit('data', '\r\n--- Disconnected. Please refresh this page. ---\r\n')
                     }
                 }).on('run', function(maxDepth){
+                    console.log('start RUN as ', language);
                     switch(language){
                         case 'c' :
 			                var result = CheckDept(classNum, maxDepth, language);
@@ -54,12 +55,22 @@ function TerminalConnect(io, classNum, language){
                                 if(err) console.log(err);
                                 else {
                                     stream.write(stdout);
-                                    enteredCommand = '/home/main\n';
-                                    stream.write('/home/main\n');
+                                    enteredCommand = 'python /home/main.pyc\n';
+                                    stream.write('python /home/main.pyc\n');
                                 }
                             });
                             break;
                         case 'python' :
+                            var result = CheckDept(classNum, maxDepth, language);
+                            exec(result, function(err, stdout){
+                                if(err) console.log(err);
+                                else {
+                                    stream.write(stdout);
+                                    enteredCommand = 'python /home/main.pyc\n';
+                                    stream.write('python /home/main.pyc\n');
+                                }
+                            });
+                            break;
                     }
                 });
 
@@ -114,16 +125,13 @@ function CheckDept(classNum, maxDepth, language){
                     cd = ' home/coco/src/' + Array(i).join("*/") + '*.cpp';
                     result += cd;
                 }
-            break;
+                break;
             case 'python' :
-                for (var i = 1; i <= maxDepth; i++) {
-                    cd = ' home/coco/src/' + Array(i).join("*/") + '*.py';
-                    result += cd;
-                }
+                result = 'python -m compileall /home/coco && chmod +x /home/coco/src *.py && mv /home/coco/src *.py /home';
                 break;
         }
 
-	    result = 'docker exec '+classNum+' sh -c "' + result + '"';
+	    result = 'docker exec '+classNum+' bash -c "' + result + '"';
 
         return result;
 }
