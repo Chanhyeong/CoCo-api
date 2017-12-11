@@ -30,6 +30,7 @@ function TerminalConnect(io, classNum, language){
                         case 'c' :
                             var result = CheckDept(classNum, maxDepth, language);
                             enteredCommand = '/home/main\n';
+                            wait(500);
                             exec(result, function(err, stdout){
                                 if(err) console.log(err);
                                 else {
@@ -41,6 +42,7 @@ function TerminalConnect(io, classNum, language){
                         case 'java' :
                             var result = CheckDept(classNum, maxDepth, language);
                             enteredCommand = 'java -cp /home com.example.Main\n';
+                            wait(500);
                             exec(result, function(err, stdout){
                                 if(err) console.log(err);
                                 else {
@@ -52,6 +54,7 @@ function TerminalConnect(io, classNum, language){
                         case 'c++' :
                             var result = CheckDept(classNum, maxDepth, language);
                             enteredCommand = '/home/main\n';
+                            wait(500);
                             exec(result, function(err, stdout){
                                 if(err) console.log(err);
                                 else {
@@ -63,6 +66,7 @@ function TerminalConnect(io, classNum, language){
                         case 'python' :
                             var result = CheckDept(classNum, maxDepth, language);
                             enteredCommand = 'python3 /home/__pycache__/*.pyc\n';
+                            wait(500);
                             exec(result, function(err, stdout){
                                 if(err) console.log(err);
                                 else {
@@ -77,8 +81,8 @@ function TerminalConnect(io, classNum, language){
                 stream.on('data', function(d) {
                     var printFromContainer = d.toString('binary');
 
-                    if(printFromContainer.slice(-2) === '$ '){}
-                    else if (enteredCommand || printFromContainer === '\n' || printFromContainer === ' \n') {
+                    //if(printFromContainer.slice(-2) === '$ '){}
+                    if (enteredCommand || printFromContainer === '\n' || printFromContainer === ' \n') {
                         printFromContainer = '';
                     }
                     enteredCommand = null;
@@ -135,4 +139,14 @@ function CheckDept(classNum, maxDepth, language){
 	    result = 'docker exec '+classNum+' bash -c "' + result + '"';
 
         return result;
+}
+
+function wait(msecs)
+{
+    var start = new Date().getTime();
+    var cur = start;
+    while(cur - start < msecs)
+    {
+        cur = new Date().getTime();
+    }
 }
