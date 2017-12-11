@@ -19,7 +19,7 @@ exports.getClasses = function (callback) {
 };
 
 exports.getLanguage = function (classNum, callback) {
-    knex.select('status').from('class').where('num', classNum)
+    knex.select('language').from('class').where('num', classNum)
         .catch(function (err) {
             console.log(err);
             callback(500);
