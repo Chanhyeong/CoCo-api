@@ -52,7 +52,7 @@ exports.getClass = function (classNum, callback) {
 exports.getClassesByNickname = function (nickname, callback) {
     var filter = [nickname, nickname, status.MATCHED];
 
-    knex.select('content', {tutorNick: 'tutor_nickname'}, {studentNick: 'student_nickname'})
+    /*knex.select('content', {tutorNick: 'tutor_nickname'}, {studentNick: 'student_nickname'})
         .from('class').where(function(){this.where('student_nickname', nickname).orWhere('tutor_nickname', nickname)})
         .orWhere('status' , status.MATCHED)
         .catch(function (err) {
@@ -71,9 +71,9 @@ exports.getClassesByNickname = function (nickname, callback) {
                 myList: allList[0]
             })
         })
-    });
+    });*/
 
-    /*knex.schema.raw('select *, tutor_nickname as tutorNick, student_nickname as studentNick' +
+    knex.schema.raw('select *, tutor_nickname as tutorNick, student_nickname as studentNick' +
         ' from class where (student_nickname = ? or tutor_nickname = ?) and status = ?', filter)
         .catch(function (err) {
             console.log(err);
@@ -91,7 +91,7 @@ exports.getClassesByNickname = function (nickname, callback) {
                 myList: allList[0]
             })
         })
-    });*/
+    });
 };
 
 exports.create = function (nickname, data, callback) {
