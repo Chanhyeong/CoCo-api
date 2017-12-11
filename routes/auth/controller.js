@@ -66,3 +66,13 @@ exports.signUp = function (req, res) {
         }
     });
 };
+
+exports.leave = function (req, res) {
+    userModel.delete(req.user.id, function (result) {
+        if (result === 500) {
+            res.status(500).send();
+        } else {
+            res.status(200).send();
+        }
+    });
+};

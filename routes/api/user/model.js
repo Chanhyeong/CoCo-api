@@ -60,3 +60,11 @@ exports.getTutorInformationById = function (id, callback) {
             callback(500);
         }).then(callback);
 };
+
+exports.delete = function (id, callback) {
+    knex.del().from('user').where('id', id)
+        .catch(function (err) {
+            console.log(err);
+            callback(500);
+        }).then(callback);
+};
