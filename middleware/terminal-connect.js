@@ -43,8 +43,8 @@ function TerminalConnect(io, classNum, language){
                                 if(err) console.log(err);
                                 else {
                                     stream.write(stdout);
-                                    enteredCommand = 'java -cp /home Main.Main\n';
-                                    stream.write('java -cp /home Main.Main\n');
+                                    enteredCommand = 'java -cp /home com.example.Main\n';
+                                    stream.write('java -cp /home com.example.Main\n');
                                 }
                             });
                             break;
@@ -117,7 +117,7 @@ function CheckDept(classNum, maxDepth, language){
             break;
             case 'python' :
                 for (var i = 1; i <= maxDepth; i++) {
-                    cd = ' home/coco/src/' + Array(i).join("*/") + '*.java';
+                    cd = ' home/coco/src/' + Array(i).join("*/") + '*.py';
                     result += cd;
                 }
                 break;
