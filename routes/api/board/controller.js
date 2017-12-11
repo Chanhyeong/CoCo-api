@@ -77,9 +77,8 @@ exports.modify = function (req, res) {
 
 // TODO: store를 coco-api 하위 폴더로 만들기
 exports.delete = function (req, res) {
-    model.delete(req.params.num, function (err) {
-        if (err) {
-            console.log ('DB delete err: ', err);
+    model.delete(req.params.num, function (result) {
+        if (result === 500) {
             res.status(500).send('Err: DB delete Error');
         } else {
             chatModel.deleteByClassNumber(req.params.num, function (status) {
