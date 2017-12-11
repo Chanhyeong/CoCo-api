@@ -27,7 +27,7 @@ function TerminalConnect(io, classNum, language){
                 }).on('run', function(maxDepth){
                     switch(language){
                         case 'c' :
-			    var result = CheckDept(classNum, maxDepth, language);
+			                var result = CheckDept(classNum, maxDepth, language);
                             exec(result, function(err, stdout){
 			    	            if(err) console.log(err);
                                 else {
@@ -38,10 +38,15 @@ function TerminalConnect(io, classNum, language){
                             });
                             break;
                         case 'java' :
-                            enteredCommand = 'javac -d . *.java\n';
-                            stream.write('javac -d . *.java\n');
-                            enteredCommand = 'java -cp . Board\n';
-                            stream.write('java -cp . Board\n');
+                            var result = CheckDept(classNum, maxDepth, language);
+                            exec(result, function(err, stdout){
+                                if(err) console.log(err);
+                                else {
+                                    stream.write(stdout);
+                                    enteredCommand = 'java -cp /home Main.Main\n';
+                                    stream.write('java -cp /home Main.Main\n');
+                                }
+                            });
                             break;
                         case 'c++' :
                             var result = CheckDept(classNum, maxDepth, language);
@@ -86,19 +91,36 @@ function TerminalConnect(io, classNum, language){
 
 function CheckDept(classNum, maxDepth, language){
 
-        var result = 'gcc -o /home/main';
-        var cd;
+        var result, cd;
 
-        if(language === 'c') {
-            for (var i = 1; i <= maxDepth; i++) {
-                cd = ' home/coco/src/' + Array(i).join("*/") + '*.c';
-                result += cd;
-            }
-        }else{
-            for (var i = 1; i <= maxDepth; i++) {
-                cd = ' home/coco/src/' + Array(i).join("*/") + '*.cpp';
-                result += cd;
-            }
+        switch(language) {
+            case 'c' :
+                result = 'gcc -o /home/main';
+                for (var i = 1; i <= maxDepth; i++) {
+                    cd = ' home/coco/src/' + Array(i).join("*/") + '*.c';
+                    result += cd;
+                }
+                break;
+            case 'java' :
+                result = 'javac -d /home/';
+                for (var i = 2; i <= maxDepth; i++) {
+                    cd = ' home/coco/com/example' + Array(i).join("*/") + '*.java';
+                    result += cd;
+                }
+                break;
+            case 'c++' :
+                result = 'gcc -o /home/main';
+                for (var i = 1; i <= maxDepth; i++) {
+                    cd = ' home/coco/src/' + Array(i).join("*/") + '*.cpp';
+                    result += cd;
+                }
+            break;
+            case 'python' :
+                for (var i = 1; i <= maxDepth; i++) {
+                    cd = ' home/coco/src/' + Array(i).join("*/") + '*.java';
+                    result += cd;
+                }
+                break;
         }
 
 	    result = 'docker exec '+classNum+' sh -c "' + result + '"';
