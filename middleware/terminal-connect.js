@@ -28,14 +28,14 @@ function TerminalConnect(io, classNum, language){
                     console.log('start RUN as ', language);
                     switch(language){
                         case 'c' :
-			    var result = CheckDept(classNum, maxDepth, language);
+                            var result = CheckDept(classNum, maxDepth, language);
                             exec(result, function(err, stdout){
-			    	if(err) console.log(err);
+                                if(err) console.log(err);
                                 else {
-					stream.write(stdout);
-					enteredCommand = '/home/main\n';
-					stream.write('/home/main\n');
-				}
+                                    //stream.write(stdout);
+                                    enteredCommand = '/home/main\n';
+                                    stream.write('/home/main\n');
+                                }
                             });
                             break;
                         case 'java' :
@@ -127,8 +127,8 @@ function CheckDept(classNum, maxDepth, language){
                 }
                 break;
             case 'python' :
-                result = 'python3 -m compileall /home/coco && chmod +x /home/coco/src/__pycache__/*.pyc ' +
-			'&& rm -rf /home/__pycache__ && mv -f /home/coco/src/__pycache__ /home';
+                result = 'rm -rf /home/__pycache__ && python3 -m compileall /home/coco && ' +
+			            'chmod +x /home/coco/src/__pycache__/*.pyc && mv -f /home/coco/src/__pycache__ /home';
                 break;
         }
 
