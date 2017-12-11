@@ -23,7 +23,7 @@ MongoDb.chatDb = function (callback) {
     });
 };
 MongoDb.editorDb = function (callback) {
-    MongoClient.connect(config.mongoUrl.editor,{poolSize : 10}, function (err, db) {
+    MongoClient.connect(config.mongoUrl.editor,{poolSize : 30}, function (err, db) {
         assert.equal(err, null);
         callback(db);
     });
