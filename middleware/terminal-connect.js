@@ -28,14 +28,14 @@ function TerminalConnect(io, classNum, language){
                     console.log('start RUN as ', language);
                     switch(language){
                         case 'c' :
-			                var result = CheckDept(classNum, maxDepth, language);
+			    var result = CheckDept(classNum, maxDepth, language);
                             exec(result, function(err, stdout){
-			    	            if(err) console.log(err);
+			    	if(err) console.log(err);
                                 else {
-					                stream.write(stdout);
-					                enteredCommand = '/home/main\n';
-					                stream.write('/home/main\n');
-				                }
+					stream.write(stdout);
+					enteredCommand = '/home/main\n';
+					stream.write('/home/main\n');
+				}
                             });
                             break;
                         case 'java' :
@@ -43,7 +43,7 @@ function TerminalConnect(io, classNum, language){
                             exec(result, function(err, stdout){
                                 if(err) console.log(err);
                                 else {
-                                    stream.write(stdout);
+                                    //stream.write(stdout);
                                     enteredCommand = 'java -cp /home com.example.Main\n';
                                     stream.write('java -cp /home com.example.Main\n');
                                 }
@@ -54,9 +54,9 @@ function TerminalConnect(io, classNum, language){
                             exec(result, function(err, stdout){
                                 if(err) console.log(err);
                                 else {
-                                    stream.write(stdout);
-                                    enteredCommand = 'python /home/main.pyc\n';
-                                    stream.write('python /home/main.pyc\n');
+                                    //stream.write(stdout);
+                                    enteredCommand = '/home/main\n';
+                                    stream.write('/home/main\n');
                                 }
                             });
                             break;
@@ -65,9 +65,9 @@ function TerminalConnect(io, classNum, language){
                             exec(result, function(err, stdout){
                                 if(err) console.log(err);
                                 else {
-                                    stream.write(stdout);
-                                    enteredCommand = 'python /home/main.pyc\n';
-                                    stream.write('python /home/main.pyc\n');
+                                    //stream.write(stdout);
+                                    enteredCommand = 'python3 /home/__pycache__/*.pyc\n';
+                                    stream.write('python3 /home/__pycache__/*.pyc\n');
                                 }
                             });
                             break;
@@ -115,7 +115,7 @@ function CheckDept(classNum, maxDepth, language){
             case 'java' :
                 result = 'javac -d /home/';
                 for (var i = 2; i <= maxDepth; i++) {
-                    cd = ' home/coco/com/example' + Array(i).join("*/") + '*.java';
+                    cd = ' home/coco/com/' + Array(i).join("*/") + '*.java';
                     result += cd;
                 }
                 break;
@@ -127,7 +127,8 @@ function CheckDept(classNum, maxDepth, language){
                 }
                 break;
             case 'python' :
-                result = 'python -m compileall /home/coco && chmod +x /home/coco/src *.py && mv /home/coco/src *.py /home';
+                result = 'python3 -m compileall /home/coco && chmod +x /home/coco/src/__pycache__/*.pyc ' +
+			'&& rm -rf /home/__pycache__ && mv -f /home/coco/src/__pycache__ /home';
                 break;
         }
 
