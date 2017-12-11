@@ -29,44 +29,44 @@ function TerminalConnect(io, classNum, language){
                     switch(language){
                         case 'c' :
                             var result = CheckDept(classNum, maxDepth, language);
+                            enteredCommand = '/home/main\n';
                             exec(result, function(err, stdout){
                                 if(err) console.log(err);
                                 else {
                                     //stream.write(stdout);
-                                    enteredCommand = '/home/main\n';
                                     stream.write('/home/main\n');
                                 }
                             });
                             break;
                         case 'java' :
                             var result = CheckDept(classNum, maxDepth, language);
+                            enteredCommand = 'java -cp /home com.example.Main\n';
                             exec(result, function(err, stdout){
                                 if(err) console.log(err);
                                 else {
                                     //stream.write(stdout);
-                                    enteredCommand = 'java -cp /home com.example.Main\n';
                                     stream.write('java -cp /home com.example.Main\n');
                                 }
                             });
                             break;
                         case 'c++' :
                             var result = CheckDept(classNum, maxDepth, language);
+                            enteredCommand = '/home/main\n';
                             exec(result, function(err, stdout){
                                 if(err) console.log(err);
                                 else {
                                     //stream.write(stdout);
-                                    enteredCommand = '/home/main\n';
                                     stream.write('/home/main\n');
                                 }
                             });
                             break;
                         case 'python' :
                             var result = CheckDept(classNum, maxDepth, language);
+                            enteredCommand = 'python3 /home/__pycache__/*.pyc\n';
                             exec(result, function(err, stdout){
                                 if(err) console.log(err);
                                 else {
                                     //stream.write(stdout);
-                                    enteredCommand = 'python3 /home/__pycache__/*.pyc\n';
                                     stream.write('python3 /home/__pycache__/*.pyc\n');
                                 }
                             });
