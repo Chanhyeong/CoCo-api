@@ -48,7 +48,7 @@ exports.search = function (req, res) {
             res.status(500).send();
         }).then(function (result) {
         res.status(200).json({
-            list: result
+            list: result[0]
         });
     });
 };
