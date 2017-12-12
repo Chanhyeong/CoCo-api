@@ -49,14 +49,15 @@ exports.create = function (req, res) {
 };
 
 exports.rename = function (req, res) {
-    var classNum = req.body.classNum;
+    var classNum = req.params.classNum;
     var prevName = req.body.prevName;
     var nextName = req.body.nextName;
     var type = req.body.type;
     var path = req.body.path;
 
-    var statement = 'docker exec ' + classNum + ' bash -c "cd /home/coco' + path +' && mv ' + prevName + ' ' + nextName + '"';
-
+    var statement = 'docker exec ' + classNum + 
+    		' bash -c "mv /home/coco' + path + '/' + prevName + ' /home/coco' + path + '/' + nextName + '"';
+	console.log(classNum, prevName, nextName, type, path, '\n', statement);
     if(type === "directory"){
         mongodb(function (db) {
         db.collection(''+classNum)
@@ -64,18 +65,19 @@ exports.rename = function (req, res) {
                 if(err) {
                     console.log (err);
                     res.status(500).send();
-                } else{
-                    for(var i=0; i<result.length; i++) {
-                        result[i]._id = path + '/' + nextName;
-                    }
-                    db.collection(''+classNum).insert(result, function (err) {
-                        if(err) {
+                } else{ 
+		    db.collection(''+classNum).remove({_id : {'$regex' : '^'+path+'/'+prevName, '$options' : 'i'}}, function (err){
+                        if('remove err : ',err) {
                             console.log (err);
                             res.status(500).send();
                         } else {
-                            db.collection(''+classNum).remove({_id : {'$regex' : '^'+path+'/'+prevName, '$options' : 'i'}}, function (err){
+			    for(var i=0; i<result.length; i++){
+			    	result[i]._id = result[i]._id.toString().replace(path+'/'+prevName, path+'/'+nextName);
+			    }
+			    console.log('result : ', result);
+			    db.collection(''+classNum).insert(result, function (err) {	
                                 if(err) {
-                                    console.log (err);
+                                    console.log ('insert err : ',err);
                                     res.status(500).send();
                                 } else{
                                     exec(statement, function(err){
@@ -84,7 +86,8 @@ exports.rename = function (req, res) {
                                             res.status(500).send();
                                         } else{
                                             res.status(200).send({msg : "폴더이름 변경이 완료되었습니다"});
-                                        }
+					    db.close();
+					}
                                     });
                                 }
                             });
@@ -92,7 +95,6 @@ exports.rename = function (req, res) {
                     });
                 }
             });
-            db.close();
         })
     } else {
         mongodb(function (db) {
@@ -101,24 +103,25 @@ exports.rename = function (req, res) {
                     console.log (err);
                     res.status(500).send();
                 } else{
-                    result[0]._id = path+'/'+nextName;
-                    db.collection(''+classNum).insert(result[0], function (err) {
+                    result._id = path+'/'+nextName;
+		    db.collection(''+classNum).remove({ _id: path+'/'+prevName }, function (err){
                         if(err) {
-                            console.log (err);
+                            console.log ('remove err :', err);
                             res.status(500).send();
                         } else {
-                            db.collection(''+classNum).remove({ _id:path+'/'+prevName }, function (err){
+			    db.collection(''+classNum).insert(result , function (err) {
                                 if(err) {
-                                    console.log (err);
+                                    console.log ('insert err :', err);
                                     res.status(500).send();
                                 } else{
                                     exec(statement, function(err){
                                         if(err) {
-                                            console.log (err);
+                                            console.log ('exec err : ',err);
                                             res.status(500).send();
                                         } else{
                                             res.status(200).send({msg : "파일이름 변경이 완료되었습니다"});
-                                        }
+                                            db.close();
+					}
                                     });
                                 }
                             });
@@ -126,7 +129,6 @@ exports.rename = function (req, res) {
                     });
                 }
             });
-            db.close();
         });
     }
 };
@@ -156,11 +158,11 @@ exports.delete = function (req, res) {
                 			res.status(500).send();
             			} else{
                 			res.status(200).send({msg : "폴더 삭제가 완료되었습니다"});
-            			}
+					db.close();
+				}
         		    });
-		        }
-           });
-           db.close();
+		  }
+           	});
 	    });
     } else {
         statement += 'rm ' + fileName +'"';
@@ -177,11 +179,11 @@ exports.delete = function (req, res) {
                             res.status(500).send();
                         } else{
                             res.status(200).send({msg : "폴더 삭제가 완료되었습니다"});
-                        }
+                            db.close();
+			}
                     });
                 }
             });
-            db.close();
         });
     }
 

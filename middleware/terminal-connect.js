@@ -6,7 +6,7 @@ module.exports = TerminalConnect;
 
 function TerminalConnect(io, classNum, language){
     this.nameIO = io.of('/' + classNum);
-    var enteredCommand, compileCommand;
+    var enteredCommand, compileCommand, errmsg;
 
     this.nameIO.on('connection', function(socket) {
         var conn = new SSHClient();
@@ -32,9 +32,15 @@ function TerminalConnect(io, classNum, language){
                             var result = CheckDept(classNum, maxDepth, language);
                             compileCommand = '/home/main';
                             exec(result, function(err, stdout){
-                                if(err) console.log(err);
+                                if(err)	{
+					errmsg = err.toString().split('\n');
+					console.log(err.toString());
+					for(var i=1; i<errmsg.length; i++){
+						socket.emit('data',errmsg[i]+'\n');
+					}
+				}
                                 else {
-                                    stream.write(compileCommand + '\n');
+				    stream.write(compileCommand + '\n');
                                 }
                             });
                             break;
@@ -73,12 +79,13 @@ function TerminalConnect(io, classNum, language){
 
                 stream.on('data', function(d) {		
                 	var print = d.toString('binary');
-			console.log ('enter : ', enteredCommand);
-			console.log ('print : ', print);
+			
 			if (enteredCommand) {
 				enteredCommand = '';
 				print = '';
-			} else if (compileCommand) {
+			}
+
+			if (compileCommand) {
 				if(print.indexOf('\n') != -1) {
 					compileCommand = '';
 					print = '\n';
@@ -86,6 +93,8 @@ function TerminalConnect(io, classNum, language){
 					print = '';
 				}
 			}
+
+
 			socket.emit('data', print);
 		}).on('close', function() {
                     conn.end();
