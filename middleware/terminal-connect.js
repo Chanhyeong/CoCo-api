@@ -16,7 +16,8 @@ function TerminalConnect(io, classNum, language){
             conn.shell(function(err, stream) {
                 
 		if (err)  return socket.emit('data', '\r\n--- Error. refresh this page please. ---: ' + err.message + ' ***\r\n');
-	        
+
+		// 프론트에서 오는 터미널 명령어
 		socket.on('command', function(data) {
                     if (stream.writable) {
                         data += '\n';
@@ -31,55 +32,38 @@ function TerminalConnect(io, classNum, language){
                         case 'c' :
                             var result = CheckDept(classNum, maxDepth, language);
                             compileCommand = '/home/main';
-                            exec(result, function(err, stdout){
-                                if(err)	{
-					errmsg = err.toString().split('\n');
-					console.log(err.toString());
-					for(var i=1; i<errmsg.length; i++){
-						socket.emit('data',errmsg[i]+'\n');
-					}
-				}
-                                else {
-				    stream.write(compileCommand + '\n');
-                                }
-                            });
+
                             break;
                         case 'java' :
                             var result = CheckDept(classNum, maxDepth, language);
                             compileCommand = 'java -cp /home com.example.Main\n';
-                            exec(result, function(err, stdout){
-                                if(err) console.log(err);
-                                else {
-                                    stream.write(compileCommand + '\n');
-                                }
-                            });
                             break;
                         case 'c++' :
                             var result = CheckDept(classNum, maxDepth, language);
                             compileCommand = '/home/main';
-                            exec(result, function(err, stdout){
-                                if(err) console.log(err);
-                                else {
-                                    stream.write(compileCommand + '\n');
-                                }
-                            });
                             break;
                         case 'python' :
                             var result = CheckDept(classNum, maxDepth, language);
-			    compileCommand = 'python3 /home/__pycache__/*.pyc';
-                            exec(result, function(err, stdout){
-                                if(err) console.log(err);
-                                else {
-                                    stream.write(compileCommand + '\n');
-                                }
-                            });
+			                compileCommand = 'python3 /home/__pycache__/*.pyc';
                             break;
                     }
+                    exec(result, function(err){
+                        if(err)	{
+                            errmsg = err.toString().split('\n');
+                            console.log(err.toString());
+                            for(var i=1; i<errmsg.length; i++){
+                                socket.emit('data',errmsg[i]+'\n');
+                            }
+                        } else {
+                            stream.write(compileCommand + '\n');
+                        }
+                    });
                 });
 
-                stream.on('data', function(d) {		
-                	var print = d.toString('binary');
-			
+		// docker에서 오는 데이터들
+		stream.on('data', function(d) {
+            var print = d.toString('binary');
+
 			if (enteredCommand) {
 				enteredCommand = '';
 				print = '';
@@ -93,8 +77,6 @@ function TerminalConnect(io, classNum, language){
 					print = '';
 				}
 			}
-
-
 			socket.emit('data', print);
 		}).on('close', function() {
                     conn.end();
