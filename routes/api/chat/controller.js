@@ -1,5 +1,4 @@
 var model = require('./model');
-var boardModel = require('../board/model');
 var fs = require('fs');
 var exec = require('child_process').exec;
 var editorDb = require('../../../middleware/database').mongodb.editorDb;

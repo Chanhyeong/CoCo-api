@@ -62,7 +62,8 @@ exports.getMessage = function (mode, userNickname, chatNumber, callback) {
         mongodb(function (db) {
             db.collection(mode).findOne( { _id : chatNumber }, function (err, chatResult) {
                 if (err) {
-                    callback(err);
+                    console.log(err);
+                    callback(500);
                 } else {
                     callback(null, [{
                         log: chatResult.log,
