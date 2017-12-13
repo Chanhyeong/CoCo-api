@@ -165,7 +165,7 @@ exports.delete = function (req, res) {
                     } else{
                         exec(statement, function (err){
                             if (err) {
-                                console.log (err);
+                                console.log(err);
                                 res.status(500).send();
                             } else {
                                 sendCompleteMessageToSocket('onDelete', req.body);
@@ -180,9 +180,10 @@ exports.delete = function (req, res) {
         statement += 'rm ' + fileName +'"';
 
         mongodb(function (db) {
-            db.collection(''+classNum).remove({_id: path+'/'+fileName }, function (err) {
+            db.collection(classNum).remove({_id: path+'/'+fileName }, function (err) {
                 if (err) {
                     console.log(err);
+                    res.status(500).send();
                 } else {
                     exec(statement, function(err){
                         if(err) {

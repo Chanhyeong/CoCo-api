@@ -125,7 +125,7 @@ function CheckCommand(classNum, maxDepth, language){
 }
 
 TerminalConnect.prototype.sendDirectoryUpdate = function (eventName, classNum, data) {
-    this.nameIO.to(classNum).emit(eventName, data);
+    this.nameIO.emit(eventName, data);
 };
 
 function wait(msecs)
