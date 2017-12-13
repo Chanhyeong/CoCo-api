@@ -9,7 +9,7 @@ module.exports = {
             password: 'whdtjf123@',
             database: 'coco'
         },
-        pool: { min: 0, max: 10 }
+        pool: { min: 0, max: 20 }
     },
     mongoUrl: {
         chat: 'mongodb://external.cocotutor.ml:27017/chat',
