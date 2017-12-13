@@ -57,7 +57,7 @@ exports.create = function (req, res) {
                 _v: 1,
                 _m: { ctime: creationTime, mtime: creationTime},
                 _o: createdObjectId
-            }
+            })
         });
     }
 
