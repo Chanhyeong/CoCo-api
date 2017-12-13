@@ -1,6 +1,7 @@
 var exec = require('child_process').exec;
 var mongodb = require('../../../../middleware/database').mongodb.editorDb;
 var terminalPool = require('../controller').currentTerminalPool;
+var ObjectId = require('mongodb').ObjectID;
 
 function sendCompleteMessageToSocket(mode, data) {
     var classNum = data.classNum;
@@ -46,14 +47,33 @@ exports.create = function (req, res) {
         msg = "파일 생성이 완료되었습니다.";
     }
 
-    exec(statement, function(err) {
-        if (err) {
-            console.log (err);
-            res.status(500).send();
-        } else {
-            sendCompleteMessageToSocket('onCreate', req.body);
-            res.status(200).send({msg : msg});
-        }
+    var createdObjectId = new ObjectId();
+    var creationTime = Date.now();
+
+    mongodb(function (db) {
+        db.collection(classNum.toString()).insertOne({
+            _id: path + '/' + fileName,
+            content: '',
+            _type: "http://sharejs.org/types/JSONv0",
+            _v: 0,
+            _m: { ctime: creationTime, mtime: creationTime},
+            _o: createdObjectId
+        }, function (err) {
+            if (err) {
+                console.log(err);
+                res.status(500).send();
+            } else {
+                exec(statement, function (err) {
+                    if (err) {
+                        console.log(err);
+                        res.status(500).send();
+                    } else {
+                        sendCompleteMessageToSocket('onCreate', req.body);
+                        res.status(200).send({msg: msg});
+                    }
+                });
+            }
+        })
     });
 };
 
