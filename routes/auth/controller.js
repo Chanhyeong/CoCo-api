@@ -7,10 +7,10 @@ exports.signIn = function (req, res) {
         if (passwordResult === 500) {
             res.status(500).send();
         } else if (!passwordResult.length) {// DB에 ID가 없을 경우
-            res.status(401).send('id가 존재하지 않습니다.');
+            res.status(401).json({ err: 'id가 존재하지 않습니다.' });
         } else {
             if (!bcrypt.compareSync(req.body.password, passwordResult[0].password)) { // 비밀번호 불일치
-                res.status(401).send('password를 확인하세요.');
+                res.status(401).send({ err: 'password를 확인하세요.' });
             } else {// 모든게 정상적으로 확인됐을 때
                 userModel.getUser(req.body.id, function (userResult) {
                     if (userResult === 500) {
