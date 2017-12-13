@@ -62,11 +62,10 @@ exports.save = function (req, res){
                         if (err) {
                             console.log(err);
                             res.status(500).send("file write error");
-                        } else {
-                            res.status(200).json({msg: '저장이 완료되었습니다.'});
                         }
                     });
                 }
+                res.status(200).json({msg: '저장이 완료되었습니다.'});
             }
         });
         db.close();
