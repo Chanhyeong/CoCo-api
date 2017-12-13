@@ -153,12 +153,6 @@ function deleteByChatNumber (chatNumber, callback) {
             if (err) {
                 console.log(err);
                 callback(500);
-            } else {
-                knex.del().from('chat').where('num', chatNumber)
-                    .catch(function (err) {
-                        console.log(err);
-                        callback(500);
-                    }).then(callback);
             }
         });
     });
