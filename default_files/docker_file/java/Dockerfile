@@ -5,6 +5,8 @@ RUN apt-get -y install vim
 RUN apt-get -y install sudo
 RUN apt-get install -y net-tools openssh-server tree
 RUN apt-get -y install default-jre
+RUN apt-get install openjdk-7-jdk
+RUN echo export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64/ >> /etc/bash.bashrc
 RUN mkdir /var/run/sshd
 RUN chmod -x /etc/update-motd.d/*
 RUN rm /etc/legal
