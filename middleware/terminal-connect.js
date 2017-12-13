@@ -37,7 +37,7 @@ function TerminalConnect(io, classNum, language){
                             compileCommand = '/home/main';
                             break;
                         case 'python' :
-			                compileCommand = 'python3 /home/__pycache__/*.pyc';
+                            compileCommand = 'python3 /home/__pycache__/*.pyc';
                             break;
                     }
                     exec(result, function(err){
@@ -52,25 +52,25 @@ function TerminalConnect(io, classNum, language){
                         }
                     });
                 });
-		// docker에서 오는 데이터들
-		stream.on('data', function(d) {
-            var print = d.toString('binary');
+                // docker에서 오는 데이터들
+                stream.on('data', function(d) {
+                    var print = d.toString('binary');
 
-			if (enteredCommand) {
-				enteredCommand = '';
-				print = '';
-			}
+                    if (enteredCommand) {
+                        enteredCommand = '';
+                        print = '';
+                    }
 
-			if (compileCommand) {
-				if(print.indexOf('\n') != -1) {
-					compileCommand = '';
-					print = '\n';
-				} else {
-					print = '';
-				}
-			}
-			socket.emit('data', print);
-		}).on('close', function() {
+                    if (compileCommand) {
+                        if(print.indexOf('\n') != -1) {
+                            compileCommand = '';
+                            print = '\n';
+                        } else {
+                            print = '';
+                        }
+                    }
+                    socket.emit('data', print);
+                }).on('close', function() {
                     conn.end();
                 });
             });
@@ -89,43 +89,43 @@ function TerminalConnect(io, classNum, language){
 
 function CheckCommand(classNum, maxDepth, language){
 
-        var result, cd;
+    var result, cd;
 
-        switch(language) {
-            case 'c' :
-                result = 'gcc -o /home/main';
-                for (var i = 1; i <= maxDepth; i++) {
-                    cd = ' home/coco/src/' + Array(i).join("*/") + '*.c';
-                    result += cd;
-                }
-                break;
-            case 'java' :
-                result = 'javac -d /home/';
-                for (var i = 2; i <= maxDepth; i++) {
-                    cd = ' home/coco/com/' + Array(i).join("*/") + '*.java';
-                    result += cd;
-                }
-                break;
-            case 'c++' :
-                result = 'gcc -o /home/main';
-                for (var i = 1; i <= maxDepth; i++) {
-                    cd = ' home/coco/src/' + Array(i).join("*/") + '*.cpp';
-                    result += cd;
-                }
-                break;
-            case 'python' :
-                result = 'rm -rf /home/__pycache__ && python3 -m compileall /home/coco && ' +
-			            'chmod +x /home/coco/src/__pycache__/*.pyc && mv -f /home/coco/src/__pycache__ /home';
-                break;
-        }
+    switch(language) {
+        case 'c' :
+            result = 'gcc -o /home/main';
+            for (var i = 1; i <= maxDepth; i++) {
+                cd = ' home/coco/src/' + Array(i).join("*/") + '*.c';
+                result += cd;
+            }
+            break;
+        case 'java' :
+            result = 'javac -d /home/';
+            for (var i = 2; i <= maxDepth; i++) {
+                cd = ' home/coco/com/' + Array(i).join("*/") + '*.java';
+                result += cd;
+            }
+            break;
+        case 'c++' :
+            result = 'gcc -o /home/main';
+            for (var i = 1; i <= maxDepth; i++) {
+                cd = ' home/coco/src/' + Array(i).join("*/") + '*.cpp';
+                result += cd;
+            }
+            break;
+        case 'python' :
+            result = 'rm -rf /home/__pycache__ && python3 -m compileall /home/coco && ' +
+                'chmod +x /home/coco/src/__pycache__/*.pyc && mv -f /home/coco/src/__pycache__ /home';
+            break;
+    }
 
-	    result = 'docker exec '+classNum+' bash -c "' + result + '"';
+    result = 'docker exec '+classNum+' bash -c "' + result + '"';
 
-        return result;
+    return result;
 }
 
-TerminalConnect.prototype.sendDirectoryUpdate = function (classNum, data) {
-    this.nameIO.to(classNum).emit('directory', data);
+TerminalConnect.prototype.sendDirectoryUpdate = function (eventName, classNum, data) {
+    this.nameIO.to(classNum).emit(eventName, data);
 };
 
 function wait(msecs)

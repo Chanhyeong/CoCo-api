@@ -2,12 +2,12 @@ var exec = require('child_process').exec;
 var mongodb = require('../../../../middleware/database').mongodb.editorDb;
 var terminalPool = require('../controller').currentTerminalPool;
 
-function sendCompleteMessageToSocket(data) {
+function sendCompleteMessageToSocket(mode, data) {
     var classNum = data.classNum;
 
     // 터미널 풀이 없을 때 에러처리는 미구현
     if (terminalPool[classNum]) {
-        terminalPool[classNum].sendDirectoryUpdate(classNum, data)
+        terminalPool[classNum].sendDirectoryUpdate(mode, classNum, data)
     }
 }
 
@@ -39,10 +39,10 @@ exports.create = function (req, res) {
     var statement = 'docker exec ' + classNum + ' bash -c "cd /home/coco' + path +' && ';
 
     if (type === 'directory'){
-        statement += ('mkdir ' + fileName +'"');
+        statement += ('mkdir ' + fileName + '"');
         msg = "폴더 생성이 완료되었습니다.";
     } else {
-        statement += ('touch ' + fileName)+'"';
+        statement += ('touch ' + fileName) + '"';
         msg = "파일 생성이 완료되었습니다.";
     }
 
@@ -51,7 +51,7 @@ exports.create = function (req, res) {
             console.log (err);
             res.status(500).send();
         } else {
-            sendCompleteMessageToSocket(req.body);
+            sendCompleteMessageToSocket('onCreate', req.body);
             res.status(200).send({msg : msg});
         }
     });
@@ -94,7 +94,7 @@ exports.rename = function (req, res) {
                                             console.log(err);
                                             res.status(500).send();
                                         } else{
-                                            sendCompleteMessageToSocket(req.body);
+                                            sendCompleteMessageToSocket('onRename', req.body);
                                             res.status(200).send({msg : "폴더이름 변경이 완료되었습니다"});
                                             db.close();
                                         }
@@ -129,7 +129,7 @@ exports.rename = function (req, res) {
                                             console.log('exec err : ',err);
                                             res.status(500).send();
                                         } else{
-                                            sendCompleteMessageToSocket(req.body);
+                                            sendCompleteMessageToSocket('onRename', req.body);
                                             res.status(200).json({ msg : '파일이름 변경이 완료되었습니다' });
                                             db.close();
                                         }
@@ -153,7 +153,7 @@ exports.delete = function (req, res) {
 
     var statement = 'docker exec ' + classNum + ' bash -c "cd /home/coco' + path +' && ';
 
-    if(type === 'directory'){
+    if (type === 'directory'){
         statement += 'rm -r ' + fileName +'"';
 
         mongodb(function (db) {
@@ -168,7 +168,7 @@ exports.delete = function (req, res) {
                                 console.log (err);
                                 res.status(500).send();
                             } else {
-                                sendCompleteMessageToSocket(req.body);
+                                sendCompleteMessageToSocket('onDelete', req.body);
                                 res.status(200).send({ msg : '폴더 삭제가 완료되었습니다' });
                                 db.close();
                             }
@@ -189,7 +189,7 @@ exports.delete = function (req, res) {
                             console.log ('remove err ', err);
                             res.status(500).send();
                         } else {
-                            sendCompleteMessageToSocket(req.body);
+                            sendCompleteMessageToSocket('onDelete', req.body);
                             res.status(200).json({ msg : '폴더 삭제가 완료되었습니다' });
                             db.close();
                         }
@@ -215,7 +215,7 @@ exports.move = function (req, res) {
             console.log (err);
             res.status(500).send();
         } else {
-            sendCompleteMessageToSocket(req.body);
+            sendCompleteMessageToSocket('onMove', req.body);
             res.status(200).send();
         }
     });
