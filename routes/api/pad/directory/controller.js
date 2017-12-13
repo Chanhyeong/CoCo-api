@@ -170,6 +170,13 @@ exports.delete = function (req, res) {
     var fileName = req.query.fileName;
     var path = req.query.path;
 
+    var data = {
+        classNum: classNum,
+        type: type,
+        fileName: fileName,
+        path: path
+    };
+
     var statement = 'docker exec ' + classNum + ' bash -c "cd /home/coco' + path +' && ';
 
     if (type === 'directory') {
@@ -187,7 +194,7 @@ exports.delete = function (req, res) {
                                 console.log(err);
                                 res.status(500).send();
                             } else {
-                                sendCompleteMessageToSocket('onDelete', req.body);
+                                sendCompleteMessageToSocket('onDelete', data);
                                 res.status(200).send({ msg : '폴더 삭제가 완료되었습니다' });
                                 db.close();
                             }
@@ -209,8 +216,8 @@ exports.delete = function (req, res) {
                             console.log('remove err ', err);
                             res.status(500).send();
                         } else {
-                            sendCompleteMessageToSocket('onDelete', req.body);
-                            res.status(200).json({ msg : '폴더 삭제가 완료되었습니다' });
+                            sendCompleteMessageToSocket('onDelete', data);
+                            res.status(200).json({ msg : '파일 삭제가 완료되었습니다' });
                             db.close();
                         }
                     });
