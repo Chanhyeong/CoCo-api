@@ -12,38 +12,31 @@ function TerminalConnect(io, classNum, language){
         var conn = new SSHClient();
         conn.on('ready', function() {
             enteredCommand = '';
-
             conn.shell(function(err, stream) {
-                
-		if (err)  return socket.emit('data', '\r\n--- Error. refresh this page please. ---: ' + err.message + ' ***\r\n');
-
-		// 프론트에서 오는 터미널 명령어
-		socket.on('command', function(data) {
+                if (err)  return socket.emit('data', '\r\n--- Error. refresh this page please. ---: ' + err.message + ' ***\r\n');
+                // 프론트에서 오는 터미널 명령어
+                socket.on('command', function(data) {
                     if (stream.writable) {
                         data += '\n';
-			enteredCommand = data;
+                        enteredCommand = data;
                         stream.write(data);
                     } else {
                         socket.emit('data', '\r\n--- Disconnected. Please refresh this page. ---\r\n')
                     }
                 }).on('run', function(maxDepth){
                     console.log('start RUN as ', language);
+                    var result = CheckCommand(classNum, maxDepth, language);
                     switch(language){
                         case 'c' :
-                            var result = CheckDept(classNum, maxDepth, language);
                             compileCommand = '/home/main';
-
                             break;
                         case 'java' :
-                            var result = CheckDept(classNum, maxDepth, language);
                             compileCommand = 'java -cp /home com.example.Main\n';
                             break;
                         case 'c++' :
-                            var result = CheckDept(classNum, maxDepth, language);
                             compileCommand = '/home/main';
                             break;
                         case 'python' :
-                            var result = CheckDept(classNum, maxDepth, language);
 			                compileCommand = 'python3 /home/__pycache__/*.pyc';
                             break;
                     }
@@ -59,7 +52,6 @@ function TerminalConnect(io, classNum, language){
                         }
                     });
                 });
-
 		// docker에서 오는 데이터들
 		stream.on('data', function(d) {
             var print = d.toString('binary');
@@ -95,7 +87,7 @@ function TerminalConnect(io, classNum, language){
     })
 }
 
-function CheckDept(classNum, maxDepth, language){
+function CheckCommand(classNum, maxDepth, language){
 
         var result, cd;
 
