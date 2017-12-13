@@ -39,10 +39,10 @@ exports.createTerminalConnect = function (req, res, next){
                         } else {
                             language = languageResult[0].language;
                             terminalPool[classNum] = new TerminalConnect(req.app.get('io'), classNum, language);
-                            next();
                         }
                     });
                 }
+                next();
             }
         }
     });

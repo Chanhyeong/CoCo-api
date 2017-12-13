@@ -129,8 +129,8 @@ exports.create = function (mode, data, time, callback) {
     });
 };
 
-exports.deleteByClassNumber = function (classNumber, callback) {
-    knex.select('num').from('chat').where({classNum: classNumber})
+exports.deleteByClassNumber = function (classNum, callback) {
+    knex.select('num').from('chat').where('class_number', classNum)
         .then(function (result) {
             for (var index in result) {
                 deleteByChatNumber(result[index], function (status) {
