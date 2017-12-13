@@ -16,10 +16,6 @@ DataHandler.prototype.init = function (io) {
     });
 };
 
-DataHandler.prototype.sendDirectory = function (classNum, object) {
-    dataSocket.to(classNum).emit('chat', object);
-};
-
 DataHandler.prototype.sendMessage = function (classNum, message) {
     dataSocket.to(classNum).emit('chat', message);
 };

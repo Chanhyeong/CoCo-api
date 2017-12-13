@@ -124,6 +124,10 @@ function CheckCommand(classNum, maxDepth, language){
         return result;
 }
 
+TerminalConnect.prototype.sendDirectoryUpdate = function (classNum, data) {
+    this.nameIO.to(classNum).emit('directory', data);
+};
+
 function wait(msecs)
 {
     var start = new Date().getTime();

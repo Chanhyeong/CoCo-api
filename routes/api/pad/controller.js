@@ -6,6 +6,8 @@ var TerminalConnect = require('../../../middleware/terminal-connect');
 
 var terminalPool = {};
 
+exports.currentTerminalPool = terminalPool;
+
 exports.createTerminalConnect = function (req, res, next){
     var language, classNum = req.params.classNum;
 
@@ -22,25 +24,25 @@ exports.createTerminalConnect = function (req, res, next){
                     err: '이 클래스에 접근할 권한이 없습니다.'
                 })
             } else {
-                exec('docker start '+ classNum, function (err) {
-                    if (err) {
-                        console.log('exec error : docker start', err);
-                    }
-                });
-
-                boardModel.getLanguage(classNum, function (languageResult) {
-                    if (languageResult === 500) {
-                        console.log('DB select error', err);
-                        res.status(500).send('Err: DB select error');
-                    } else {
-                        language = languageResult[0].language;
-
-                        if (!terminalPool[classNum]) {
-                            terminalPool[classNum] = new TerminalConnect(req.app.get('io'), classNum, language);
+                if (!terminalPool[classNum]) {
+                    exec('docker start ' + classNum, function (err) {
+                        if (err) {
+                            console.log('exec error : docker start', err);
+                            res.status(500).json({ err: '컨테이너 생성 실패'});
                         }
-                        next();
-                    }
-                });
+                    });
+
+                    boardModel.getLanguage(classNum, function (languageResult) {
+                        if (languageResult === 500) {
+                            console.log('DB select error', err);
+                            res.status(500).json({ err: '데이터베이스 에러 발생'});
+                        } else {
+                            language = languageResult[0].language;
+                            terminalPool[classNum] = new TerminalConnect(req.app.get('io'), classNum, language);
+                            next();
+                        }
+                    });
+                }
             }
         }
     });
@@ -69,5 +71,4 @@ exports.save = function (req, res){
         });
         db.close();
     });
-
 };
