@@ -45,35 +45,30 @@ exports.create = function (req, res) {
     } else {
         statement += ('touch ' + fileName) + '"';
         msg = "파일 생성이 완료되었습니다.";
+
+        var createdObjectId = new ObjectId();
+        var creationTime = Date.now();
+
+        mongodb(function (db) {
+            db.collection(classNum.toString()).insertOne({
+                _id: path + '/' + fileName,
+                content: '',
+                _type: "http://sharejs.org/types/JSONv0",
+                _v: 0,
+                _m: { ctime: creationTime, mtime: creationTime},
+                _o: createdObjectId
+            }
+        });
     }
 
-    var createdObjectId = new ObjectId();
-    var creationTime = Date.now();
-
-    mongodb(function (db) {
-        db.collection(classNum.toString()).insertOne({
-            _id: path + '/' + fileName,
-            content: '',
-            _type: "http://sharejs.org/types/JSONv0",
-            _v: 0,
-            _m: { ctime: creationTime, mtime: creationTime},
-            _o: createdObjectId
-        }, function (err) {
-            if (err) {
-                console.log(err);
-                res.status(500).send();
-            } else {
-                exec(statement, function (err) {
-                    if (err) {
-                        console.log(err);
-                        res.status(500).send();
-                    } else {
-                        sendCompleteMessageToSocket('onCreate', req.body);
-                        res.status(200).send({msg: msg});
-                    }
-                });
-            }
-        })
+    exec(statement, function (err) {
+        if (err) {
+            console.log(err);
+            res.status(500).send();
+        } else {
+            sendCompleteMessageToSocket('onCreate', req.body);
+            res.status(200).send({msg: msg});
+        }
     });
 };
 
