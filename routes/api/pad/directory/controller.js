@@ -54,7 +54,7 @@ exports.create = function (req, res) {
                 _id: path + '/' + fileName,
                 content: '',
                 _type: "http://sharejs.org/types/JSONv0",
-                _v: 0,
+                _v: 1,
                 _m: { ctime: creationTime, mtime: creationTime},
                 _o: createdObjectId
             }
