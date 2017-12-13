@@ -144,26 +144,25 @@ exports.rename = function (req, res) {
     }
 };
 
-
 exports.delete = function (req, res) {
-    var classNum = req.query.classNum;
+    var classNum = req.query.classNum.toString();
     var type = req.query.type;
     var fileName = req.query.fileName;
     var path = req.query.path;
 
     var statement = 'docker exec ' + classNum + ' bash -c "cd /home/coco' + path +' && ';
 
-    if (type === 'directory'){
+    if (type === 'directory') {
         statement += 'rm -r ' + fileName +'"';
 
         mongodb(function (db) {
-            db.collection(''+classNum)
-                .remove({_id : {'$regex' : '^'+path+'/'+fileName, '$options' : 'i'}}, function(err){
+            db.collection(classNum)
+                .remove({_id : {'$regex' : '^' + path + '/' + fileName, '$options' : 'i'}}, function (err) {
                     if (err) {
                         console.log ('remove err : ' , err);
                         res.status(500).send();
-                    } else{
-                        exec(statement, function (err){
+                    } else {
+                        exec(statement, function (err) {
                             if (err) {
                                 console.log(err);
                                 res.status(500).send();
@@ -177,17 +176,17 @@ exports.delete = function (req, res) {
                 });
         });
     } else {
-        statement += 'rm ' + fileName +'"';
+        statement += 'rm ' + fileName + '"';
 
         mongodb(function (db) {
-            db.collection(classNum).remove({_id: path+'/'+fileName }, function (err) {
+            db.collection(classNum).remove({_id: path + '/' + fileName }, function (err) {
                 if (err) {
                     console.log(err);
                     res.status(500).send();
                 } else {
-                    exec(statement, function(err){
-                        if(err) {
-                            console.log ('remove err ', err);
+                    exec(statement, function (err) {
+                        if (err) {
+                            console.log('remove err ', err);
                             res.status(500).send();
                         } else {
                             sendCompleteMessageToSocket('onDelete', req.body);
