@@ -43,7 +43,6 @@ function TerminalConnect(io, classNum, language){
                     exec(result, function(err){
                         if(err)	{
                             errmsg = err.toString().split('\n');
-                            console.log(err.toString());
                             for(var i=1; i<errmsg.length; i++){
                                 socket.emit('data',errmsg[i]+'\n');
                             }
@@ -64,7 +63,7 @@ function TerminalConnect(io, classNum, language){
                     if (compileCommand) {
                         if(print.indexOf('\n') != -1) {
                             compileCommand = '';
-                            print = '\n';
+                            print = '';
                         } else {
                             print = '';
                         }
