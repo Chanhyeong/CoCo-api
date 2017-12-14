@@ -74,7 +74,7 @@ function TerminalConnect(io, classNum, language){
                 });
             });
         }).on('close', function() {
-            socket.emit('data', '\r\n*** SSH CONNECTION CLOSED ***\r\n');
+            socket.emit('onClose', '\r\n*** SSH CONNECTION CLOSED ***\r\n');
         }).on('error', function(err) {
             socket.emit('data', '\r\n*** SSH CONNECTION ERROR: ' + err.message + ' ***\r\n')
         }).connect({
