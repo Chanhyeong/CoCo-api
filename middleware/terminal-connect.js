@@ -44,7 +44,7 @@ function TerminalConnect(io, classNum, language){
                         if(err)	{
                             errmsg = err.toString().split('\n');
                             for(var i=1; i<errmsg.length; i++){
-                                socket.emit('data',errmsg[i]+'\n');
+                                socket.emit('data',errmsg[i]);
                             }
                         } else {
                             stream.write(compileCommand + '\n');
