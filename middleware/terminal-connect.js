@@ -1,21 +1,22 @@
-// TODO: 시작 시 모든 포트에 대한 소켓을 열기 or 프로젝트 접속자 파악해서 열고 닫기
 var SSHClient = require('ssh2').Client;
 var exec = require('child_process').exec;
 
 module.exports = TerminalConnect;
 
-function TerminalConnect(io, classNum, language){
+function TerminalConnect(io, classNum, language) {
     this.nameIO = io.of('/' + classNum);
     var enteredCommand, compileCommand, errmsg;
 
-    this.nameIO.on('connection', function(socket) {
+    this.nameIO.on('connection', function (socket) {
         var conn = new SSHClient();
         conn.on('ready', function() {
             enteredCommand = '';
-            conn.shell(function(err, stream) {
-                if (err)  return socket.emit('data', '\r\n--- Error. refresh this page please. ---: ' + err.message + ' ***\r\n');
+            conn.shell(function (err, stream) {
+                if (err) {
+                    return socket.emit('data', '\r\n--- Error. refresh this page please. ---: ' + err.message + ' ***\r\n');
+                }
                 // 프론트에서 오는 터미널 명령어
-                socket.on('command', function(data) {
+                socket.on('command', function (data) {
                     if (stream.writable) {
                         data += '\n';
                         enteredCommand = data;
@@ -23,10 +24,9 @@ function TerminalConnect(io, classNum, language){
                     } else {
                         socket.emit('data', '\r\n--- Disconnected. Please refresh this page. ---\r\n')
                     }
-                }).on('run', function(maxDepth){
-                    console.log('start RUN as ', language);
+                }).on('run', function (maxDepth) {
                     var result = CheckCommand(classNum, maxDepth, language);
-                    switch(language){
+                    switch(language) {
                         case 'c' :
                             compileCommand = '/home/main';
                             break;
@@ -40,11 +40,11 @@ function TerminalConnect(io, classNum, language){
                             compileCommand = 'python3 /home/__pycache__/*.pyc';
                             break;
                     }
-                    exec(result, function(err){
+                    exec(result, function(err) {
                         if(err)	{
                             errmsg = err.toString().split('\n');
-                            for(var i=1; i<errmsg.length; i++){
-                                socket.emit('data',errmsg[i]);
+                            for(var i = 1; i < errmsg.length; i++){
+                                socket.emit('data', errmsg[i]);
                             }
                         } else {
                             stream.write(compileCommand + '\n');
@@ -118,7 +118,7 @@ function CheckCommand(classNum, maxDepth, language){
             break;
     }
 
-    result = 'docker exec '+classNum+' bash -c "' + result + '"';
+    result = 'docker exec ' + classNum + ' bash -c "' + result + '"';
 
     return result;
 }
@@ -126,13 +126,3 @@ function CheckCommand(classNum, maxDepth, language){
 TerminalConnect.prototype.sendDirectoryUpdate = function (eventName, classNum, data) {
     this.nameIO.emit(eventName, data);
 };
-
-function wait(msecs)
-{
-    var start = new Date().getTime();
-    var cur = start;
-    while(cur - start < msecs)
-    {
-        cur = new Date().getTime();
-    }
-}
