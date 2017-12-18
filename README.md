@@ -3,7 +3,9 @@ The back-end of [CoCo](https://github.com/highalps/CoCo)
 
 Resolve requests (Rest API) from clients
 
-Currently client available www.cocotutor.ml (2017/12/6)
+Currently client available www.cocotutor.ml (2017/12/19)
+
+Structure reference - [auth-example-api](https://github.com/kimdhoe/auth-example-api/)
 
 ## Features
 * Interactive text editor service using [ShareDB](https://github.com/share/sharedb)
@@ -12,6 +14,8 @@ Currently client available www.cocotutor.ml (2017/12/6)
 * Independent container for each class using [docker](https://www.docker.com)
 * CRUD operations about class and user
 
+
+(The followings weren't be tested, they may not work well.)
 ## Prerequisites
 Install MySQL, MongoDB, Docker on Ubuntu 16.04 LTS
 ```
@@ -64,5 +68,18 @@ npm install
 npm start
 ```
 
-### Structure reference
-[auth-example-api](https://github.com/kimdhoe/auth-example-api/)
+## Test
+You can run API test, only about /auth.
+
+The others are complicated to test because they need user information and jwt token.
+
+Before progress, start server.
+```
+npm start
+```
+
+
+And do test on another shell.
+```
+npm run test
+```
