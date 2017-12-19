@@ -1,5 +1,6 @@
 var SSHClient = require('ssh2').Client;
 var exec = require('child_process').exec;
+var config = require('../config').containerInformation;
 
 module.exports = TerminalConnect;
 
@@ -78,43 +79,42 @@ function TerminalConnect(io, classNum, language) {
         }).on('error', function(err) {
             socket.emit('data', '\r\n*** SSH CONNECTION ERROR: ' + err.message + ' ***\r\n')
         }).connect({
-            host: 'external.cocotutor.ml',
+            host: config.host,
             port: classNum,
-            username: 'coco',
-            password: 'whdtjf123@'
+            username: config.username,
+            password: config.password
         });
     })
 }
 
 function CheckCommand(classNum, maxDepth, language){
-
     var result, cd;
 
     switch(language) {
         case 'c' :
             result = 'gcc -o /home/main';
             for (var i = 1; i <= maxDepth; i++) {
-                cd = ' home/coco/src/' + Array(i).join("*/") + '*.c';
+                cd = ' home/' + config.username + '/src/' + Array(i).join("*/") + '*.c';
                 result += cd;
             }
             break;
         case 'java' :
             result = 'javac -d /home/';
             for (var i = 2; i <= maxDepth; i++) {
-                cd = ' home/coco/com/' + Array(i).join("*/") + '*.java';
+                cd = ' home/' + config.username + '/com/' + Array(i).join("*/") + '*.java';
                 result += cd;
             }
             break;
         case 'c++' :
             result = 'gcc -o /home/main';
             for (var i = 1; i <= maxDepth; i++) {
-                cd = ' home/coco/src/' + Array(i).join("*/") + '*.cpp';
+                cd = ' home/' + config.username + '/src/' + Array(i).join("*/") + '*.cpp';
                 result += cd;
             }
             break;
         case 'python' :
-            result = 'rm -rf /home/__pycache__ && python3 -m compileall /home/coco && ' +
-                'chmod +x /home/coco/src/__pycache__/*.pyc && mv -f /home/coco/src/__pycache__ /home';
+            result = 'rm -rf /home/__pycache__ && python3 -m compileall /home/' + config.username + ' && ' +
+                'chmod +x /home/' + config.username + '/src/__pycache__/*.pyc && mv -f /home/' + config.username + '/src/__pycache__ /home';
             break;
     }
 

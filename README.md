@@ -32,8 +32,8 @@ mysql> GRANT ALL PRIVILEGES ON coco.* TO 'your_username'@'localhost' IDENTIFIED 
 mysql> GRANT ALL PRIVILEGES ON coco.* TO 'your_username'@'%' IDENTIFIED BY 'your_password';
 ```
 
-Set your path where database located on config/index.js
-```
+Modify `config/index.js` to match your database settings and docker url
+```js
 mysqlConfig: {
     client: 'mysql',
     connection: {
@@ -47,8 +47,17 @@ mysqlConfig: {
 mongoUrl: {
     chat: 'mongodb://database_url:27017/chat',
     editor: 'mongodb://database_url:27017/editor'
-}
+},
+containerInformation: {
+    host: 'docker_located_url',
+    username: 'coco',
+    password: 'whdtjf123@'
+},
 ```
+
+Default username/password of container are coco/whdtjf123@.
+
+If you changed them on this, please change all `Dockerfile` under directory `default/docker_files/`.
 
 Build Dockerfiles
 ```

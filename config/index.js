@@ -4,16 +4,21 @@ module.exports = {
     knexMysqlConfig: {
         client: 'mysql',
         connection: {
-            host: 'external.cocotutor.ml',
-            user: 'coco',
-            password: 'whdtjf123@',
+            host: 'database_url',
+            user: 'your_username',
+            password: 'your_password',
             database: 'coco'
         },
         pool: { min: 0, max: 20 }
     },
     mongoUrl: {
-        chat: 'mongodb://external.cocotutor.ml:27017/chat',
-        editor: 'mongodb://external.cocotutor.ml:27017/editor'
+        chat: 'mongodb://database_url:27017/chat',
+        editor: 'mongodb://database_url:27017/editor'
+    },
+    containerInformation: {
+        host: 'docker_located_url',
+        username: 'coco',
+        password: 'whdtjf123@'
     },
     jwtSecret: process.env.JWT || 'coco_token_secret'
 };
