@@ -9,17 +9,13 @@ module.exports = DataHandler;
 DataHandler.prototype.init = function (io) {
     dataSocket = io.of('/data');
     dataSocket.on('connection', function (socket) {
-        socket.on('join', function (classNumber) {
-            socket.join(classNumber.toString());
-            console.log(classNumber, '에 join');
+        socket.on('join', function (classNum) {
+            socket.join(classNum.toString());
+            console.log(classNum, '에 join');
         })
     });
 };
 
-DataHandler.prototype.sendDirectory = function (classNumber, object) {
-    dataSocket.to(classNumber).emit('chat', object);
-};
-
-DataHandler.prototype.sendMessage = function (classNumber, message) {
-    dataSocket.to(classNumber).emit('chat', message);
+DataHandler.prototype.sendMessage = function (classNum, message) {
+    dataSocket.to(classNum).emit('chat', message);
 };

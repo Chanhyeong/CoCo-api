@@ -1,38 +1,34 @@
 var bcrypt = require('bcrypt');
-var mysql = require('../../middleware/database')('mysql');
 var jwtHandler = require('../../middleware/jwt-handler');
+var userModel = require('../api/user/model');
 
 exports.signIn = function (req, res) {
-    var sql = "select * from User where id = ?";
-    mysql.query(sql, req.body.id ,function (err, result){
-        if (err) { // DB 에러 발생 시
-            console.log('DB err :' + err);
-            res.status(500).json({ error: err });
+    userModel.getPassword(req.body.id, function (passwordResult) {
+        if (passwordResult === 500) {
+            res.status(500).send();
+        } else if (!passwordResult.length) {// DB에 ID가 없을 경우
+            res.status(401).json({ err: 'id가 존재하지 않습니다.' });
         } else {
-            if (result.length === 0) { // DB에 ID가 없을 경우
-                res.status(401).send('CHECK_ID');
-            } else {
-                if (!bcrypt.compareSync(req.body.password, result[0].password)) { // 비밀번호 불일치
-                    res.status(401).send('CHECK_PW');
-                } else { // 모든게 정상적으로 확인됐을 때
-                    var user = {
-                        id: result[0].id,
-                        nickname: result[0].nickname,
-                        email: result[0].email,
-                        tutor: result[0].tutor
-                    };
-                    var token = jwtHandler.signToken(user);
-                    res.json({
-                        access_token: token,
-                        user: user
-                    });
-                }
+            if (!bcrypt.compareSync(req.body.password, passwordResult[0].password)) { // 비밀번호 불일치
+                res.status(401).send({ err: 'password를 확인하세요.' });
+            } else {// 모든게 정상적으로 확인됐을 때
+                userModel.getUser(req.body.id, function (userResult) {
+                    if (userResult === 500) {
+                        res.status(500).send();
+                    } else {
+                        var token = jwtHandler.signToken(userResult[0]);
+                        res.status(200).json({
+                            access_token: token,
+                            user: userResult[0]
+                        });
+                    }
+                });
             }
         }
     });
 };
 
-exports.signUp = function(req,res){
+exports.signUp = function (req, res) {
     var hash = bcrypt.hashSync(req.body.password, 10);
 
     var user = {
@@ -42,26 +38,41 @@ exports.signUp = function(req,res){
         nickname : req.body.nickname
     };
 
-    var sql = "select * from User where id = ?";
-
-    mysql.query(sql, req.body.id, function(err, result){
-        if (err) {
-            console.log('DB select err :' + err);
-            res.status(500).json({ error: err });
+    userModel.getUser(req.body.id, function (result) {
+        if (result === 500) {
+            res.status(500).send();
+        } else if (result.length) {
+            res.status(409).json({
+                err: 'id가 이미 존재합니다.'
+            });
         } else {
-            if(result.length !== 0) {
-                res.status(401).json({ errors: '해당아이디가 이미 존재합니다' });
-            } else {
-                sql = "insert into User SET ?";
-                mysql.query(sql, user, function(err) {
-                    if (err) {
-                        console.log('DB insert err :' + err);
-                        res.status(500).json({ error: err });
-                    } else {
-                        res.status(200).json({ user: user })
-                    }
-                });
-            }
+            userModel.checkNickname(req.body.nickname, function (checkResult) {
+                if (checkResult === 500) {
+                    res.status(500).send();
+                } else if (checkResult.length) {
+                    res.status(409).json({
+                        err: 'nickname이 이미 존재합니다.'
+                    });
+                } else {
+                    userModel.createUser(user, function (createResult) {
+                        if (createResult === 500) {
+                            res.status(500).send();
+                        } else {
+                            res.status(200).send();
+                        }
+                    });
+                }
+            })
+        }
+    });
+};
+
+exports.leave = function (req, res) {
+    userModel.delete(req.user.id, function (result) {
+        if (result === 500) {
+            res.status(500).send();
+        } else {
+            res.status(200).send();
         }
     });
 };

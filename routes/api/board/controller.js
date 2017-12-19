@@ -3,22 +3,20 @@ var chatModel = require('../chat/model');
 var exec = require('child_process').exec;
 
 exports.getClasses = function (req, res) {
-    model.getClasses( function (err, result) {
-        if (err) {
-            console.log('DB select err: ', err);
+    model.getClasses( function (result) {
+        if (result === 500) {
             res.status(500).send('Err: DB select Error');
         } else {
             res.status(200).json({
-                list: result
+                list: result[0]
             });
         }
     });
 };
 
 exports.getClass = function (req, res) {
-    model.getInstance(req.params.num, function (err, result) {
-        if (err) {
-            console.log('DB select err: ', err);
+    model.getClass(req.params.num, function (result) {
+        if (result === 500) {
             res.status(500).send('Err: DB select Error');
         } else {
             res.status(200).json({
@@ -37,9 +35,6 @@ exports.create = function (req, res) {
                 case 400: res.status(400).send('Check the \'status\' number'); break;
                 case 409: res.status(409).send('동일 제목한 제목으로 이미 게시글을 생성하였습니다.');
             }
-        } else if (err) {
-            console.log('DB err: ', err);
-            res.status(500).send('Err: DB select Error');
         } else {
             res.status(200).send();
         }
@@ -57,7 +52,6 @@ exports.request = function (req, res) {
 
     chatModel.create('matching', data, time, function (err) {
         if (err) {
-            console.log('DB insert err: ', err);
             res.status(500).send('Err: DB insert Error');
         } else {
             res.status(200).send();
@@ -81,18 +75,33 @@ exports.modify = function (req, res) {
     }
 };
 
+// TODO: store를 coco-api 하위 폴더로 만들기
 exports.delete = function (req, res) {
-    model.delete(req.params.num, function (err) {
-        if (err) {
-            console.log ('DB delete err: ', err);
-            res.status(500).send('Err: DB delete Error');
+    var classNum = req.params.num;
+
+    chatModel.deleteByClassNumber(classNum, function (status) {
+        if (status === 500) {
+            res.status(500).send();
         } else {
-            exec('docker stop ' + req.params.num + '&&docker rm ' + req.params.num, function (err) {
-                if (err) {
-                    console.log ('Docker remove err: ', err);
-                    res.status(500).send();
+            model.delete(classNum, function (result) {
+                if (result === 500) {
+                    res.status(500).send('Err: DB delete Error');
                 } else {
-                    res.status(200).send();
+                    exec('docker ps | grep ' + classNum, function (err, result) {
+                        if (result) {
+                            exec('docker stop ' + classNum + '&&docker rm ' + classNum
+                                + '&&rm -rf /root/store/' + classNum, function (err) {
+                                if (err) {
+                                    console.log ('Docker remove err: ', err);
+                                    res.status(500).send();
+                                } else {
+                                    res.status(200).send();
+                                }
+                            });
+                        } else {
+                            res.status(200).send();
+                        }
+                    });
                 }
             });
         }
