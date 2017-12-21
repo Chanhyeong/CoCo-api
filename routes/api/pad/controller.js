@@ -15,7 +15,7 @@ exports.createTerminalConnect = function (req, res, next){
         if (classResult === 500){
             res.status(500).send('Err: DB select error');
         } else if (!classResult) {
-            res.status(409).json({
+            res.status(404).json({
                 err: '없는 클래스 입니다.'
             })
         } else {
