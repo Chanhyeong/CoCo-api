@@ -43,7 +43,7 @@ function defineDatabaseSchemas () {
                 knex.schema.createTable('user', function (table) {
                     table.charset('utf8');
                     table.string('id', MYSQL_TYPE_LENGTH.COMMON_STRING).primary().notNullable();
-                    table.string('password', MYSQL_TYPE_LENGTH.LONG_STRING).notNullable();
+                    table.string('password', MYSQL_TYPE_LENGTH.COMMON_STRING).notNullable();
                     table.string('email', MYSQL_TYPE_LENGTH.EMAIL).notNullable();
                     table.string('nickname', MYSQL_TYPE_LENGTH.COMMON_STRING).notNullable().unique();
                     table.boolean('is_tutor').notNullable().defaultTo(false);
