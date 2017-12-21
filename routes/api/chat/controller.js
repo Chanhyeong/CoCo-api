@@ -29,7 +29,7 @@ exports.getMessage = function (req, res) {
                 res.status(500).send('Error: DB Find Error');
             } else {
                 if(!result) {
-                    res.status(409).send('wrong chat number');
+                    res.status(404).send('wrong chat number');
                 } else {
                     res.status(200).json(result[0]);
                 }
