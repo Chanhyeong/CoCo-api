@@ -3,8 +3,6 @@ The back-end of [CoCo](https://github.com/highalps/CoCo)
 
 Resolve requests (Rest API) from clients
 
-Currently client available www.cocotutor.ml (2017/12/19)
-
 Structure reference - [auth-example-api](https://github.com/kimdhoe/auth-example-api/)
 
 ## Features
